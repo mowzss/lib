@@ -30,7 +30,11 @@ abstract class Controller
      * @var bool
      */
     protected bool $batchValidate = false;
-
+    /**
+     * 存储模板变量的数组
+     * @var array
+     */
+    protected array $vars = [];
     /**
      * 控制器中间件
      * @var array
@@ -76,7 +80,7 @@ abstract class Controller
      */
     protected function fetch(string $template = '', array $vars = []): string
     {
-        foreach ($this as $name => $value) {
+        foreach ($this->vars as $name => $value) {
             $vars[$name] = $value;
         }
         return View::fetch($template, $vars);
@@ -102,6 +106,7 @@ abstract class Controller
         return true;
     }
 
+
     /**
      * 模板变量赋值
      * @param mixed $name 要显示的模板变量
@@ -111,16 +116,17 @@ abstract class Controller
     public function assign(mixed $name, mixed $value = ''): static
     {
         if (is_string($name)) {
-            $this->$name = $value;
+            $this->vars[$name] = $value;
         } elseif (is_array($name)) {
             foreach ($name as $k => $v) {
                 if (is_string($k)) {
-                    $this->$k = $v;
+                    $this->vars[$k] = $v;
                 }
             }
         }
         return $this;
     }
+
 
     /**
      * 验证数据
