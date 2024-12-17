@@ -8,6 +8,7 @@ return [
     'radio' => '单选框',
     'checkbox' => '复选框',
     'select' => '单选下拉框',
+    'xmselect' => '高级下拉框',
     'image' => '单图上传',
     'images' => '多图上传',
     'file' => '单文件上传',
