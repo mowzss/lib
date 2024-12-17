@@ -67,7 +67,10 @@ abstract class Controller
         $this->initialize();
     }
 
-    // 初始化
+    /**
+     * 初始化
+     * @return void
+     */
     protected function initialize()
     {
     }
@@ -88,7 +91,7 @@ abstract class Controller
     }
 
     /**
-     * 回调
+     * 数据回调
      * @param string $name
      * @param array $one
      * @param array $two
