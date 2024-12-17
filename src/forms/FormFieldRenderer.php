@@ -22,7 +22,7 @@ class FormFieldRenderer
         // 动态生成渲染器映射
         foreach ($formConfig as $type => $label) {
             // 假设渲染器类名与字段类型相同，并位于 `Mowzs\Libs\forms\field` 命名空间下
-            $className = 'mowzs\\libs\\forms\\field\\' . ucfirst($type);
+            $className = 'mowzs\\lib\\forms\\field\\' . ucfirst($type);
             // 检查类是否存在
             if (class_exists($className)) {
                 self::$renderers[$type] = $className;
