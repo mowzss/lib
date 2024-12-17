@@ -1,9 +1,9 @@
 <?php
 declare (strict_types=1);
 
-namespace Mowzs\Lib\helper;
+namespace mowzs\lib\helper;
 
-use Mowzs\Lib\Helper;
+use mowzs\lib\Helper;
 
 class EventHelper extends Helper
 {

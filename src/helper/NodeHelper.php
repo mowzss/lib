@@ -1,8 +1,8 @@
 <?php
 
-namespace Mowzs\Lib\helper;
+namespace mowzs\lib\helper;
 
-use Mowzs\Lib\Helper;
+use mowzs\lib\Helper;
 use ReflectionClass;
 use ReflectionMethod;
 use think\Exception;

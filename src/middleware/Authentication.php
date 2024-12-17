@@ -1,8 +1,8 @@
 <?php
 
-namespace Mowzs\Lib\middleware;
+namespace mowzs\lib\middleware;
 
-use Mowzs\Lib\helper\AuthHelper;
+use mowzs\lib\helper\AuthHelper;
 use think\App;
 use think\exception\HttpResponseException;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Mowzs\Lib;
+namespace mowzs\lib;
 
-use Mowzs\Lib\forms\FormFieldRenderer;
+use mowzs\lib\forms\FormFieldRenderer;
 use think\Exception;
 use think\exception\HttpResponseException;
 use think\facade\Env;

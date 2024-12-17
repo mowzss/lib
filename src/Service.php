@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace Mowzs\Lib;
+namespace mowzs\lib;
 
 use think\Service as BaseService;
 
@@ -22,7 +22,7 @@ class Service extends BaseService
         //注册session
         $this->app->middleware->add(\think\middleware\SessionInit::class);
         //注册权限中间件
-        $this->app->middleware->add(\Mowzs\Lib\middleware\Authentication::class, 'route');
+        $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
     }
 
     /**

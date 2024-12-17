@@ -1,8 +1,8 @@
 <?php
 
-namespace Mowzs\Lib\forms;
+namespace mowzs\lib\forms;
 
-use Mowzs\Lib\forms\field\Text;
+use mowzs\lib\forms\field\Text;
 use think\facade\Config;
 use think\facade\Log;
 use think\facade\View;

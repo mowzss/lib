@@ -1,6 +1,6 @@
 <?php
 
-namespace Mowzs\Lib;
+namespace mowzs\lib;
 
 abstract class Extend
 {

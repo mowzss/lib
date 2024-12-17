@@ -1,8 +1,8 @@
 <?php
 
-namespace Mowzs\Lib\helper;
+namespace mowzs\lib\helper;
 
-use Mowzs\Lib\Helper;
+use mowzs\lib\Helper;
 use think\Exception;
 
 class AuthHelper extends Helper

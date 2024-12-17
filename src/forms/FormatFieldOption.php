@@ -1,6 +1,6 @@
 <?php
 
-namespace Mowzs\Lib\forms;
+namespace mowzs\lib\forms;
 
 class FormatFieldOption
 {

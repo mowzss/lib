@@ -1,6 +1,6 @@
 <?php
 
-namespace Mowzs\Lib;
+namespace mowzs\lib;
 
 use think\App;
 use think\Container;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mowzs\Lib;
+namespace mowzs\lib;
 
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;

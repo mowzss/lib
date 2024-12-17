@@ -1,9 +1,9 @@
 <?php
 
-namespace Mowzs\Lib\forms\field;
+namespace mowzs\lib\forms\field;
 
-use Mowzs\Lib\forms\FormFieldRenderer;
-use Mowzs\Lib\forms\RendererInterface;
+use mowzs\lib\forms\FormFieldRenderer;
+use mowzs\lib\forms\RendererInterface;
 
 class Textarea extends FormFieldRenderer implements RendererInterface
 {

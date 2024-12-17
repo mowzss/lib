@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace Mowzs\Lib;
+namespace mowzs\lib;
 
 use think\App;
 use think\exception\HttpResponseException;

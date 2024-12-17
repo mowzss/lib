@@ -1,10 +1,5 @@
 {
   "name": "mowzs/lib",
-  "autoload": {
-    "psr-4": {
-      "Mowzs\\Lib\\": "src/"
-    }
-  },
   "authors": [
     {
       "name": "sunboy",
@@ -26,6 +21,11 @@
         "auth": "stc/auth.php",
         "form": "stc/form.php"
       }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "mowzs\\lib\\": "src/"
     }
   }
 }

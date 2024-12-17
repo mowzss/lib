@@ -1,8 +1,8 @@
 <?php
 
-namespace Mowzs\Lib\extend;
+namespace mowzs\lib\extend;
 
-use Mowzs\Lib\Extend;
+use mowzs\lib\Extend;
 
 class DataExtend extends Extend
 {
