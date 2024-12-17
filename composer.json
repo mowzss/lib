@@ -16,7 +16,7 @@
     "ezyang/htmlpurifier": "^4.18",
     "hightman/xunsearch": "^1.4",
     "guzzlehttp/guzzle": "^7.9",
-    "iidestiny/flysystem-oss": "^2.0",
+    "yzh52521/flysystem-oss": "^2.0",
     "overtrue/flysystem-cos": "^3.0",
     "overtrue/flysystem-qiniu": "^1.0"
   },

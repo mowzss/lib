@@ -28,7 +28,7 @@ class Oss extends Driver
             'oss_accesskeysecret' => sys_config('oss_accesskeysecret'),
             'oss_bucket' => sys_config('oss_bucket'),
             'oss_endpoint' => sys_config('oss_endpoint'),
-            'oss_domain' => sys_config('oss_domain'),
+            'isCName' => false,
             'prefix' => '',
         ];
         return new OssAdapter(
@@ -36,9 +36,26 @@ class Oss extends Driver
             $ossConfig['oss_accesskeysecret'],
             $ossConfig['oss_endpoint'],
             $ossConfig['oss_bucket'],
-            $ossConfig['oss_domain'],
+            $ossConfig['isCName'],
             $ossConfig['prefix']
         );
     }
 
+    /**
+     * 获取文件访问地址
+     * @param string $path 文件路径
+     * @return string
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     */
+    public function url(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+
+        if (!empty(sys_config('oss_domain'))) {
+            return $this->concatPathToUrl(sys_config('oss_domain'), $path);
+        }
+        return parent::url($path);
+    }
 }
