@@ -84,7 +84,7 @@ abstract class Controller
      */
     protected function fetch(string $template = '', array $vars = []): string
     {
-        foreach ($this->vars as $name => $value) {
+        foreach ($this as $name => $value) {
             $vars[$name] = $value;
         }
         return View::fetch($template, $vars);
@@ -116,20 +116,11 @@ abstract class Controller
      * 模板变量赋值
      * @param mixed $name 要显示的模板变量
      * @param mixed $value 变量的值
-     * @return $this
+     * @return \think\View
      */
-    public function assign(mixed $name, mixed $value = ''): static
+    public function assign(mixed $name, mixed $value = ''): \think\View
     {
-        if (is_string($name)) {
-            $this->vars[$name] = $value;
-        } elseif (is_array($name)) {
-            foreach ($name as $k => $v) {
-                if (is_string($k)) {
-                    $this->vars[$k] = $v;
-                }
-            }
-        }
-        return $this;
+        return View::assign($name, $value);
     }
 
 
