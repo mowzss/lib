@@ -13,7 +13,11 @@
     "topthink/think-filesystem": "^2.0||^3.0",
     "topthink/think-view": "^2.0",
     "topthink/think-helper": "^3.1",
-    "hightman/xunsearch": "^1.4"
+    "hightman/xunsearch": "^1.4",
+    "guzzlehttp/guzzle": "^7.9",
+    "iidestiny/flysystem-oss": "^4.2",
+    "overtrue/flysystem-cos": "^5.1",
+    "overtrue/flysystem-qiniu": "^3.2"
   },
   "extra": {
     "think": {
