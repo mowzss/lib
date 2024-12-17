@@ -15,10 +15,7 @@
     "topthink/think-helper": "^3.1",
     "ezyang/htmlpurifier": "^4.18",
     "hightman/xunsearch": "^1.4",
-    "guzzlehttp/guzzle": "^7.9",
-    "iidestiny/flysystem-oss": "^4.2",
-    "overtrue/flysystem-cos": "^5.1",
-    "overtrue/flysystem-qiniu": "^3.2"
+    "guzzlehttp/guzzle": "^7.9"
   },
   "extra": {
     "think": {
