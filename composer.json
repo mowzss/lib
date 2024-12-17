@@ -1,0 +1,23 @@
+{
+  "name": "mowzs/lib",
+  "autoload": {
+    "psr-4": {
+      "Mowzs\\Lib\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "sunboy",
+      "email": "qysk@vip.qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.0.0",
+    "topthink/framework": "^8.0",
+    "topthink/think-orm": "^3.0",
+    "topthink/think-filesystem": "^2.0||^3.0",
+    "topthink/think-view": "^2.0",
+    "topthink/think-helper": "^3.1",
+    "hightman/xunsearch": "^1.4"
+  }
+}
