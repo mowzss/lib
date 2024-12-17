@@ -74,6 +74,7 @@ abstract class Controller
 
 
     /**
+     * 渲染模板
      * @param string $template
      * @param array $vars
      * @return string
@@ -87,6 +88,7 @@ abstract class Controller
     }
 
     /**
+     * 回调
      * @param string $name
      * @param array $one
      * @param array $two
