@@ -26,7 +26,6 @@ class Authentication
     public function handle($request, \Closure $next)
     {
         if ($this->app->config->get('route.controller_layer') == 'admin') {
-            dump(AuthHelper::instance()->cheek());
             //权限校验 或 忽略控制器
             if (AuthHelper::instance()->cheek()) {
                 return $next($request);
