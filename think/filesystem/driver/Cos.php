@@ -16,17 +16,10 @@ class Cos extends Driver
     {
         // TODO: Implement createAdapter() method.
         $Config = ['type' => 'qcloud',
-            'region' => '',
-            'credentials' => [
-                'appId' => '', // 域名中数字部分
-                'secretId' => '',
-                'secretKey' => '',
-            ],
-            'bucket' => 'test',
-            'timeout' => 60,
-            'connect_timeout' => 60,
-            'scheme' => 'https',
-            'read_from_cdn' => false,
+            'bucket' => null,
+            'app_id' => null,
+            'region' => 'ap-guangzhou',
+            'signed_url' => false,
         ];
 
         return new CosAdapter($this->config);
