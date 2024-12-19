@@ -19,7 +19,7 @@
     "yzh52521/flysystem-oss": "^2.0",
     "overtrue/flysystem-cos": "^3.0",
     "overtrue/flysystem-qiniu": "^1.0",
-    "phpmailer/phpmailer": "^6.9"
+    "nette/mail": "3.*||4.*"
   },
   "extra": {
     "think": {
