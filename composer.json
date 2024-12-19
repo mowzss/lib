@@ -19,6 +19,7 @@
     "yzh52521/flysystem-oss": "^3.0",
     "overtrue/flysystem-cos": "^5.0",
     "overtrue/flysystem-qiniu": "^3.0",
+    "yunwuxin/think-cron": "^3.0",
     "nette/mail": "3.*||4.*"
   },
   "extra": {
