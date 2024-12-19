@@ -97,7 +97,7 @@ class NodeHelper extends Helper
                 // 提取匹配的部分
                 $app_name = $matches[1];
                 $class_name = $matches[2];
-                $excludeMethods = get_class_methods('\Mowzs\Libs\Controller');
+                $excludeMethods = get_class_methods('\mowzs\lib\Controller');
                 $this->getPublicMethodComments($app_name, $layer, $class_name, $excludeMethods, $data);
             }
         }
