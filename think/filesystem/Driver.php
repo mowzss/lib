@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace mowzs\lib\filesystem;
+namespace think\filesystem;
 
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;

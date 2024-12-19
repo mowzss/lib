@@ -1,13 +1,13 @@
 <?php
 
-namespace mowzs\lib\filesystem\driver;
+namespace think\filesystem\driver;
 
 use League\Flysystem\FilesystemAdapter;
-use mowzs\lib\filesystem\Driver;
 use Overtrue\Flysystem\Qiniu\QiniuAdapter;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\filesystem\Driver;
 
 class Qiniu extends Driver
 {

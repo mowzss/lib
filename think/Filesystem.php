@@ -10,13 +10,12 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace mowzs\lib;
+namespace think;
 
 use InvalidArgumentException;
-use mowzs\lib\filesystem\Driver;
-use mowzs\lib\filesystem\driver\Local;
+use think\filesystem\Driver;
+use think\filesystem\driver\Local;
 use think\helper\Arr;
-use think\Manager;
 
 /**
  * Class Filesystem
@@ -26,7 +25,7 @@ use think\Manager;
  */
 class Filesystem extends Manager
 {
-    protected $namespace = '\\mowzs\\lib\\filesystem\\driver\\';
+    protected $namespace = '\\think\\filesystem\\driver\\';
 
     /**
      * 获取磁盘驱动实例

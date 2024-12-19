@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace mowzs\lib\filesystem\driver;
+namespace think\filesystem\driver;
 
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
@@ -19,7 +19,7 @@ use League\Flysystem\PathPrefixer;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\Flysystem\Visibility;
 use League\Flysystem\WhitespacePathNormalizer;
-use mowzs\lib\filesystem\Driver;
+use think\filesystem\Driver;
 
 class Local extends Driver
 {

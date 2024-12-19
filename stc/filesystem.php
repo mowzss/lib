@@ -20,10 +20,10 @@ return [
             'visibility' => 'public',
         ],
         'oss' => [
-            'type' => 'mowzs\lib\filesystem\driver\Oss',
+            'type' => 'think\filesystem\driver\Oss',
         ],
         'qiniu' => [
-            'type' => 'mowzs\lib\filesystem\driver\Qiniu',
+            'type' => 'think\filesystem\driver\Qiniu',
         ]
         // 更多的磁盘配置信息
     ],
