@@ -5,8 +5,8 @@ namespace mowzs\lib\helper;
 use mowzs\lib\Helper;
 use ReflectionClass;
 use ReflectionMethod;
-use mowzs\lib\Exception;
-use mowzs\lib\helper\Str;
+use think\Exception;
+use think\helper\Str;
 
 class NodeHelper extends Helper
 {

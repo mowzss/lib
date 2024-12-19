@@ -2,8 +2,8 @@
 
 namespace mowzs\lib;
 
-use mowzs\lib\App;
-use mowzs\lib\Container;
+use think\App;
+use think\Container;
 
 class Helper
 {

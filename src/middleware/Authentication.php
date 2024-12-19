@@ -3,20 +3,20 @@
 namespace mowzs\lib\middleware;
 
 use mowzs\lib\helper\AuthHelper;
-use mowzs\lib\App;
-use mowzs\lib\exception\HttpResponseException;
+use think\App;
+use think\exception\HttpResponseException;
 
 class Authentication
 {
     /**
      * 当前 App 对象
-     * @var \mowzs\lib\App
+     * @var \think\App
      */
     protected App $app;
 
     /**
      * Construct
-     * @param \mowzs\lib\App $app
+     * @param \think\App $app
      */
     public function __construct(App $app)
     {

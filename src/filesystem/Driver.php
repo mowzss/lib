@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2021 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2024 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -12,13 +12,11 @@ declare (strict_types=1);
 
 namespace mowzs\lib\filesystem;
 
-use League\Flysystem\Adapter\AbstractAdapter;
-use League\Flysystem\AdapterInterface;
-use League\Flysystem\Cached\CachedAdapter;
-use League\Flysystem\Cached\Storage\Memory as MemoryStore;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\UnableToSetVisibility;
+use League\Flysystem\UnableToWriteFile;
 use RuntimeException;
-use think\Cache;
 use think\File;
 
 /**
@@ -29,9 +27,6 @@ use think\File;
 abstract class Driver
 {
 
-    /** @var Cache */
-    protected $cache;
-
     /** @var Filesystem */
     protected $filesystem;
 
@@ -41,36 +36,18 @@ abstract class Driver
      */
     protected $config = [];
 
-    public function __construct(Cache $cache, array $config)
+    public function __construct(array $config)
     {
-        $this->cache = $cache;
         $this->config = array_merge($this->config, $config);
 
         $adapter = $this->createAdapter();
         $this->filesystem = $this->createFilesystem($adapter);
     }
 
-    protected function createCacheStore($config)
+    abstract protected function createAdapter(): FilesystemAdapter;
+
+    protected function createFilesystem(FilesystemAdapter $adapter): Filesystem
     {
-        if (true === $config) {
-            return new MemoryStore;
-        }
-
-        return new CacheStore(
-            $this->cache->store($config['store']),
-            $config['prefix'] ?? 'flysystem',
-            $config['expire'] ?? null
-        );
-    }
-
-    abstract protected function createAdapter(): AdapterInterface;
-
-    protected function createFilesystem(AdapterInterface $adapter): Filesystem
-    {
-        if (!empty($this->config['cache'])) {
-            $adapter = new CachedAdapter($adapter, $this->createCacheStore($this->config['cache']));
-        }
-
         $config = array_intersect_key($this->config, array_flip(['visibility', 'disable_asserts', 'url']));
 
         return new Filesystem($adapter, $config);
@@ -83,12 +60,6 @@ abstract class Driver
      */
     public function path(string $path): string
     {
-        $adapter = $this->filesystem->getAdapter();
-
-        if ($adapter instanceof AbstractAdapter) {
-            return $adapter->applyPathPrefix($path);
-        }
-
         return $path;
     }
 
@@ -128,13 +99,23 @@ abstract class Driver
         $stream = fopen($file->getRealPath(), 'r');
         $path = trim($path . '/' . $name, '/');
 
-        $result = $this->putStream($path, $stream, $options);
+        $result = $this->put($path, $stream, $options);
 
         if (is_resource($stream)) {
             fclose($stream);
         }
 
         return $result ? $path : false;
+    }
+
+    protected function put(string $path, $contents, array $options = [])
+    {
+        try {
+            $this->writeStream($path, $contents, $options);
+        } catch (UnableToWriteFile|UnableToSetVisibility $e) {
+            return false;
+        }
+        return true;
     }
 
     public function __call($method, $parameters)

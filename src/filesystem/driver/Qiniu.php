@@ -2,17 +2,17 @@
 
 namespace mowzs\lib\filesystem\driver;
 
-use League\Flysystem\AdapterInterface;
-use Overtrue\Flysystem\Qiniu\QiniuAdapter;
-use mowzs\lib\db\exception\DataNotFoundException;
-use mowzs\lib\db\exception\DbException;
-use mowzs\lib\db\exception\ModelNotFoundException;
+use League\Flysystem\FilesystemAdapter;
 use mowzs\lib\filesystem\Driver;
+use Overtrue\Flysystem\Qiniu\QiniuAdapter;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 
 class Qiniu extends Driver
 {
 
-    protected function createAdapter(): AdapterInterface
+    protected function createAdapter(): FilesystemAdapter
     {
         // TODO: Implement createAdapter() method.
         $qiniuConfig = [
@@ -34,7 +34,7 @@ class Qiniu extends Driver
      */
     public function url(string $path): string
     {
-        $path = str_replace('\\', '/', $path);
+        $path = $this->normalizer()->normalizePath($path);
 
         if (!empty(sys_config('qiniu_domain'))) {
             return $this->concatPathToUrl(sys_config('qiniu_domain'), $path);

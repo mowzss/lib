@@ -3,25 +3,25 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
-use mowzs\lib\App;
-use mowzs\lib\exception\HttpResponseException;
-use mowzs\lib\exception\ValidateException;
-use mowzs\lib\facade\View;
-use mowzs\lib\Response;
-use mowzs\lib\Validate;
+use think\App;
+use think\exception\HttpResponseException;
+use think\exception\ValidateException;
+use think\facade\View;
+use think\Response;
+use think\Validate;
 
 abstract class Controller
 {
 
     /**
      * Request实例
-     * @var \mowzs\lib\Request
+     * @var \think\Request
      */
-    protected \mowzs\lib\Request $request;
+    protected \think\Request $request;
 
     /**
      * 应用实例
-     * @var \mowzs\lib\App
+     * @var \think\App
      */
     protected App $app;
 
@@ -116,9 +116,9 @@ abstract class Controller
      * 模板变量赋值
      * @param mixed $name 要显示的模板变量
      * @param mixed $value 变量的值
-     * @return \mowzs\lib\View
+     * @return \think\View
      */
-    public function assign(mixed $name, mixed $value = ''): \mowzs\lib\View
+    public function assign(mixed $name, mixed $value = ''): \think\View
     {
         return View::assign($name, $value);
     }

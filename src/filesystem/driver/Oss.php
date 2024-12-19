@@ -2,43 +2,35 @@
 
 namespace mowzs\lib\filesystem\driver;
 
-use Iidestiny\Flysystem\Oss\OssAdapter;
-use League\Flysystem\AdapterInterface;
-use OSS\Core\OssException;
-use mowzs\lib\db\exception\DataNotFoundException;
-use mowzs\lib\db\exception\DbException;
-use mowzs\lib\db\exception\ModelNotFoundException;
+use League\Flysystem\FilesystemAdapter;
 use mowzs\lib\filesystem\Driver;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
+use yzh52521\Flysystem\Oss\OssAdapter;
 
 class Oss extends Driver
 {
+
     /**
-     *
-     * @return AdapterInterface
-     * @throws OssException
+     * @return OssAdapter
      * @throws DataNotFoundException
      * @throws DbException
      * @throws ModelNotFoundException
      */
-    protected function createAdapter(): AdapterInterface
+    protected function createAdapter(): FilesystemAdapter
     {
         // TODO: Implement createAdapter() method.
         $ossConfig = [
-            'oss_accesskeyid' => sys_config('oss_accesskeyid'),
-            'oss_accesskeysecret' => sys_config('oss_accesskeysecret'),
-            'oss_bucket' => sys_config('oss_bucket'),
-            'oss_endpoint' => sys_config('oss_endpoint'),
+            'access_id' => sys_config('oss_accesskeyid'),
+            'access_secret' => sys_config('oss_accesskeysecret'),
+            'bucket' => sys_config('oss_bucket'),
+            'endpoint' => sys_config('oss_endpoint'),
             'isCName' => false,
             'prefix' => '',
+            'cdnUrl' => ''
         ];
-        return new OssAdapter(
-            $ossConfig['oss_accesskeyid'],
-            $ossConfig['oss_accesskeysecret'],
-            $ossConfig['oss_endpoint'],
-            $ossConfig['oss_bucket'],
-            $ossConfig['isCName'],
-            $ossConfig['prefix']
-        );
+        return new OssAdapter($ossConfig);
     }
 
     /**
@@ -51,7 +43,8 @@ class Oss extends Driver
      */
     public function url(string $path): string
     {
-        $path = str_replace('\\', '/', $path);
+        $path = $this->normalizer()->normalizePath($path);
+
         if (!empty(sys_config('oss_domain'))) {
             return $this->concatPathToUrl(sys_config('oss_domain'), $path);
         }

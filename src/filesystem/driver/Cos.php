@@ -2,16 +2,17 @@
 
 namespace mowzs\lib\filesystem\driver;
 
-use Overtrue\Flysystem\Cos\CosAdapter;
-use mowzs\lib\db\exception\DataNotFoundException;
-use mowzs\lib\db\exception\DbException;
-use mowzs\lib\db\exception\ModelNotFoundException;
+use League\Flysystem\FilesystemAdapter;
 use mowzs\lib\filesystem\Driver;
+use Overtrue\Flysystem\Cos\CosAdapter;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 
 class Cos extends Driver
 {
 
-    protected function createAdapter(): \League\Flysystem\AdapterInterface
+    protected function createAdapter(): FilesystemAdapter
     {
         // TODO: Implement createAdapter() method.
         $Config = ['type' => 'qcloud',
@@ -26,7 +27,7 @@ class Cos extends Driver
             'connect_timeout' => 60,
             'scheme' => 'https',
             'read_from_cdn' => false,
-            ];
+        ];
 
         return new CosAdapter($this->config);
     }

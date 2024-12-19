@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
-use mowzs\lib\Service as BaseService;
+use think\Service as BaseService;
 
 /**
  * 应用服务类
@@ -20,7 +20,7 @@ class Service extends BaseService
         // 服务启动
         $this->app->config->set(['tpl_replace_string' => $this->tplReplaceString()], 'view');
         //注册session
-        $this->app->middleware->add(\mowzs\lib\middleware\SessionInit::class);
+        $this->app->middleware->add(\think\middleware\SessionInit::class);
         //注册权限中间件
         $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
     }
