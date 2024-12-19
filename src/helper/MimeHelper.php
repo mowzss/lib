@@ -53,4 +53,28 @@ class MimeHelper extends Helper
 
         return $reversedMimeTypes[$mimeType] ?? null;
     }
+
+    /**
+     * 根据多个扩展名获取对应的 MIME 类型
+     *
+     * @param array $extensions 文件扩展名数组
+     * @return array MIME 类型数组
+     * @throws \Exception
+     */
+    public function getMimeTypesByExtensions(array $extensions): array
+    {
+        $mimeTypes = [];
+        foreach ($extensions as $extension) {
+            // 调用现有的方法获取单个扩展名的 MIME 类型
+            $mime = $this->getMimeTypeByExtension($extension);
+            if ($mime !== null) {
+                $mimeTypes[$extension] = $mime;
+            }
+            // 如果想要包含找不到的扩展名, 请取消下面这行的注释
+            // else {
+            //     $mimeTypes[$extension] = null;
+            // }
+        }
+        return $mimeTypes;
+    }
 }

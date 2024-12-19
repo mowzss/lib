@@ -328,13 +328,13 @@ class Forms
 
     /**
      * 设置表单字段
-     * @param mixed $type
-     * @param string|null $name
-     * @param string|null $label
-     * @param string|null $value
-     * @param array|null $options
-     * @param string|null $help
-     * @param bool $required
+     * @param mixed $type 表单类型
+     * @param string|null $name 字段名称
+     * @param string|null $label 标签名称
+     * @param string|null $value 默认值
+     * @param array|null $options 扩展参数
+     * @param string|null $help 帮助说明
+     * @param bool $required 是否必填
      * @return $this
      */
     public function setInput($type, ?string $name = null, ?string $label = null, ?string $value = null, ?array $options = null, ?string $help = null, bool $required = false): static

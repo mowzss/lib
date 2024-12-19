@@ -52,7 +52,6 @@ class Oss extends Driver
     public function url(string $path): string
     {
         $path = str_replace('\\', '/', $path);
-
         if (!empty(sys_config('oss_domain'))) {
             return $this->concatPathToUrl(sys_config('oss_domain'), $path);
         }
