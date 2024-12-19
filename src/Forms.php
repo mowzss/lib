@@ -3,11 +3,11 @@
 namespace mowzs\lib;
 
 use mowzs\lib\forms\FormFieldRenderer;
-use think\Exception;
-use think\exception\HttpResponseException;
-use think\facade\Env;
-use think\facade\Request;
-use think\facade\View;
+use mowzs\lib\Exception;
+use mowzs\lib\exception\HttpResponseException;
+use mowzs\lib\facade\Env;
+use mowzs\lib\facade\Request;
+use mowzs\lib\facade\View;
 
 class Forms
 {
@@ -23,7 +23,7 @@ class Forms
     protected array $submit = [];
     protected mixed $lay_filter = '';
 
-    protected \think\Template $view;
+    protected \mowzs\lib\Template $view;
     /**
      * @var array|mixed
      */

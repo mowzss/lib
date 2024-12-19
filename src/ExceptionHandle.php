@@ -2,13 +2,13 @@
 
 namespace mowzs\lib;
 
-use think\db\exception\DataNotFoundException;
-use think\db\exception\ModelNotFoundException;
-use think\exception\Handle;
-use think\exception\HttpException;
-use think\exception\HttpResponseException;
-use think\exception\ValidateException;
-use think\Response;
+use mowzs\lib\db\exception\DataNotFoundException;
+use mowzs\lib\db\exception\ModelNotFoundException;
+use mowzs\lib\exception\Handle;
+use mowzs\lib\exception\HttpException;
+use mowzs\lib\exception\HttpResponseException;
+use mowzs\lib\exception\ValidateException;
+use mowzs\lib\Response;
 use Throwable;
 
 /**
@@ -45,7 +45,7 @@ class ExceptionHandle extends Handle
      * Render an exception into an HTTP response.
      *
      * @access public
-     * @param \think\Request $request
+     * @param \mowzs\lib\Request $request
      * @param Throwable $e
      * @return Response
      */

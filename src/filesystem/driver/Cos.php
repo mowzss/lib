@@ -3,10 +3,10 @@
 namespace mowzs\lib\filesystem\driver;
 
 use Overtrue\Flysystem\Cos\CosAdapter;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
-use think\filesystem\Driver;
+use mowzs\lib\db\exception\DataNotFoundException;
+use mowzs\lib\db\exception\DbException;
+use mowzs\lib\db\exception\ModelNotFoundException;
+use mowzs\lib\filesystem\Driver;
 
 class Cos extends Driver
 {

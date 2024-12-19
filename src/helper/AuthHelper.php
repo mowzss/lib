@@ -3,7 +3,7 @@
 namespace mowzs\lib\helper;
 
 use mowzs\lib\Helper;
-use think\Exception;
+use mowzs\lib\Exception;
 
 class AuthHelper extends Helper
 {

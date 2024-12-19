@@ -2,7 +2,7 @@
 
 namespace mowzs\lib;
 
-abstract class Model extends \think\Model
+abstract class Model extends \mowzs\lib\Model
 {
 
 }

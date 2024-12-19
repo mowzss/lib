@@ -3,9 +3,9 @@
 namespace mowzs\lib\forms;
 
 use mowzs\lib\forms\field\Text;
-use think\facade\Config;
-use think\facade\Log;
-use think\facade\View;
+use mowzs\lib\facade\Config;
+use mowzs\lib\facade\Log;
+use mowzs\lib\facade\View;
 
 class FormFieldRenderer
 {
