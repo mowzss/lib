@@ -3,6 +3,8 @@
 namespace think\filesystem\driver;
 
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\PathNormalizer;
+use League\Flysystem\WhitespacePathNormalizer;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
@@ -11,6 +13,10 @@ use yzh52521\Flysystem\Oss\OssAdapter;
 
 class Oss extends Driver
 {
+    /**
+     * @var PathNormalizer
+     */
+    protected $normalizer;
 
     /**
      * @return OssAdapter
@@ -31,6 +37,14 @@ class Oss extends Driver
             'cdnUrl' => ''
         ];
         return new OssAdapter($ossConfig);
+    }
+
+    protected function normalizer()
+    {
+        if (!$this->normalizer) {
+            $this->normalizer = new WhitespacePathNormalizer();
+        }
+        return $this->normalizer;
     }
 
     /**
