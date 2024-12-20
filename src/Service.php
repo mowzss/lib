@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
+use mowzs\lib\command\AdminInit;
 use think\Service as BaseService;
 
 /**
@@ -23,6 +24,8 @@ class Service extends BaseService
         $this->app->middleware->add(\think\middleware\SessionInit::class);
         //注册权限中间件
         $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
+        //注册命令行
+        $this->registerCommand();
     }
 
     /**
@@ -34,5 +37,16 @@ class Service extends BaseService
             '__STATIC__' => '/static',
         ];
         return array_merge($this->app->config->get('view.tpl_replace_string', []), $data);
+    }
+
+    /**
+     * 注册命令行
+     * @return void
+     */
+    protected function registerCommand(): void
+    {
+        $this->app->console->addCommands([
+            AdminInit::class,
+        ]);
     }
 }
