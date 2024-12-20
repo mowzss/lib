@@ -23,6 +23,7 @@
     "topthink/think-queue": "^3.0",
     "nette/mail": "3.*||4.*"
   },
+  "extra": {
     "think": {
       "config": {
         "auth": "stc/auth.php",
