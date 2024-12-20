@@ -58,6 +58,12 @@ class ModuleInit extends Command
                 $packageName = $package['name'];
                 $output->writeln("Processing package: <info>$packageName</info>");
 
+                // 处理 del 节点（删除包的内容）
+                if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
+                    $output->writeln("Detected 'del' node in package: <info>$packageName</info>");
+                    $this->deletePackageContent($packageName, $output);
+                }
+
                 // 处理 make 节点（强制替换）
                 if (isset($extra['module']['make'])) {
                     $this->processPaths($extra['module']['make'], true, $output, $packageName);
@@ -66,11 +72,6 @@ class ModuleInit extends Command
                 // 处理 copy 节点（复制，目标路径已存在则跳过）
                 if (isset($extra['module']['copy'])) {
                     $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
-                }
-
-                // 处理 del 节点（删除包的内容）
-                if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
-                    $this->deletePackageContent($packageName, $output);
                 }
             }
         }
@@ -91,7 +92,7 @@ class ModuleInit extends Command
     {
         foreach ($paths as $targetKey => $sourcePath) {
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
-            $targetFullPath = $this->app->getRootPath()() . $targetKey;
+            $targetFullPath = $this->app->getRootPath() . $targetKey;
 
             if (!file_exists($sourceFullPath)) {
                 $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
@@ -180,11 +181,23 @@ class ModuleInit extends Command
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
 
-        if (file_exists($packagePath)) {
-            $this->recursiveDelete($packagePath, $output);
-            $output->writeln("Deleted content of package: <info>$packageName</info>");
-        } else {
+        if (!file_exists($packagePath)) {
             $output->writeln("Warning: Package path '$packagePath' does not exist.");
+            return;
+        }
+
+        if (!is_dir($packagePath)) {
+            $output->writeln("Error: Path '$packagePath' is not a directory.");
+            return;
+        }
+
+        $output->writeln("Deleting content of package: <info>$packageName</info>");
+
+        // 递归删除包的内容
+        if ($this->recursiveDelete($packagePath, $output)) {
+            $output->writeln("Successfully deleted content of package: <info>$packageName</info>");
+        } else {
+            $output->writeln("<error>Failed to delete content of package: $packageName</error>");
         }
     }
 
@@ -193,24 +206,56 @@ class ModuleInit extends Command
      *
      * @param string $path 目录路径
      * @param Output $output 输出对象
+     * @return bool 是否删除成功
      */
-    protected function recursiveDelete(string $path, Output $output)
+    protected function recursiveDelete(string $path, Output $output): bool
     {
-        if (is_dir($path)) {
-            $objects = scandir($path);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    $fullPath = $path . DIRECTORY_SEPARATOR . $object;
-                    if (is_dir($fullPath)) {
-                        $this->recursiveDelete($fullPath, $output);
-                    } else {
-                        unlink($fullPath);
-                    }
-                }
+        if (!file_exists($path)) {
+            $output->writeln("Warning: Path '$path' does not exist.");
+            return true; // 如果路径不存在，认为删除成功
+        }
+
+        if (!is_dir($path)) {
+            // 如果是文件，直接删除
+            if (unlink($path)) {
+                $output->writeln("Deleted file: '$path'");
+                return true;
+            } else {
+                $output->writeln("<error>Failed to delete file: $path</error>");
+                return false;
             }
-            rmdir($path);
+        }
+
+        // 获取目录中的所有文件和子目录
+        $objects = scandir($path);
+        foreach ($objects as $object) {
+            if ($object == '.' || $object == '..') {
+                continue;
+            }
+
+            $fullPath = $path . DIRECTORY_SEPARATOR . $object;
+
+            // 递归删除子目录或文件
+            if (is_dir($fullPath)) {
+                if (!$this->recursiveDelete($fullPath, $output)) {
+                    return false; // 如果删除子目录失败，返回 false
+                }
+            } else {
+                if (!unlink($fullPath)) {
+                    $output->writeln("<error>Failed to delete file: $fullPath</error>");
+                    return false;
+                }
+                $output->writeln("Deleted file: '$fullPath'");
+            }
+        }
+
+        // 删除空目录
+        if (rmdir($path)) {
+            $output->writeln("Deleted directory: '$path'");
+            return true;
         } else {
-            unlink($path);
+            $output->writeln("<error>Failed to delete directory: $path</error>");
+            return false;
         }
     }
 }
