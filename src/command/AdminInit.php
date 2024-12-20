@@ -18,33 +18,26 @@ class AdminInit extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        // 执行 service:discover 命令
-        $output->writeln('Running <info>service:discover</info>...');
+        // 定义要执行的命令列表
+        $commands = [
+            'service:discover',
+            'vendor:publish',
+            'admin:moduleInit',
+        ];
 
-        $exitCode = $this->app->console->call('service:discover', [], $output);
-        if ($exitCode != 0) {
-            $output->writeln('<error>Failed to run service:discover.</error>');
-            return $exitCode;
-        }
-        $output->writeln('<info>service:discover completed successfully.</info>');
+        foreach ($commands as $commandName) {
+            $output->writeln("Running <info>$commandName</info>...");
 
-        // 执行 vendor:publish 命令
-        $output->writeln('Running <info>vendor:publish</info>...');
-        $exitCode = $this->app->console->call('vendor:publish', [], $output);
-        if ($exitCode != 0) {
-            $output->writeln('<error>Failed to run vendor:publish.</error>');
-            return $exitCode;
-        }
-        $output->writeln('<info>vendor:publish completed successfully.</info>');
+            // 使用 Console::call 方法调用其他命令
+            $exitCode = $this->app->console->call($commandName);
 
-        // 执行 admin:moduleInit 命令
-        $output->writeln('Running <info>admin:moduleInit</info>...');
-        $exitCode = $this->app->console->call('admin:moduleInit', [], $output);
-        if ($exitCode != 0) {
-            $output->writeln('<error>Failed to run admin:moduleInit.</error>');
-            return $exitCode;
+            if ($exitCode != 0) {
+                $output->writeln("<error>Failed to run $commandName.</error>");
+                return $exitCode;
+            }
+
+            $output->writeln("<info>$commandName completed successfully.</info>");
         }
-        $output->writeln('<info>admin:moduleInit completed successfully.</info>');
 
         $output->writeln('<comment>All initialization steps have been completed.</comment>');
         return 0;
