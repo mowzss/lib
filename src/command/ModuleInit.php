@@ -91,7 +91,7 @@ class ModuleInit extends Command
     {
         foreach ($paths as $targetKey => $sourcePath) {
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
-            $targetFullPath = $this->app->getAppPath() . $targetKey . '.php';
+            $targetFullPath = $this->app->getRootPath()() . $targetKey;
 
             if (!file_exists($sourceFullPath)) {
                 $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
