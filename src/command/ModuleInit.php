@@ -2,53 +2,60 @@
 
 namespace mowzs\lib\command;
 
-use Composer\Factory;
-use Composer\IO\NullIO;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use think\console\Command;
 use think\console\Input;
+use think\console\input\Option;
 use think\console\Output;
-use function base_path;
-use function config_path;
 use function copy;
 use function file_exists;
 use function is_dir;
+use function is_file;
+use function json_decode;
+use function mkdir;
 use function rmdir;
+use function scandir;
 use function unlink;
 
 class ModuleInit extends Command
 {
     protected function configure()
     {
-        // 设置命令名称、描述和帮助信息
         $this->setName('admin:moduleInit')
             ->setDescription('Initialize custom module configurations from installed happy-module packages.')
-            ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".');
+            ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".')
+            ->addOption('force', null, Option::VALUE_NONE, 'Force replace existing files');
     }
 
     protected function execute(Input $input, Output $output)
     {
         $output->writeln('Starting module initialization...');
 
-        // 获取 Composer 的全局配置和已安装的包列表
-        $composerFactory = new Factory();
-        $composerConfig = $composerFactory->createConfig();
-        $composerIo = new NullIO();
-        $composer = $composerFactory->createComposer($composerIo, $composerConfig);
-        $installedRepo = $composer->getRepositoryManager()->getLocalRepository();
+        // 检查并读取 installed.json 文件
+        $installedJsonPath = $this->app->getRootPath() . 'vendor/composer/installed.json';
+        if (!is_file($installedJsonPath)) {
+            $output->writeln('<error>File vendor/composer/installed.json not found!</error>');
+            return 1; // 返回非零值表示命令执行失败
+        }
 
-        // 遍历所有已安装的包，只处理 type 为 'happy-module' 的包
-        foreach ($installedRepo->getPackages() as $package) {
-            if ($package->getType() !== 'happy-module') {
+        $packages = json_decode(@file_get_contents($installedJsonPath), true);
+        if (isset($packages['packages'])) {
+            $packages = $packages['packages']; // 兼容 Composer 2.0
+        } else {
+            $packages = [$packages]; // 确保我们总是处理一个数组
+        }
+
+        $force = $input->getOption('force');
+
+        foreach ($packages as $package) {
+            if ($package['type'] !== 'happy-module') {
                 continue; // 跳过非 happy-module 类型的包
             }
 
-            $extra = $package->getExtra();
+            $extra = $package['extra'] ?? [];
 
             // 检查包的 composer.json 是否包含 'module' 配置项
             if (isset($extra['module'])) {
-                $packageName = $package->getName();
+                $packageName = $package['name'];
                 $output->writeln("Processing package: <info>$packageName</info>");
 
                 // 处理 make 节点（强制替换）
@@ -58,7 +65,7 @@ class ModuleInit extends Command
 
                 // 处理 copy 节点（复制，目标路径已存在则跳过）
                 if (isset($extra['module']['copy'])) {
-                    $this->processPaths($extra['module']['copy'], false, $output, $packageName);
+                    $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
                 }
 
                 // 处理 del 节点（删除包的内容）
@@ -69,6 +76,7 @@ class ModuleInit extends Command
         }
 
         $output->writeln('Module initialization completed.');
+        return 0; // 返回零值表示命令成功执行
     }
 
     /**
@@ -82,8 +90,8 @@ class ModuleInit extends Command
     protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName)
     {
         foreach ($paths as $targetKey => $sourcePath) {
-            $sourceFullPath = base_path() . '/vendor/' . $packageName . '/' . $sourcePath;
-            $targetFullPath = config_path() . $targetKey . '.php';
+            $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
+            $targetFullPath = $this->app->getAppPath() . $targetKey . '.php';
 
             if (!file_exists($sourceFullPath)) {
                 $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
@@ -138,7 +146,7 @@ class ModuleInit extends Command
             mkdir($targetFullPath, 0755, true);
         }
 
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceFullPath));
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceFullPath));
         foreach ($iterator as $file) {
             if ($file->isDir()) {
                 continue;
@@ -170,7 +178,7 @@ class ModuleInit extends Command
      */
     protected function deletePackageContent(string $packageName, Output $output)
     {
-        $packagePath = base_path() . '/vendor/' . $packageName;
+        $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
 
         if (file_exists($packagePath)) {
             $this->recursiveDelete($packagePath, $output);
@@ -192,10 +200,11 @@ class ModuleInit extends Command
             $objects = scandir($path);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (is_dir($path . DIRECTORY_SEPARATOR . $object)) {
-                        $this->recursiveDelete($path . DIRECTORY_SEPARATOR . $object, $output);
+                    $fullPath = $path . DIRECTORY_SEPARATOR . $object;
+                    if (is_dir($fullPath)) {
+                        $this->recursiveDelete($fullPath, $output);
                     } else {
-                        unlink($path . DIRECTORY_SEPARATOR . $object);
+                        unlink($fullPath);
                     }
                 }
             }

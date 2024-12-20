@@ -16,6 +16,7 @@ class AdminInit extends Command
             ->setHelp('This command runs a series of initialization steps including service discovery, vendor publishing, and module configuration.');
     }
 
+
     protected function execute(Input $input, Output $output)
     {
         // 定义要执行的命令列表
@@ -27,16 +28,8 @@ class AdminInit extends Command
 
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
-
-            // 使用 Console::call 方法调用其他命令
-            $exitCode = $this->app->console->call($commandName);
-
-            if ($exitCode != 0) {
-                $output->writeln("<error>Failed to run $commandName.</error>");
-                return $exitCode;
-            }
-
-            $output->writeln("<info>$commandName completed successfully.</info>");
+            $commandOutput = $this->app->console->call($commandName)->fetch();
+            $output->writeln($commandOutput);
         }
 
         $output->writeln('<comment>All initialization steps have been completed.</comment>');

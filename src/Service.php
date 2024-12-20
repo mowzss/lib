@@ -46,7 +46,7 @@ class Service extends BaseService
      */
     protected function registerCommand(): void
     {
-        $this->app->console->addCommands([
+        $this->commands([
             AdminInit::class,
             ModuleInit::class
         ]);
