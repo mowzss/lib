@@ -23,16 +23,6 @@
     "topthink/think-queue": "^3.0",
     "nette/mail": "3.*||4.*"
   },
-  "extra": {
-    "module": {
-      "make": {
-        "复制路径": "包路径"
-      },
-      "copy": {
-        "复制路径": "包路径"
-      },
-      "del": "true"
-    },
     "think": {
       "config": {
         "auth": "stc/auth.php",
