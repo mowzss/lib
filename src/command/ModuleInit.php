@@ -57,22 +57,20 @@ class ModuleInit extends Command
             if (isset($extra['module'])) {
                 $packageName = $package['name'];
                 $output->writeln("Processing package: <info>$packageName</info>");
-
+                // 处理 make 节点（强制替换）
+                if (isset($extra['module']['make'])) {
+                    $this->processPaths($extra['module']['make'], true, $output, $packageName);
+                }
+                // 处理 copy 节点（复制，目标路径已存在则跳过）
+                if (isset($extra['module']['copy'])) {
+                    $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
+                }
                 // 处理 del 节点（删除包的内容）
                 if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
                     $output->writeln("Detected 'del' node in package: <info>$packageName</info>");
                     $this->deletePackageContent($packageName, $output);
                 }
 
-                // 处理 make 节点（强制替换）
-                if (isset($extra['module']['make'])) {
-                    $this->processPaths($extra['module']['make'], true, $output, $packageName);
-                }
-
-                // 处理 copy 节点（复制，目标路径已存在则跳过）
-                if (isset($extra['module']['copy'])) {
-                    $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
-                }
             }
         }
 
