@@ -4,6 +4,7 @@ declare (strict_types=1);
 namespace mowzs\lib;
 
 use mowzs\lib\command\AdminInit;
+use mowzs\lib\command\ModuleInit;
 use think\Service as BaseService;
 
 /**
@@ -47,6 +48,7 @@ class Service extends BaseService
     {
         $this->app->console->addCommands([
             AdminInit::class,
+            ModuleInit::class
         ]);
     }
 }
