@@ -18,6 +18,10 @@ use function unlink;
 
 class ModuleInit extends Command
 {
+    /**
+     * 配置命令
+     * @return void
+     */
     protected function configure()
     {
         $this->setName('admin:moduleInit')
@@ -26,6 +30,12 @@ class ModuleInit extends Command
             ->addOption('force', null, Option::VALUE_NONE, 'Force replace existing files');
     }
 
+    /**
+     * 执行
+     * @param Input $input
+     * @param Output $output
+     * @return int
+     */
     protected function execute(Input $input, Output $output)
     {
         $output->writeln('Starting module initialization...');
