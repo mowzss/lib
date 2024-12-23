@@ -60,7 +60,6 @@ class Forms
         $this->trigger = isset($options['trigger']) ? $this->setTriggers($options['trigger']) : [];
     }
 
-
     /**
      * 设置联动显示隐藏效果
      *
@@ -82,12 +81,27 @@ class Forms
             throw new Exception('触发字段必须是字符串或数组');
         }
 
+        // 查找已存在的 trigger，如果有则合并 value 和 field
+        foreach ($this->trigger as &$existingTrigger) {
+            if ($existingTrigger['name'] === $name) {
+                // 如果已经存在该 name 的 trigger，则添加新的 value 和 field
+                $existingTrigger['values'][] = [
+                    'value' => $value,
+                    'field' => $field,
+                ];
+                return $this;
+            }
+        }
 
-        // 添加触发条件到 $trigger 数组
+        // 如果没有找到已存在的 trigger，则创建一个新的
         $this->trigger[] = [
             'name' => $name,
-            'value' => $value,
-            'field' => $field,
+            'values' => [
+                [
+                    'value' => $value,
+                    'field' => $field,
+                ]
+            ]
         ];
 
         return $this;
@@ -103,15 +117,27 @@ class Forms
     public function setTriggers(array $triggers): static
     {
         foreach ($triggers as $trigger) {
-            if (!isset($trigger['name'], $trigger['value'], $trigger['field'])) {
-                throw new Exception('每个触发条件必须包含 name, value 和 field');
+            if (!isset($trigger['name'], $trigger['values'])) {
+                throw new Exception('每个触发条件必须包含 name 和 values');
             }
-            // 调用 setTrigger 方法来设置每个触发条件
-            $this->setTrigger(
-                $trigger['name'],
-                $trigger['value'],
-                $trigger['field'],
-            );
+
+            // 确保 values 是一个数组
+            if (!is_array($trigger['values'])) {
+                throw new Exception('触发条件的 values 必须是一个数组');
+            }
+
+            // 遍历 values 数组，调用 setTrigger 方法来设置每个触发条件
+            foreach ($trigger['values'] as $valueConfig) {
+                if (!isset($valueConfig['value'], $valueConfig['field'])) {
+                    throw new Exception('每个 valueConfig 必须包含 value 和 field');
+                }
+
+                $this->setTrigger(
+                    $trigger['name'],
+                    $valueConfig['value'],
+                    $valueConfig['field']
+                );
+            }
         }
 
         return $this;
@@ -129,12 +155,15 @@ class Forms
         if (empty($field)) {
             $field = $this->inputData;
         }
+
         // 解析字段数据并生成触发条件
         foreach ($field as $item) {
             if (!empty($item['options'])) {
                 $this->parseOptionsTriggers($item);
             }
         }
+
+        // 将触发条件传递给视图层
         View::assign('trigger', $this->trigger);
     }
 
@@ -150,6 +179,7 @@ class Forms
         if (is_array($item['options'])) {
             return false;
         }
+
         // 解析 options 字段
         $options = array_filter(explode("\n", trim($item['options'])));
         foreach ($options as $option) {
