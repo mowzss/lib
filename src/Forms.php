@@ -372,10 +372,10 @@ class Forms
     {
         if (is_array($type)) {
             // 如果传入的是数组，则直接添加到输入数据中
-            $this->inputData[] = $this->mergeValue($type);
+            $this->inputData[] = $type;
         } else {
             // 如果传入的是单独的参数，则构建一个字段数组
-            $this->inputData[] = $this->mergeValue([
+            $this->inputData[] = [
                 'type' => $type,
                 'name' => $name,
                 'label' => $label,
@@ -383,7 +383,7 @@ class Forms
                 'options' => $options ?? [],
                 'help' => $help ?? '',
                 'required' => $required
-            ]);
+            ];
         }
         return $this;
     }
@@ -396,7 +396,7 @@ class Forms
     public function setInputs(array $fields): static
     {
         foreach ($fields as $field) {
-            $this->inputData[] = $this->mergeValue($field);
+            $this->inputData[] = $field;
         }
         return $this;
     }
@@ -411,10 +411,34 @@ class Forms
         $name = $field['name'] ?? '';
         $value = $field['value'] ?? null;
 
-        if (isset($this->value[$name])) {
-            $field['value'] = $this->value[$name];
-        } elseif ($value !== null) {
-            $field['value'] = $value;
+        // 如果字段名包含方括号，则尝试解析为嵌套数组
+        if (strpos($name, '[') !== false && strpos($name, ']') !== false) {
+            // 去掉方括号并分割成键数组
+            $parts = explode('[', str_replace(']', '', $name));
+
+            // 从 this->value 中获取最深层的值
+            $tempValue = $this->value;
+            foreach ($parts as $part) {
+                if (isset($tempValue[$part])) {
+                    $tempValue = $tempValue[$part];
+                } else {
+                    $tempValue = null;  // 如果路径中的某个部分不存在，则返回null
+                    break;
+                }
+            }
+
+            if ($tempValue !== null) {
+                $field['value'] = $tempValue;
+            } elseif ($value !== null) {
+                $field['value'] = $value;
+            }
+        } else {
+            // 对于非嵌套的字段名，直接从 this->value 获取值
+            if (isset($this->value[$name])) {
+                $field['value'] = $this->value[$name];
+            } elseif ($value !== null) {
+                $field['value'] = $value;
+            }
         }
 
         return $field;
@@ -434,6 +458,7 @@ class Forms
         $this->outputMode = $outputMode ?? $this->outputMode;
         // 处理传入的数据
         $fields = array_merge($this->inputData, $data);
+
         if (empty($fields)) {
             return $this->outputMode();
         }
@@ -516,6 +541,9 @@ class Forms
                 'name' => $this->pk,
                 'value' => $this->value[$this->pk]
             ];
+        }
+        foreach ($fields as &$field) {
+            $field = $this->mergeValue($field);
         }
         View::assign([
             'fields' => $fields,
