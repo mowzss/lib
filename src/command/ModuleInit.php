@@ -117,16 +117,15 @@ class ModuleInit extends Command
         }
     }
 
-    /**
-     * 处理文件（复制或替换）
-     *
-     * @param string $sourceFullPath 源文件路径
-     * @param string $targetFullPath 目标文件路径
-     * @param bool $forceReplace 是否强制替换
-     * @param Output $output 输出对象
-     */
     protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
     {
+        // 确保目标文件所在的目录存在
+        $targetDir = dirname($targetFullPath);
+        if (!$this->ensureDirectoryExists($targetDir)) {
+            $output->writeln("Error: Failed to create directory '$targetDir'.");
+            return;
+        }
+
         if (file_exists($targetFullPath)) {
             if ($forceReplace) {
                 unlink($targetFullPath); // 删除目标文件
@@ -141,18 +140,12 @@ class ModuleInit extends Command
         }
     }
 
-    /**
-     * 处理目录（递归复制或替换）
-     *
-     * @param string $sourceFullPath 源目录路径
-     * @param string $targetFullPath 目标目录路径
-     * @param bool $forceReplace 是否强制替换
-     * @param Output $output 输出对象
-     */
     protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
     {
-        if (!file_exists($targetFullPath)) {
-            mkdir($targetFullPath, 0755, true);
+        // 确保目标目录存在
+        if (!$this->ensureDirectoryExists($targetFullPath)) {
+            $output->writeln("Error: Failed to create directory '$targetFullPath'.");
+            return;
         }
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceFullPath));
@@ -160,9 +153,15 @@ class ModuleInit extends Command
             if ($file->isDir()) {
                 continue;
             }
-
             $relativePath = substr($file->getPathname(), strlen($sourceFullPath) + 1);
             $targetFile = $targetFullPath . DIRECTORY_SEPARATOR . $relativePath;
+
+            // 确保目标文件所在的目录存在
+            $targetDir = dirname($targetFile);
+            if (!$this->ensureDirectoryExists($targetDir)) {
+                $output->writeln("Error: Failed to create directory '$targetDir'.");
+                continue;
+            }
 
             if (file_exists($targetFile)) {
                 if ($forceReplace) {
@@ -262,5 +261,21 @@ class ModuleInit extends Command
             $output->writeln("<error>Failed to delete directory: $path</error>");
             return false;
         }
+    }
+
+    /**
+     * 确保目录路径存在，如果不存在则创建。
+     *
+     * @param string $path 目标路径
+     * @param int $mode 目录权限模式，默认为 0755
+     * @return bool 创建是否成功
+     */
+    public function ensureDirectoryExists($path, $mode = 0755)
+    {
+        if (!file_exists($path)) {
+            // mkdir() 的第三个参数设置为 true 以启用递归创建
+            return mkdir($path, $mode, true);
+        }
+        return is_dir($path);
     }
 }
