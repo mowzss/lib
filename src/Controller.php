@@ -195,7 +195,7 @@ abstract class Controller
             $response = Response::create($result, $type)->header($header);
         }
 
-        throw new HttpResponseException($response);
+        return throw new HttpResponseException($response);
     }
 
     /**
@@ -206,30 +206,40 @@ abstract class Controller
      * @param string|null $url 跳转的URL地址
      * @param integer $wait 跳转等待时间
      * @param array $header 发送的Header信息
-     * @return void
+     * @return mixed
      */
-    protected function success(mixed $msg = '', mixed $data = '', ?string $url = null, int $wait = 3, array $header = []): void
+    protected function success(mixed $msg = '', mixed $data = '', ?string $url = null, int $wait = 3, array $header = []): mixed
     {
         if (!is_string($msg) && empty($data)) {
             $data = $msg;
             $msg = 'ok';
         }
-        $this->ret($url, $msg, $data, $wait, $header);
+        return $this->ret($url, $msg, $data, $wait, $header);
     }
 
     /**
      * 操作错误跳转的快捷方法
      * @access protected
      * @param mixed|string $msg 提示信息
-     * @param string|null $url 跳转的URL地址
      * @param null|string $data 返回的数据
+     * @param string|null $url 跳转的URL地址
      * @param integer $wait 跳转等待时间
      * @param array $header 发送的Header信息
-     * @return void
+     * @return mixed
      */
-    protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): void
+    protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): mixed
     {
-        $this->ret($url, $msg, $data, $wait, $header, 1);
+        return $this->ret($url, $msg, $data, $wait, $header, 1);
+    }
+
+    /**
+     * 获取当前的response 输出类型
+     * @access protected
+     * @return string
+     */
+    private function getResponseType(): string
+    {
+        return $this->request->isJson() || $this->request->isAjax() ? 'json' : 'html';
     }
 
     /**
@@ -252,7 +262,7 @@ abstract class Controller
         ];
         $type = $type ?: $this->getResponseType();
         $response = Response::create($result, $type)->header($header);
-        throw new HttpResponseException($response);
+        return throw new HttpResponseException($response);
     }
 
     /**
@@ -272,13 +282,5 @@ abstract class Controller
         throw new HttpResponseException($response);
     }
 
-    /**
-     * 获取当前的response 输出类型
-     * @access protected
-     * @return string
-     */
-    private function getResponseType(): string
-    {
-        return $this->request->isJson() || $this->request->isAjax() ? 'json' : 'html';
-    }
+
 }
