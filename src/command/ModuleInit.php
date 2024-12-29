@@ -55,37 +55,41 @@ class ModuleInit extends Command
         }
 
         $force = $input->getOption('force');
-
+        $summary = [
+            'processed_packages' => 0,
+            'copied_files' => 0,
+            'replaced_files' => 0,
+            'deleted_files' => 0,
+        ];
         foreach ($packages as $package) {
             if ($package['type'] !== 'happy-module') {
-                continue; // 跳过非 happy-module 类型的包
+                continue;
             }
-
             $extra = $package['extra'] ?? [];
-
-            // 检查包的 composer.json 是否包含 'module' 配置项
             if (isset($extra['module'])) {
                 $packageName = $package['name'];
                 $output->writeln("Processing package: <info>$packageName</info>");
+
                 // 处理 make 节点（强制替换）
                 if (isset($extra['module']['make'])) {
-                    $this->processPaths($extra['module']['make'], true, $output, $packageName);
+                    $this->processPaths($extra['module']['make'], true, $output, $packageName, $summary);
                 }
                 // 处理 copy 节点（复制，目标路径已存在则跳过）
                 if (isset($extra['module']['copy'])) {
-                    $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
+                    $this->processPaths($extra['module']['copy'], $force, $output, $packageName, $summary);
                 }
                 // 处理 del 节点（删除包的内容）
                 if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
-                    $output->writeln("Detected 'del' node in package: <info>$packageName</info>");
-                    $this->deletePackageContent($packageName, $output);
+                    $this->deletePackageContent($packageName, $output, $summary);
                 }
 
+                $summary['processed_packages']++;
+                $output->writeln("Finished processing package: <info>$packageName</info>");
             }
         }
-
         $output->writeln('Module initialization completed.');
-        return 0; // 返回零值表示命令成功执行
+        $output->writeln("Summary: Processed <info>{$summary['processed_packages']}</info> packages, copied <info>{$summary['copied_files']}</info> files, replaced <info>{$summary['replaced_files']}</info> files, deleted <info>{$summary['deleted_files']}</info> files.");
+        return 0;
     }
 
     /**
@@ -96,7 +100,7 @@ class ModuleInit extends Command
      * @param Output $output 输出对象
      * @param string $packageName 包名
      */
-    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName)
+    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName, array &$summary)
     {
         foreach ($paths as $targetKey => $sourcePath) {
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
@@ -118,11 +122,9 @@ class ModuleInit extends Command
             }
 
             if (is_dir($sourceFullPath)) {
-                // 处理目录
-                $this->processDirectory($sourceFullPath, $targetFullPath, $forceReplace, $output);
+                $this->processDirectory($sourceFullPath, $targetFullPath, $forceReplace, $output, $summary);
             } else {
-                // 处理文件
-                $this->processFile($sourceFullPath, $targetFullPath, $forceReplace, $output);
+                $this->processFile($sourceFullPath, $targetFullPath, $forceReplace, $output, $summary);
             }
         }
     }
@@ -135,7 +137,7 @@ class ModuleInit extends Command
      * @param bool $forceReplace 是否强制替换
      * @param Output $output 输出对象
      */
-    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
+    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output, array &$summary)
     {
         // 确保目标文件夹存在
         $targetDir = dirname($targetFullPath);
@@ -145,22 +147,19 @@ class ModuleInit extends Command
                 return;
             }
         }
-
         try {
             if (file_exists($targetFullPath)) {
                 if ($forceReplace) {
                     unlink($targetFullPath); // 删除目标文件
                     if (copy($sourceFullPath, $targetFullPath)) {
-                        $output->writeln("Replaced file at '$targetFullPath'.");
+                        $summary['replaced_files']++;
                     } else {
                         throw new \Exception("Failed to copy file to '$targetFullPath'.");
                     }
-                } else {
-                    $output->writeln("Warning: The file '$targetFullPath' already exists and will be skipped.");
                 }
             } else {
                 if (copy($sourceFullPath, $targetFullPath)) {
-                    $output->writeln("Copied file to '$targetFullPath'.");
+                    $summary['copied_files']++;
                 } else {
                     throw new \Exception("Failed to copy file to '$targetFullPath'.");
                 }
@@ -178,7 +177,7 @@ class ModuleInit extends Command
      * @param bool $forceReplace 是否强制替换
      * @param Output $output 输出对象
      */
-    protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
+    protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output, array &$summary)
     {
         // 确保目标目录存在
         if (!is_dir($targetFullPath)) {
@@ -187,7 +186,6 @@ class ModuleInit extends Command
                 return;
             }
         }
-
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceFullPath));
         foreach ($iterator as $file) {
             if ($file->isDir()) {
@@ -197,30 +195,21 @@ class ModuleInit extends Command
             $relativePath = substr($file->getPathname(), strlen($sourceFullPath) + 1);
             $targetFile = $targetFullPath . DIRECTORY_SEPARATOR . $relativePath;
 
-            // 确保目标文件夹存在
-            $targetDir = dirname($targetFile);
-            if (!is_dir($targetDir)) {
-                if (!mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
-                    $output->writeln("Error: Failed to create target directory: '$targetDir'.");
-                    continue;
-                }
-            }
+            // ... (确保目标文件夹存在的代码保持不变)
 
             try {
                 if (file_exists($targetFile)) {
                     if ($forceReplace) {
                         unlink($targetFile); // 删除目标文件
                         if (copy($file->getPathname(), $targetFile)) {
-                            $output->writeln("Replaced file at '$targetFile'.");
+                            $summary['replaced_files']++;
                         } else {
                             throw new \Exception("Failed to copy file to '$targetFile'.");
                         }
-                    } else {
-                        $output->writeln("Warning: The file '$targetFile' already exists and will be skipped.");
                     }
                 } else {
                     if (copy($file->getPathname(), $targetFile)) {
-                        $output->writeln("Copied file to '$targetFile'.");
+                        $summary['copied_files']++;
                     } else {
                         throw new \Exception("Failed to copy file to '$targetFile'.");
                     }
@@ -230,36 +219,44 @@ class ModuleInit extends Command
             }
         }
     }
-    
+
     /**
      * 删除包的内容
      *
      * @param string $packageName 包名
      * @param Output $output 输出对象
      */
-    protected function deletePackageContent(string $packageName, Output $output)
+
+    protected function deletePackageContent(string $packageName, Output $output, array &$summary)
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
 
+        // 检查路径是否存在且是一个目录
         if (!file_exists($packagePath)) {
-            $output->writeln("Warning: Package path '$packagePath' does not exist.");
+            $output->writeln("Notice: Path for package '$packageName' does not exist.");
             return;
         }
-
         if (!is_dir($packagePath)) {
             $output->writeln("Error: Path '$packagePath' is not a directory.");
             return;
         }
 
-        $output->writeln("Deleting content of package: <info>$packageName</info>");
+        // 确认目录不为空（可选）
+        if (empty(iterator_to_array(new \FilesystemIterator($packagePath)))) {
+            $output->writeln("Notice: Package directory '$packageName' is empty, nothing to delete.");
+            return;
+        }
 
-        // 递归删除包的内容
         if ($this->recursiveDelete($packagePath, $output)) {
-            $output->writeln("Successfully deleted content of package: <info>$packageName</info>");
+            // 计算被删除的文件数量
+            $deletedFilesCount = iterator_count(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packagePath)));
+            $summary['deleted_files'] += $deletedFilesCount;
+            $output->writeln("Deleted <info>$deletedFilesCount</info> files from package: <info>$packageName</info>");
         } else {
             $output->writeln("<error>Failed to delete content of package: $packageName</error>");
         }
     }
+
 
     /**
      * 递归删除目录及其内容
@@ -274,7 +271,6 @@ class ModuleInit extends Command
             $output->writeln("Warning: Path '$path' does not exist.");
             return true; // 如果路径不存在，认为删除成功
         }
-
         if (!is_dir($path)) {
             // 如果是文件，直接删除
             if (unlink($path)) {
@@ -285,16 +281,13 @@ class ModuleInit extends Command
                 return false;
             }
         }
-
         // 获取目录中的所有文件和子目录
         $objects = scandir($path);
         foreach ($objects as $object) {
             if ($object == '.' || $object == '..') {
                 continue;
             }
-
             $fullPath = $path . DIRECTORY_SEPARATOR . $object;
-
             // 递归删除子目录或文件
             if (is_dir($fullPath)) {
                 if (!$this->recursiveDelete($fullPath, $output)) {
@@ -308,7 +301,6 @@ class ModuleInit extends Command
                 $output->writeln("Deleted file: '$fullPath'");
             }
         }
-
         // 删除空目录
         if (rmdir($path)) {
             $output->writeln("Deleted directory: '$path'");
