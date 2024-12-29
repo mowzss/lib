@@ -100,18 +100,16 @@ class ModuleInit extends Command
      * @param Output $output 输出对象
      * @param string $packageName 包名
      */
-    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName, array &$summary)
+    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName, array &$summary): void
     {
         foreach ($paths as $targetKey => $sourcePath) {
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
             $targetFullPath = $this->app->getRootPath() . $targetKey;
-
             // 检查源文件或目录是否存在
             if (!file_exists($sourceFullPath)) {
                 $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
                 continue;
             }
-
             // 确保目标目录存在
             $targetDir = dirname($targetFullPath);
             if (!is_dir($targetDir)) {
@@ -120,7 +118,6 @@ class ModuleInit extends Command
                     continue;
                 }
             }
-
             if (is_dir($sourceFullPath)) {
                 $this->processDirectory($sourceFullPath, $targetFullPath, $forceReplace, $output, $summary);
             } else {
