@@ -6,7 +6,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use think\console\Command;
 use think\console\Input;
-use think\console\input\Option;
 use think\console\Output;
 use function copy;
 use function file_exists;
@@ -29,8 +28,7 @@ class ModuleInit extends Command
     {
         $this->setName('admin:moduleInit')
             ->setDescription('Initialize custom module configurations from installed happy-module packages.')
-            ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".')
-            ->addOption('force', null, Option::VALUE_NONE, 'Force replace existing files');
+            ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".');
     }
 
     /**
@@ -57,7 +55,6 @@ class ModuleInit extends Command
             $packages = [$packages]; // 确保我们总是处理一个数组
         }
 
-        $force = $input->getOption('force');
         $processedPackages = array_filter($packages, function ($package) {
             return isset($package['type']) && $package['type'] === 'happy-module' && isset($package['extra']['module']);
         });
@@ -77,7 +74,7 @@ class ModuleInit extends Command
 
             // 复制替换（无论是否存在都进行替换）
             if (isset($extra['module']['copy'])) {
-                $this->processPaths($extra['module']['copy'], $force, $output, $installPath, $output);
+                $this->processPaths($extra['module']['copy'], true, $output, $installPath, $output);
             }
 
             // 清理当前库的所有文件及信息
@@ -92,7 +89,7 @@ class ModuleInit extends Command
         $output->writeln('Module initialization completed.');
         return 0; // 返回零值表示命令成功执行
     }
-    
+
 
     /**
      * 处理路径（复制或替换）
