@@ -13,7 +13,6 @@ use function is_file;
 use function json_decode;
 use function mkdir;
 use function rmdir;
-use function scandir;
 use function unlink;
 
 class ModuleInit extends Command
@@ -217,12 +216,6 @@ class ModuleInit extends Command
         }
     }
 
-    /**
-     * 删除包的内容
-     *
-     * @param string $packageName 包名
-     * @param Output $output 输出对象
-     */
     protected function deletePackageContent(string $packageName, Output $output, array &$summary)
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
@@ -245,6 +238,8 @@ class ModuleInit extends Command
         }
 
         try {
+            $output->writeln("Deleting content of package: <info>'$packageName'</info>");
+
             if ($this->recursiveDelete($packagePath, $output)) {
                 // 计算被删除的文件数量
                 $deletedFilesCount = iterator_count(new \RecursiveIteratorIterator(new \FilesystemIterator($packagePath)));
@@ -258,7 +253,6 @@ class ModuleInit extends Command
         }
     }
 
-
     /**
      * 递归删除目录及其内容
      *
@@ -266,49 +260,52 @@ class ModuleInit extends Command
      * @param Output $output 输出对象
      * @return bool 是否删除成功
      */
-    protected function recursiveDelete(string $path, Output $output): bool
+    protected function recursiveDelete($path, Output $output)
     {
         if (!file_exists($path)) {
-            $output->writeln("Warning: Path '$path' does not exist.");
-            return true; // 如果路径不存在，认为删除成功
+            return true;
         }
-        if (!is_dir($path)) {
-            // 如果是文件，直接删除
-            if (unlink($path)) {
-                $output->writeln("Deleted file: '$path'");
-                return true;
-            } else {
-                $output->writeln("<error>Failed to delete file: $path</error>");
+
+        if (is_file($path)) {
+            return unlink($path);
+        }
+
+        if (is_dir($path)) {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            $fileCount = iterator_count($iterator);
+            $progressStep = max(1, (int)($fileCount / 10)); // 每10%打印一次进度
+            $currentFile = 0;
+
+            foreach ($iterator as $file) {
+                try {
+                    if ($file->isDir()) {
+                        rmdir($file->getPathname());
+                    } else {
+                        unlink($file->getPathname());
+                    }
+                    $currentFile++;
+                    if ($currentFile % $progressStep === 0) {
+                        $output->write('.'); // 打印进度点号
+                    }
+                } catch (\Exception $e) {
+                    $output->writeln("\n<error>Error deleting <info>'" . $file->getPathname() . "'</info>: " . $e->getMessage() . "</error>");
+                }
+            }
+
+            try {
+                rmdir($path);
+            } catch (\Exception $e) {
+                $output->writeln("\n<error>Error removing directory <info>'$path'</info>: " . $e->getMessage() . "</error>");
                 return false;
             }
-        }
-        // 获取目录中的所有文件和子目录
-        $objects = scandir($path);
-        foreach ($objects as $object) {
-            if ($object == '.' || $object == '..') {
-                continue;
-            }
-            $fullPath = $path . DIRECTORY_SEPARATOR . $object;
-            // 递归删除子目录或文件
-            if (is_dir($fullPath)) {
-                if (!$this->recursiveDelete($fullPath, $output)) {
-                    return false; // 如果删除子目录失败，返回 false
-                }
-            } else {
-                if (!unlink($fullPath)) {
-                    $output->writeln("<error>Failed to delete file: $fullPath</error>");
-                    return false;
-                }
-                $output->writeln("Deleted file: '$fullPath'");
-            }
-        }
-        // 删除空目录
-        if (rmdir($path)) {
-            $output->writeln("Deleted directory: '$path'");
+
             return true;
-        } else {
-            $output->writeln("<error>Failed to delete directory: $path</error>");
-            return false;
         }
+
+        $output->writeln("Error: Path <info>'$path'</info> is neither a file nor a directory.");
+        return false;
     }
 }
