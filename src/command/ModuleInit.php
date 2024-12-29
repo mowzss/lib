@@ -91,15 +91,6 @@ class ModuleInit extends Command
     }
 
 
-    /**
-     * 处理路径（复制或替换）
-     *
-     * @param array $paths 路径配置
-     * @param bool $forceReplace 是否强制替换
-     * @param Output $output 输出对象
-     * @param string $installPath 安装路径
-     * @param Output $io 输出接口
-     */
     protected function processPaths(array $paths, bool $forceReplace, Output $output, string $installPath, Output $io)
     {
         foreach ($paths as $source => $target) {
@@ -116,20 +107,20 @@ class ModuleInit extends Command
                 continue;
             }
 
-            // 检查目标文件，若已经存在并且内容相同则跳过
+            // 检查目标文件，若已经存在并且内容相同则跳过（除非是强制替换）
             if (is_file($sourceFullPath) && is_file($target) && !$forceReplace && md5_file($sourceFullPath) === md5_file($target)) {
                 $output->writeln("Skipped copying <info>{$source}</info> to <info>{$target}</info> (files are identical).");
                 continue;
             }
 
-            // 如果目标目录或其上级目录下存在 ignore 文件则跳过复制
+            // 如果目标目录或其上级目录下存在 lock 文件则跳过复制
             if (file_exists(dirname($target) . '/lock') || file_exists(rtrim($target, '\\/') . "/lock")) {
                 $output->writeln("Skipped copying <info>{$source}</info> to <info>{$target}</info> (ignore file exists).");
                 continue;
             }
 
-            // 绝对复制时需要先删再写入
-            if ($absoluteCopy && file_exists($target)) {
+            // 强制替换时需要先删再写入
+            if ($forceReplace && file_exists($target)) {
                 if (is_file($target)) {
                     unlink($target);
                 } elseif (is_dir($target)) {
