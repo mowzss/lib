@@ -130,13 +130,13 @@ class ModuleInit extends Command
             if ($forceReplace) {
                 unlink($targetFullPath); // 删除目标文件
                 copy($sourceFullPath, $targetFullPath);
-                $output->writeln("Replaced file at '$targetFullPath'.");
+                //                $output->writeln("Replaced file at '$targetFullPath'.");
             } else {
                 $output->writeln("Warning: The file '$targetFullPath' already exists and will be skipped.");
             }
         } else {
             copy($sourceFullPath, $targetFullPath);
-            $output->writeln("Copied file to '$targetFullPath'.");
+            //            $output->writeln("Copied file to '$targetFullPath'.");
         }
     }
 
@@ -167,13 +167,13 @@ class ModuleInit extends Command
                 if ($forceReplace) {
                     unlink($targetFile); // 删除目标文件
                     copy($file->getPathname(), $targetFile);
-                    $output->writeln("Replaced file at '$targetFile'.");
+                    //                    $output->writeln("Replaced file at '$targetFile'.");
                 } else {
                     $output->writeln("Warning: The file '$targetFile' already exists and will be skipped.");
                 }
             } else {
                 copy($file->getPathname(), $targetFile);
-                $output->writeln("Copied file to '$targetFile'.");
+                //                $output->writeln("Copied file to '$targetFile'.");
             }
         }
     }
