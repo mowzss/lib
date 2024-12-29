@@ -194,8 +194,7 @@ abstract class Controller
         } else {
             $response = Response::create($result, $type)->header($header);
         }
-
-        return throw new HttpResponseException($response);
+        return $response;
     }
 
     /**
