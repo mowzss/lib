@@ -64,23 +64,25 @@ class ModuleInit extends Command
                 $packageName = $package['name'];
                 $output->writeln("Processing package: <info>$packageName</info>");
                 // 处理 make 节点（创建目录和文件）
+                // Process 'make' node (create directories and files)
                 if (isset($extra['module']['make'])) {
-                    $output->writeln('<info>开始处理 module[\'make\'] 节点...</info>');
+                    $output->writeln('<info>Starting to process module[\'make\'] node...</info>');
                     $this->processPaths($extra['module']['make'], true, $output, $packageName);
-                    $output->writeln('<info>已完成 module[\'make\'] 节点的处理。</info>');
+                    $output->writeln('<info>Completed processing of module[\'make\'] node.</info>');
                 }
 
-                // 处理 copy 节点（复制文件，目标路径已存在则跳过）
+                // Process 'copy' node (copy files, skip if destination path exists)
                 if (isset($extra['module']['copy'])) {
-                    $output->writeln('<info>开始处理 module[\'copy\'] 节点...</info>');
+                    $output->writeln('<info>Starting to process module[\'copy\'] node...</info>');
                     $this->processPaths($extra['module']['copy'], false, $output, $packageName);
-                    $output->writeln('<info>已完成 module[\'copy\'] 节点的处理。</info>');
+                    $output->writeln('<info>Completed processing of module[\'copy\'] node.</info>');
                 }
-                // 处理 del 节点（删除包的内容）
+
+                // Process 'del' node (delete package contents)
                 if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
-                    $output->writeln("开始清理 <info>$packageName</info>");
+                    $output->writeln("Starting cleanup of <info>$packageName</info>");
                     $this->deletePackageContent($packageName, $output);
-                    $output->writeln("<info>$packageName</info> 清理完成");
+                    $output->writeln("<info>$packageName</info> cleanup completed");
                 }
 
             }
