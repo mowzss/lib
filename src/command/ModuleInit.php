@@ -67,6 +67,9 @@ class ModuleInit extends Command
             $packageName = $package['name'];
             $installPath = $this->app->getRootPath() . 'vendor/' . $packageName;
 
+            // 输出开始信息
+            $output->writeln("Starting processing package: <info>$packageName</info>");
+
             // 初始化（若文件存在不进行操作）
             if (isset($extra['module']['init'])) {
                 $this->processPaths($extra['module']['init'], false, $output, $installPath, $output);
@@ -81,11 +84,15 @@ class ModuleInit extends Command
             if (isset($extra['module']['clear']) && $extra['module']['clear'] === true) {
                 $this->deletePackageContent($packageName, $output);
             }
+
+            // 输出结束信息
+            $output->writeln("Finished processing package: <info>$packageName</info>");
         }
 
         $output->writeln('Module initialization completed.');
         return 0; // 返回零值表示命令成功执行
     }
+    
 
     /**
      * 处理路径（复制或替换）
