@@ -223,34 +223,38 @@ class ModuleInit extends Command
      * @param string $packageName 包名
      * @param Output $output 输出对象
      */
-
     protected function deletePackageContent(string $packageName, Output $output, array &$summary)
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
 
         // 检查路径是否存在且是一个目录
         if (!file_exists($packagePath)) {
-            $output->writeln("Notice: Path for package '$packageName' does not exist.");
+            $output->writeln("Notice: Path for package <info>'$packageName'</info> does not exist. Skipping deletion.");
             return;
         }
         if (!is_dir($packagePath)) {
-            $output->writeln("Error: Path '$packagePath' is not a directory.");
+            $output->writeln("Error: Path <info>'$packagePath'</info> is not a directory. Skipping deletion.");
             return;
         }
 
         // 确认目录不为空（可选）
-        if (empty(iterator_to_array(new \FilesystemIterator($packagePath)))) {
-            $output->writeln("Notice: Package directory '$packageName' is empty, nothing to delete.");
+        $iterator = new \FilesystemIterator($packagePath);
+        if (empty(iterator_to_array($iterator))) {
+            $output->writeln("Notice: Package directory <info>'$packageName'</info> is empty, nothing to delete.");
             return;
         }
 
-        if ($this->recursiveDelete($packagePath, $output)) {
-            // 计算被删除的文件数量
-            $deletedFilesCount = iterator_count(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packagePath)));
-            $summary['deleted_files'] += $deletedFilesCount;
-            $output->writeln("Deleted <info>$deletedFilesCount</info> files from package: <info>$packageName</info>");
-        } else {
-            $output->writeln("<error>Failed to delete content of package: $packageName</error>");
+        try {
+            if ($this->recursiveDelete($packagePath, $output)) {
+                // 计算被删除的文件数量
+                $deletedFilesCount = iterator_count(new \RecursiveIteratorIterator(new \FilesystemIterator($packagePath)));
+                $summary['deleted_files'] += $deletedFilesCount;
+                $output->writeln("Deleted <info>$deletedFilesCount</info> files from package: <info>'$packageName'</info>");
+            } else {
+                $output->writeln("<error>Failed to delete content of package: '$packageName'</error>");
+            }
+        } catch (\Exception $e) {
+            $output->writeln("<error>Error deleting content of package <info>'$packageName'</info>: " . $e->getMessage() . "</error>");
         }
     }
 
