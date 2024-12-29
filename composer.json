@@ -39,6 +39,9 @@
     "psr-4": {
       "mowzs\\lib\\": "src/",
       "think\\": "think"
-    }
+    },
+    "file": [
+      "src/sys.php"
+    ]
   }
 }
