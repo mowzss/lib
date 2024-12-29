@@ -2,8 +2,8 @@
 
 namespace mowzs\lib\command;
 
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Filesystem\Filesystem;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use think\console\Command;
 use think\console\Input;
 use think\console\input\Option;
@@ -13,7 +13,10 @@ use function file_exists;
 use function is_dir;
 use function is_file;
 use function json_decode;
+use function md5_file;
 use function mkdir;
+use function rtrim;
+use function scandir;
 use function unlink;
 
 class ModuleInit extends Command
@@ -59,31 +62,27 @@ class ModuleInit extends Command
             return isset($package['type']) && $package['type'] === 'happy-module' && isset($package['extra']['module']);
         });
 
-        // 创建进度条
-        $progress = new ProgressBar($output, count($processedPackages));
-        $progress->start();
-
         foreach ($processedPackages as $package) {
             $extra = $package['extra'] ?? [];
             $packageName = $package['name'];
-            // 处理 make 节点（强制替换）
-            if (isset($extra['module']['make'])) {
-                $this->processPaths($extra['module']['make'], true, $output, $packageName);
+            $installPath = $this->app->getRootPath() . 'vendor/' . $packageName;
+
+            // 初始化（若文件存在不进行操作）
+            if (isset($extra['module']['init'])) {
+                $this->processPaths($extra['module']['init'], false, $output, $installPath, $output);
             }
-            // 处理 copy 节点（复制，目标路径已存在则跳过）
+
+            // 复制替换（无论是否存在都进行替换）
             if (isset($extra['module']['copy'])) {
-                $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
+                $this->processPaths($extra['module']['copy'], $force, $output, $installPath, $output);
             }
-            // 处理 del 节点（删除包的内容）
-            if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
+
+            // 清理当前库的所有文件及信息
+            if (isset($extra['module']['clear']) && $extra['module']['clear'] === true) {
                 $this->deletePackageContent($packageName, $output);
             }
-            // 更新进度条
-            $progress->advance();
         }
 
-        $progress->finish();
-        $output->writeln('');
         $output->writeln('Module initialization completed.');
         return 0; // 返回零值表示命令成功执行
     }
@@ -94,140 +93,105 @@ class ModuleInit extends Command
      * @param array $paths 路径配置
      * @param bool $forceReplace 是否强制替换
      * @param Output $output 输出对象
-     * @param string $packageName 包名
+     * @param string $installPath 安装路径
+     * @param Output $io 输出接口
      */
-    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName)
+    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $installPath, Output $io)
     {
-        // 计算总路径数
-        $totalPaths = count($paths);
-        $progress = new ProgressBar($output, $totalPaths);
-        $progress->start();
+        foreach ($paths as $source => $target) {
+            // 是否为绝对复制模式
+            $absoluteCopy = $target[0] === '!';
+            if ($absoluteCopy) {
+                $target = substr($target, 1);
+            }
 
-        foreach ($paths as $targetKey => $sourcePath) {
-            $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
-            $targetFullPath = $this->app->getRootPath() . $targetKey;
-
-            // 检查源文件或目录是否存在
+            // 源文件位置，若不存在直接跳过
+            $sourceFullPath = $installPath . DIRECTORY_SEPARATOR . $source;
             if (!file_exists($sourceFullPath)) {
-                $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
+                $output->writeln("Warning: Source path '$sourceFullPath' does not exist.");
                 continue;
             }
 
+            // 检查目标文件，若已经存在并且内容相同则跳过
+            if (is_file($sourceFullPath) && is_file($target) && !$forceReplace && md5_file($sourceFullPath) === md5_file($target)) {
+                $output->writeln("Skipped copying <info>{$source}</info> to <info>{$target}</info> (files are identical).");
+                continue;
+            }
+
+            // 如果目标目录或其上级目录下存在 ignore 文件则跳过复制
+            if (file_exists(dirname($target) . '/lock') || file_exists(rtrim($target, '\\/') . "/lock")) {
+                $output->writeln("Skipped copying <info>{$source}</info> to <info>{$target}</info> (ignore file exists).");
+                continue;
+            }
+
+            // 绝对复制时需要先删再写入
+            if ($absoluteCopy && file_exists($target)) {
+                if (is_file($target)) {
+                    unlink($target);
+                } elseif (is_dir($target)) {
+                    $this->removeDirectoryPhp($target);
+                }
+            }
+
             // 确保目标目录存在
-            $targetDir = dirname($targetFullPath);
+            $targetDir = dirname($target);
             if (!is_dir($targetDir)) {
                 if (!mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
-                    $output->writeln("Error: Failed to create target directory: '$targetDir'.");
+                    $output->writeln("Error: Failed to create target directory: <info>$targetDir</info>.");
                     continue;
                 }
             }
 
+            // 执行复制操作，将原文件或目录复制到目标位置
             if (is_dir($sourceFullPath)) {
-                // 处理目录
-                $this->processDirectory($sourceFullPath, $targetFullPath, $forceReplace, $output);
-            } else {
-                // 处理文件
-                $this->processFile($sourceFullPath, $targetFullPath, $forceReplace, $output);
-            }
-
-            // 处理完成后更新进度条
-            $progress->advance();
-        }
-
-        $progress->finish();
-        $output->writeln('');
-    }
-
-    /**
-     * 处理文件（复制或替换）
-     *
-     * @param string $sourceFullPath 源文件路径
-     * @param string $targetFullPath 目标文件路径
-     * @param bool $forceReplace 是否强制替换
-     * @param Output $output 输出对象
-     */
-    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
-    {
-        try {
-            if (file_exists($targetFullPath)) {
-                if ($forceReplace) {
-                    unlink($targetFullPath); // 删除目标文件
-                    if (copy($sourceFullPath, $targetFullPath)) {
-                        $output->writeln("Replaced file at '$targetFullPath'.");
-                    } else {
-                        throw new \Exception("Failed to copy file to '$targetFullPath'.");
-                    }
+                $this->copyDirectory($sourceFullPath, $target, $forceReplace, $output);
+            } elseif (is_file($sourceFullPath)) {
+                if (copy($sourceFullPath, $target)) {
+                    $output->writeln("Copied <info>{$source}</info> to <info>{$target}</info>.");
                 } else {
-                    $output->writeln("Warning: The file '$targetFullPath' already exists and will be skipped.");
-                }
-            } else {
-                if (copy($sourceFullPath, $targetFullPath)) {
-                    $output->writeln("Copied file to '$targetFullPath'.");
-                } else {
-                    throw new \Exception("Failed to copy file to '$targetFullPath'.");
+                    $output->writeln("<error>Error: Failed to copy file to <info>{$target}</info>.</error>");
                 }
             }
-        } catch (\Exception $e) {
-            $output->writeln("<error>Error: " . $e->getMessage() . "</error>");
         }
     }
 
     /**
-     * 处理目录（递归复制或替换）
+     * 复制目录及其内容
      *
-     * @param string $sourceFullPath 源目录路径
-     * @param string $targetFullPath 目标目录路径
+     * @param string $source 源目录路径
+     * @param string $target 目标目录路径
      * @param bool $forceReplace 是否强制替换
      * @param Output $output 输出对象
      */
-    protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
+    protected function copyDirectory(string $source, string $target, bool $forceReplace, Output $output)
     {
-        // 确保目标目录存在
-        if (!is_dir($targetFullPath)) {
-            if (!mkdir($targetFullPath, 0755, true) && !is_dir($targetFullPath)) {
-                $output->writeln("Error: Failed to create target directory: '$targetFullPath'.");
-                return;
-            }
-        }
-
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceFullPath));
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source));
         foreach ($iterator as $file) {
             if ($file->isDir()) {
                 continue;
             }
-            $relativePath = substr($file->getPathname(), strlen($sourceFullPath) + 1);
-            $targetFile = $targetFullPath . DIRECTORY_SEPARATOR . $relativePath;
+            $relativePath = substr($file->getPathname(), strlen($source) + 1);
+            $targetFile = $target . DIRECTORY_SEPARATOR . $relativePath;
 
             // 确保目标文件夹存在
             $targetDir = dirname($targetFile);
             if (!is_dir($targetDir)) {
                 if (!mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
-                    $output->writeln("Error: Failed to create target directory: '$targetDir'.");
+                    $output->writeln("Error: Failed to create target directory: <info>$targetDir</info>.");
                     continue;
                 }
             }
 
-            try {
-                if (file_exists($targetFile)) {
-                    if ($forceReplace) {
-                        unlink($targetFile); // 删除目标文件
-                        if (copy($file->getPathname(), $targetFile)) {
-                            $output->writeln("Replaced file at '$targetFile'.");
-                        } else {
-                            throw new \Exception("Failed to copy file to '$targetFile'.");
-                        }
-                    } else {
-                        $output->writeln("Warning: The file '$targetFile' already exists and will be skipped.");
-                    }
-                } else {
-                    if (copy($file->getPathname(), $targetFile)) {
-                        $output->writeln("Copied file to '$targetFile'.");
-                    } else {
-                        throw new \Exception("Failed to copy file to '$targetFile'.");
-                    }
-                }
-            } catch (\Exception $e) {
-                $output->writeln("<error>Error: " . $e->getMessage() . "</error>");
+            // 检查是否跳过复制
+            if (file_exists($targetFile) && !$forceReplace && md5_file($file->getPathname()) === md5_file($targetFile)) {
+                $output->writeln("Skipped copying <info>{$relativePath}</info> to <info>{$targetFile}</info> (files are identical).");
+                continue;
+            }
+
+            if (copy($file->getPathname(), $targetFile)) {
+                $output->writeln("Copied <info>{$relativePath}</info> to <info>{$targetFile}</info>.");
+            } else {
+                $output->writeln("<error>Error: Failed to copy file to <info>{$targetFile}</info>.</error>");
             }
         }
     }
@@ -242,21 +206,48 @@ class ModuleInit extends Command
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
         if (!file_exists($packagePath)) {
-            $output->writeln("Warning: Package path '$packagePath' does not exist.");
+            $output->writeln("Warning: Package path <info>'$packagePath'</info> does not exist.");
             return;
         }
         if (!is_dir($packagePath)) {
-            $output->writeln("Error: Path '$packagePath' is not a directory.");
+            $output->writeln("Error: Path <info>'$packagePath'</info> is not a directory.");
             return;
         }
 
-        $fs = new Filesystem();
         try {
-            $fs->remove($packagePath);
+            $this->removeDirectoryPhp($packagePath);
             $output->writeln("Successfully deleted content of package: <info>$packageName</info>");
         } catch (\Exception $e) {
             $output->writeln("<error>Failed to delete content of package: $packageName</error>");
             $output->writeln("<error>Error: " . $e->getMessage() . "</error>");
         }
+    }
+
+    /**
+     * 递归删除目录
+     *
+     * @param string $directory 目录路径
+     */
+    protected function removeDirectoryPhp(string $directory)
+    {
+        if (!is_dir($directory)) {
+            return;
+        }
+
+        $files = scandir($directory);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $path = $directory . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($path)) {
+                $this->removeDirectoryPhp($path);
+            } else {
+                unlink($path);
+            }
+        }
+
+        rmdir($directory);
     }
 }
