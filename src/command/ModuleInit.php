@@ -107,6 +107,15 @@ class ModuleInit extends Command
                 continue;
             }
 
+            // 确保目标目录存在
+            $targetDir = dirname($targetFullPath);
+            if (!is_dir($targetDir)) {
+                if (!mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                    $output->writeln("Error: Failed to create target directory: '$targetDir'.");
+                    continue;
+                }
+            }
+
             if (is_dir($sourceFullPath)) {
                 // 处理目录
                 $this->processDirectory($sourceFullPath, $targetFullPath, $forceReplace, $output);
@@ -127,6 +136,15 @@ class ModuleInit extends Command
      */
     protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
     {
+        // 确保目标文件夹存在
+        $targetDir = dirname($targetFullPath);
+        if (!is_dir($targetDir)) {
+            if (!mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                $output->writeln("Error: Failed to create target directory: '$targetDir'.");
+                return;
+            }
+        }
+
         if (file_exists($targetFullPath)) {
             if ($forceReplace) {
                 unlink($targetFullPath); // 删除目标文件
@@ -136,8 +154,11 @@ class ModuleInit extends Command
                 $output->writeln("Warning: The file '$targetFullPath' already exists and will be skipped.");
             }
         } else {
-            copy($sourceFullPath, $targetFullPath);
-            $output->writeln("Copied file to '$targetFullPath'.");
+            if (copy($sourceFullPath, $targetFullPath)) {
+                $output->writeln("Copied file to '$targetFullPath'.");
+            } else {
+                $output->writeln("Error: Failed to copy file to '$targetFullPath'.");
+            }
         }
     }
 
