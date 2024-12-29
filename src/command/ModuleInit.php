@@ -102,6 +102,7 @@ class ModuleInit extends Command
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
             $targetFullPath = $this->app->getRootPath() . $targetKey;
 
+            // 检查源文件或目录是否存在
             if (!file_exists($sourceFullPath)) {
                 $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
                 continue;
@@ -145,20 +146,27 @@ class ModuleInit extends Command
             }
         }
 
-        if (file_exists($targetFullPath)) {
-            if ($forceReplace) {
-                unlink($targetFullPath); // 删除目标文件
-                copy($sourceFullPath, $targetFullPath);
-                $output->writeln("Replaced file at '$targetFullPath'.");
+        try {
+            if (file_exists($targetFullPath)) {
+                if ($forceReplace) {
+                    unlink($targetFullPath); // 删除目标文件
+                    if (copy($sourceFullPath, $targetFullPath)) {
+                        $output->writeln("Replaced file at '$targetFullPath'.");
+                    } else {
+                        throw new \Exception("Failed to copy file to '$targetFullPath'.");
+                    }
+                } else {
+                    $output->writeln("Warning: The file '$targetFullPath' already exists and will be skipped.");
+                }
             } else {
-                $output->writeln("Warning: The file '$targetFullPath' already exists and will be skipped.");
+                if (copy($sourceFullPath, $targetFullPath)) {
+                    $output->writeln("Copied file to '$targetFullPath'.");
+                } else {
+                    throw new \Exception("Failed to copy file to '$targetFullPath'.");
+                }
             }
-        } else {
-            if (copy($sourceFullPath, $targetFullPath)) {
-                $output->writeln("Copied file to '$targetFullPath'.");
-            } else {
-                $output->writeln("Error: Failed to copy file to '$targetFullPath'.");
-            }
+        } catch (\Exception $e) {
+            $output->writeln("<error>Error: " . $e->getMessage() . "</error>");
         }
     }
 
@@ -172,8 +180,12 @@ class ModuleInit extends Command
      */
     protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
     {
-        if (!file_exists($targetFullPath)) {
-            mkdir($targetFullPath, 0755, true);
+        // 确保目标目录存在
+        if (!is_dir($targetFullPath)) {
+            if (!mkdir($targetFullPath, 0755, true) && !is_dir($targetFullPath)) {
+                $output->writeln("Error: Failed to create target directory: '$targetFullPath'.");
+                return;
+            }
         }
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceFullPath));
@@ -185,21 +197,40 @@ class ModuleInit extends Command
             $relativePath = substr($file->getPathname(), strlen($sourceFullPath) + 1);
             $targetFile = $targetFullPath . DIRECTORY_SEPARATOR . $relativePath;
 
-            if (file_exists($targetFile)) {
-                if ($forceReplace) {
-                    unlink($targetFile); // 删除目标文件
-                    copy($file->getPathname(), $targetFile);
-                    $output->writeln("Replaced file at '$targetFile'.");
-                } else {
-                    $output->writeln("Warning: The file '$targetFile' already exists and will be skipped.");
+            // 确保目标文件夹存在
+            $targetDir = dirname($targetFile);
+            if (!is_dir($targetDir)) {
+                if (!mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                    $output->writeln("Error: Failed to create target directory: '$targetDir'.");
+                    continue;
                 }
-            } else {
-                copy($file->getPathname(), $targetFile);
-                $output->writeln("Copied file to '$targetFile'.");
+            }
+
+            try {
+                if (file_exists($targetFile)) {
+                    if ($forceReplace) {
+                        unlink($targetFile); // 删除目标文件
+                        if (copy($file->getPathname(), $targetFile)) {
+                            $output->writeln("Replaced file at '$targetFile'.");
+                        } else {
+                            throw new \Exception("Failed to copy file to '$targetFile'.");
+                        }
+                    } else {
+                        $output->writeln("Warning: The file '$targetFile' already exists and will be skipped.");
+                    }
+                } else {
+                    if (copy($file->getPathname(), $targetFile)) {
+                        $output->writeln("Copied file to '$targetFile'.");
+                    } else {
+                        throw new \Exception("Failed to copy file to '$targetFile'.");
+                    }
+                }
+            } catch (\Exception $e) {
+                $output->writeln("<error>Error: " . $e->getMessage() . "</error>");
             }
         }
     }
-
+    
     /**
      * 删除包的内容
      *
