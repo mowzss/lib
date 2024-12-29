@@ -40,7 +40,7 @@
       "mowzs\\lib\\": "src/",
       "think\\": "think"
     },
-    "file": [
+    "files": [
       "src/sys.php"
     ]
   }
