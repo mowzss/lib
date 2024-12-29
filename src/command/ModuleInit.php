@@ -226,7 +226,6 @@ class ModuleInit extends Command
         if (!is_dir($path)) {
             // 如果是文件，直接删除
             if (unlink($path)) {
-                $output->writeln("Deleted file: '$path'");
                 return true;
             } else {
                 $output->writeln("<error>Failed to delete file: $path</error>");
@@ -253,13 +252,11 @@ class ModuleInit extends Command
                     $output->writeln("<error>Failed to delete file: $fullPath</error>");
                     return false;
                 }
-                $output->writeln("Deleted file: '$fullPath'");
             }
         }
 
         // 删除空目录
         if (rmdir($path)) {
-            $output->writeln("Deleted directory: '$path'");
             return true;
         } else {
             $output->writeln("<error>Failed to delete directory: $path</error>");
