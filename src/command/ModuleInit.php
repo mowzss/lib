@@ -4,7 +4,6 @@ namespace mowzs\lib\command;
 
 use think\console\Command;
 use think\console\Input;
-use think\console\input\Option;
 use think\console\Output;
 use function copy;
 use function file_exists;
@@ -26,8 +25,7 @@ class ModuleInit extends Command
     {
         $this->setName('admin:moduleInit')
             ->setDescription('Initialize custom module configurations from installed happy-module packages.')
-            ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".')
-            ->addOption('force', null, Option::VALUE_NONE, 'Force replace existing files');
+            ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".');
     }
 
     /**
@@ -54,8 +52,6 @@ class ModuleInit extends Command
             $packages = [$packages]; // 确保我们总是处理一个数组
         }
 
-        $force = $input->getOption('force');
-
         foreach ($packages as $package) {
             if ($package['type'] !== 'happy-module') {
                 continue; // 跳过非 happy-module 类型的包
@@ -77,7 +73,7 @@ class ModuleInit extends Command
                 // 处理 copy 节点（复制文件，目标路径已存在则跳过）
                 if (isset($extra['module']['copy'])) {
                     $output->writeln('<info>开始处理 module[\'copy\'] 节点...</info>');
-                    $this->processPaths($extra['module']['copy'], $force, $output, $packageName);
+                    $this->processPaths($extra['module']['copy'], false, $output, $packageName);
                     $output->writeln('<info>已完成 module[\'copy\'] 节点的处理。</info>');
                 }
                 // 处理 del 节点（删除包的内容）
