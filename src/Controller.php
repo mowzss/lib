@@ -168,18 +168,9 @@ abstract class Controller
      * @param int $wait
      * @param array $header
      * @param int $code
-     * @return
-     */
-    /**
-     * @param string|null $url
-     * @param mixed $msg
-     * @param mixed $data
-     * @param int $wait
-     * @param array $header
-     * @param $code
      * @return void
      */
-    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, $code = 0): void
+    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, int $code = 0): void
     {
         if (is_null($url) && isset($_SERVER["HTTP_REFERER"])) {
             $url = $_SERVER["HTTP_REFERER"];
@@ -260,7 +251,7 @@ abstract class Controller
      * @param array $header 发送的Header信息
      * @return void
      */
-    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = '', array $header = [])
+    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = '', array $header = []): void
     {
         $result = [
             'code' => $code,
@@ -281,7 +272,7 @@ abstract class Controller
      * @param array $with 隐式传参
      * @return void
      */
-    protected function redirect($url, int $code = 302, $with = [])
+    protected function redirect($url, int $code = 302, $with = []): void
     {
         $response = Response::create($url, 'redirect');
 
