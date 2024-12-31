@@ -168,9 +168,18 @@ abstract class Controller
      * @param int $wait
      * @param array $header
      * @param int $code
-     * @return mixed
+     * @return
      */
-    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, $code = 0): mixed
+    /**
+     * @param string|null $url
+     * @param mixed $msg
+     * @param mixed $data
+     * @param int $wait
+     * @param array $header
+     * @param $code
+     * @return void
+     */
+    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, $code = 0): void
     {
         if (is_null($url) && isset($_SERVER["HTTP_REFERER"])) {
             $url = $_SERVER["HTTP_REFERER"];
@@ -194,7 +203,7 @@ abstract class Controller
         } else {
             $response = Response::create($result, $type)->header($header);
         }
-        return $response;
+        throw new HttpResponseException($response);
     }
 
     /**
@@ -205,15 +214,15 @@ abstract class Controller
      * @param string|null $url 跳转的URL地址
      * @param integer $wait 跳转等待时间
      * @param array $header 发送的Header信息
-     * @return mixed
+     * @return void
      */
-    protected function success(mixed $msg = '', mixed $data = '', ?string $url = null, int $wait = 3, array $header = []): mixed
+    protected function success(mixed $msg = '', mixed $data = '', ?string $url = null, int $wait = 3, array $header = []): void
     {
         if (!is_string($msg) && empty($data)) {
             $data = $msg;
             $msg = 'ok';
         }
-        return $this->ret($url, $msg, $data, $wait, $header);
+        $this->ret($url, $msg, $data, $wait, $header);
     }
 
     /**
@@ -224,11 +233,11 @@ abstract class Controller
      * @param string|null $url 跳转的URL地址
      * @param integer $wait 跳转等待时间
      * @param array $header 发送的Header信息
-     * @return mixed
+     * @return void
      */
-    protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): mixed
+    protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): void
     {
-        return $this->ret($url, $msg, $data, $wait, $header, 1);
+        $this->ret($url, $msg, $data, $wait, $header, 1);
     }
 
     /**
@@ -249,9 +258,9 @@ abstract class Controller
      * @param null|string $msg 提示信息
      * @param string $type 返回数据格式
      * @param array $header 发送的Header信息
-     * @return mixed
+     * @return void
      */
-    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = '', array $header = []): mixed
+    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = '', array $header = [])
     {
         $result = [
             'code' => $code,
@@ -261,7 +270,7 @@ abstract class Controller
         ];
         $type = $type ?: $this->getResponseType();
         $response = Response::create($result, $type)->header($header);
-        return throw new HttpResponseException($response);
+        throw new HttpResponseException($response);
     }
 
     /**
