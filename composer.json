@@ -21,7 +21,7 @@
     "overtrue/flysystem-qiniu": "^3.0",
     "yunwuxin/think-cron": "^3.0",
     "topthink/think-queue": "^3.0",
-    "phpmailer/phpmailer": "^6.0"
+    "phpmailer/phpmailer": "^6.9"
   },
   "extra": {
     "think": {
