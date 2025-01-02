@@ -7,6 +7,7 @@ use mowzs\lib\Helper;
 use ReflectionClass;
 use ReflectionMethod;
 use think\Exception;
+use think\facade\Config;
 use think\helper\Str;
 
 class NodeHelper extends Helper
@@ -74,6 +75,15 @@ class NodeHelper extends Helper
         return "{$controller}/{$method}";
     }
 
+    protected function removeSlashes($string)
+    {
+        // 定义要删除的字符
+        $charsToRemove = ['/', '\\'];
+
+        // 使用 str_replace 删除这些字符
+        return str_replace($charsToRemove, '', $string);
+    }
+
     /**
      * 获取全部节点信息
      * @param bool $force_flush 是否强制刷新
@@ -92,12 +102,16 @@ class NodeHelper extends Helper
         }
         $data = [];
 
-        $methods = FileHelper::instance()->scanDirectory($this->app->getBasePath(), 'php', 0, true);
+        $basePath = $this->app->getBasePath() . $layer;
+        $methods = FileHelper::instance()->scanDirectory($basePath, 'php', 0, true);
         foreach ($methods as $name) {
+            $app_namespace = $this->removeSlashes(Config::get('app.app_namespace') ?: 'app') . '/';
+            $name = $app_namespace . $name;
             if (preg_match("/^(.+?)\/$layer\/(.+)\.php$/", strtr($name, '\\', '/'), $matches)) {
                 // 提取匹配的部分
                 $app_name = $matches[1];
                 $class_name = $matches[2];
+
                 $excludeMethods = get_class_methods('\mowzs\lib\Controller');
                 $this->getPublicMethodComments($app_name, $layer, $class_name, $excludeMethods, $data);
             }
@@ -166,6 +180,9 @@ class NodeHelper extends Helper
     protected function parseComment($comment): array
     {
         $parsedComment = [];
+        if (empty($comment)) {
+            return [];
+        }
         $lines = explode("\n", $comment);
 
         foreach ($lines as $line) {

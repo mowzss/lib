@@ -19,6 +19,8 @@ class Service extends BaseService
 
     public function boot(): void
     {
+        //开启多模块
+        $this->app->route->auto();
         // 服务启动
         $this->app->config->set(['tpl_replace_string' => $this->tplReplaceString()], 'view');
         //注册session
