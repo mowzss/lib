@@ -36,13 +36,13 @@ class Authentication
                 throw new HttpResponseException(json(['code' => 0, 'info' => lang('禁用访问！')]));
             }
             //未登录
-            $login_url = $this->app->config->get('auth.auth_login') ?: url('login/index');
+            $login_url = $this->app->config->get('auth.auth_login') ?: 'index/login/index';
+            $login_url = aurl($login_url);
             if ($request->isAjax()) {
                 throw new HttpResponseException(json(['code' => 0, 'info' => lang('请重新登录！'), 'url' => $login_url]));
             } else {
                 return redirect($login_url);
             }
-
         }
         return $next($request);
     }

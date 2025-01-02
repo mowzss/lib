@@ -42,11 +42,12 @@ class Forms
 
     /**
      * @param array $options
+     * @throws Exception
      */
     public function __construct(array $options = [])
     {
         $this->setFormsViewPath($options['theme'] ?? null);
-        $this->action = $options['action'] ?? url(Request::action(), Request::get())->build();
+        $this->action = $options['action'] ?? urls(Request::action(), Request::get());
         $this->method = $options['method'] ?? 'post';
         $this->value = $options['value'] ?? [];
         $this->inputData = $options['inputData'] ?? [];
