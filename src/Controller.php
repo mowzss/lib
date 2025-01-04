@@ -170,7 +170,7 @@ abstract class Controller
      * @param int $code
      * @return void
      */
-    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, int $code = 0): void
+    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, int $code = 0, $tpl = ''): void
     {
         if (is_null($url) && isset($_SERVER["HTTP_REFERER"])) {
             $url = $_SERVER["HTTP_REFERER"];
@@ -190,7 +190,14 @@ abstract class Controller
         // 把跳转模板的渲染下沉，这样在 response_send 行为里通过getData()获得的数据是一致性的格式
         if ('html' == strtolower($type)) {
             $type = 'view';
-            $response = Response::create($this->app->config->get('app.dispatch_success_tmpl'), $type)->assign($result)->header($header);
+            if (empty($tpl)) {
+                if ($code == 0) {
+                    $tpl = $this->app->config->get('app.dispatch_success_tmpl');
+                } else {
+                    $tpl = $this->app->config->get('app.dispatch_error_tmpl');
+                }
+            }
+            $response = Response::create($tpl, $type)->assign($result)->header($header);
         } else {
             $response = Response::create($result, $type)->header($header);
         }
@@ -229,6 +236,19 @@ abstract class Controller
     protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): void
     {
         $this->ret($url, $msg, $data, $wait, $header, 1);
+    }
+
+    /**
+     * 闭站/模块提示
+     * @param string $msg
+     * @param string|null $url
+     * @param int $wait
+     * @return void
+     */
+    protected function closeSite(string $msg = '', ?string $url = null, int $wait = 3): void
+    {
+        $tpl = $this->app->config->get('app.dispatch_close_site_tmpl');
+        $this->ret($url, $msg, [], $wait, [], 1, $tpl);
     }
 
     /**

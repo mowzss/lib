@@ -3,22 +3,23 @@
 namespace mowzs\lib\module\controller\home;
 
 use app\common\controllers\BaseHome;
-use mowzs\lib\module\service\ColumnBaseService;
+use mowzs\lib\module\service\ContentBaseService;
+use mowzs\lib\module\service\TagBaseService;
 use think\App;
 use think\Exception;
 
-class ColumnHome extends BaseHome
+class TagHome extends BaseHome
 {
     /**
      * 服务类名称
      * @var string
      */
-    protected static string $serviceClass = ColumnBaseService::class;
+    protected static string $serviceClass = TagBaseService::class;
     /**
      * 服务类
-     * @var
+     * @var ContentBaseService|mixed
      */
-    protected ColumnBaseService $service;
+    protected TagBaseService $service;
 
     public function __construct(App $app)
     {
@@ -29,26 +30,35 @@ class ColumnHome extends BaseHome
         $this->service = new static::$serviceClass();
     }
 
+    /**
+     * tag首页
+     * @return string
+     */
+    public function index(): string
+    {
+        return $this->fetch();
+    }
 
     /**
-     * 栏目列表
+     * tag详情
      * @param int $id
-     * @return string
-     * @throws Exception
+     * @return string|void
      */
-    public function index(int $id = 0): string
+    public function show(int $id = 0)
     {
         try {
             $info = $this->service->getInfo($id);
+            //内容回调
+            $this->callback('_info_result', $info);
+
+            $this->assign([
+                'info' => $info,
+                'id' => $id,
+                'tid' => $id
+            ]);
+            return $this->fetch();
         } catch (Exception $e) {
             $this->error('出错了:' . $e->getMessage());
         }
-        $this->callback('_info_result', $info);
-        $this->assign([
-            'info' => $info,
-            'cid' => $info['id'],
-            'id' => $info['id'],
-        ]);
-        return $this->fetch();
     }
 }

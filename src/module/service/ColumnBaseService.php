@@ -40,12 +40,20 @@ class ColumnBaseService extends BaseService
 
     /**
      * 获取栏目信息
-     * @param string $id
+     * @param int|string $id
      * @return array
+     * @throws Exception
      */
-    public function getInfo(string $id = ''): array
+    public function getInfo(int|string $id = ''): array
     {
-        return $this->model->findOrEmpty($id)->toArray();
+        if (empty($id)) {
+            throw new Exception('栏目ID不能为空');
+        }
+        $info = $this->model->findOrEmpty($id);
+        if ($info->isEmpty()) {
+            throw new Exception('栏目不存在');
+        }
+        return $info->toArray();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace mowzs\lib\forms\field;
 
+use mowzs\lib\forms\FormatFieldOption;
 use mowzs\lib\forms\FormFieldRenderer;
 use mowzs\lib\forms\RendererInterface;
 
@@ -19,12 +20,16 @@ class Checkbox extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string
     {
+        if (!is_array($option)) {
+            $option = FormatFieldOption::strToArray($option);
+        }
         $required = $required ? 'required lay-verify="required"' : '';
-        return $this->fetch('icon', [
+        return $this->fetch('checkbox', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
             'required' => $required,
+            'option' => $option,
             'ext' => $ext,
         ]);
     }

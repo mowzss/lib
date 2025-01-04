@@ -3,7 +3,7 @@
 namespace mowzs\lib\module\controller\home;
 
 use app\common\controllers\BaseHome;
-use app\service\service\ContentBaseService;
+use mowzs\lib\module\service\ContentBaseService;
 use think\App;
 
 class ContentHome extends BaseHome

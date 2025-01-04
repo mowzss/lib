@@ -31,6 +31,16 @@ class TagBaseService extends BaseService
      * @var string
      */
     protected string $infoTable;
+    /**
+     * 内容表
+     * @var string
+     */
+    protected string $contentTable;
+    /**
+     * 内容模型
+     * @var Model
+     */
+    protected Model $contentModel;
 
     /**
      * @return void
@@ -41,7 +51,27 @@ class TagBaseService extends BaseService
         $this->modelName = $this->getModule();
         $this->table = $this->modelName . '_tag';
         $this->infoTable = $this->modelName . '_tag_info';
+        $this->contentTable = $this->modelName . '_content';
         $this->model = $this->getModel($this->table);
+        $this->contentModel = $this->getModel($this->contentTable);
+    }
+
+    /**
+     * 获取tag详情
+     * @param int $tid
+     * @return array
+     * @throws Exception
+     */
+    public function getInfo(int $tid = 0): array
+    {
+        if (empty($tid)) {
+            throw new Exception('标签ID不能为空');
+        }
+        $info = $this->model->findOrEmpty($tid);
+        if ($info->isEmpty()) {
+            throw new Exception('标签不存在！');
+        }
+        return $info->toArray();
     }
 
     /**

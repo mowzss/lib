@@ -2,6 +2,7 @@
 
 namespace mowzs\lib\forms\field;
 
+use mowzs\lib\forms\FormatFieldOption;
 use mowzs\lib\forms\FormFieldRenderer;
 use mowzs\lib\forms\RendererInterface;
 
@@ -20,8 +21,9 @@ class Select extends FormFieldRenderer implements RendererInterface
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string
     {
         if (!is_array($option)) {
-            $option = explode('|', $option);
+            $option = FormatFieldOption::strToArray($option);
         }
+
         $required = $required ? 'required' : '';
         return $this->fetch('select', [
             'name' => $name,
