@@ -19,8 +19,8 @@ class ModuleFoematHelper extends Helper
         $item['_image'] = $item['image'] ?? '';
         $item['images'] = [];
         if (!empty($item['_images'])) {
-            $item['_images'] = str2arr($item['_images']);
-            $item['image'] = $item['_images'][0];
+            $item['images'] = str2arr($item['_images']);
+            $item['image'] = $item['images'][0];
         }
         $time = $item['update_time'];
         if (empty($item['update_time'])) {

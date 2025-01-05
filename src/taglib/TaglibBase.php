@@ -6,7 +6,7 @@ use think\App;
 use think\Container;
 use think\facade\Log;
 
-class TabLibs
+class TaglibBase
 {
     protected App $app;
 

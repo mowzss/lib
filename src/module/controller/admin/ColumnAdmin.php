@@ -5,7 +5,7 @@ namespace mowzs\lib\module\controller\admin;
 
 use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
-use mowzs\lib\extend\DataExtend;
+use mowzs\lib\helper\DataHelper;
 use think\App;
 use think\Model;
 
@@ -53,7 +53,7 @@ abstract class ColumnAdmin extends BaseAdmin
      */
     protected function _index_list_filter(&$data): void
     {
-        $data['data'] = DataExtend::getInstance()->arrToTree($data['data']);
+        $data['data'] = DataHelper::instance()->arrToTree($data['data']);
 
     }
 

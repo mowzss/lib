@@ -1,10 +1,10 @@
 <?php
 
-namespace mowzs\lib\extend;
+namespace mowzs\lib\helper;
 
-use mowzs\lib\Extend;
+use mowzs\lib\Helper;
 
-class DataExtend extends Extend
+class DataHelper extends Helper
 {
     /**
      * 数组转树形结构

@@ -6,10 +6,10 @@ namespace mowzs\lib\taglib\extends;
 
 use mowzs\lib\helper\ColumnCacheHelper;
 use mowzs\lib\helper\ModuleFoematHelper;
-use mowzs\lib\taglib\TabLibs;
+use mowzs\lib\taglib\TaglibBase;
 use think\facade\Db;
 
-class Lists extends TabLibs
+class Lists extends TaglibBase
 {
     /**
      * 获取列表数据
@@ -20,7 +20,7 @@ class Lists extends TabLibs
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function Taglib(string $module, mixed $config): mixed
+    public function run(string $module, mixed $config): mixed
     {
         $this->module = $module;
         $config['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');
