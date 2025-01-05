@@ -79,7 +79,7 @@ abstract class ModelAdmin extends BaseAdmin
                 [
                     'event' => '',
                     'type' => 'data-open',
-                    'url' => url($this->getModuleName() . '.field/index', ['mid' => '__id__'])->build(),
+                    'url' => urls('field/index', ['mid' => '__id__']),
                     'name' => '字段设计',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
                 ],

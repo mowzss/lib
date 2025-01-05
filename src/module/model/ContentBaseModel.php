@@ -16,8 +16,20 @@ abstract class ContentBaseModel extends Model
      */
     public function saveContent($data): bool|int|string
     {
+        if (empty($data['mid'])) {
+            throw new Exception('模型id不能为空');
+        }
         $newId = $this->insertGetId($data);
         $data['id'] = $newId;
+        if ($data['create_time']) {
+            $data['create_time'] = time();
+        }
+        if ($data['update_time']) {
+            $data['update_time'] = time();
+        }
+        if ($data['list']) {
+            $data['list'] = time();
+        }
         $this->suffix("_{$data['mid']}")->insert($data);
         $this->suffix("_{$data['mid']}s")->insert($data);
         return $newId;
@@ -33,6 +45,12 @@ abstract class ContentBaseModel extends Model
             return false;
         }
         $where = ['id' => $data['id']];
+        if (empty($data['update_time'])) {
+            $data['update_time'] = time();
+        }
+        if (empty($data['list'])) {
+            $data['list'] = time();
+        }
         $this->where($where)->update($data);
         $this->suffix("_{$data['mid']}")->where($where)->update($data);
         $this->suffix("_{$data['mid']}s")->where($where)->update($data);

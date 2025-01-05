@@ -4,7 +4,6 @@ namespace mowzs\lib\taglib;
 
 use think\App;
 use think\Container;
-use think\Exception;
 use think\facade\Log;
 
 class TabLibs
@@ -12,6 +11,11 @@ class TabLibs
     protected App $app;
 
     protected \think\Request $request;
+    /**
+     * 当前操作模块
+     * @var string
+     */
+    protected string $module;
 
     /**
      * @param App $app
@@ -71,17 +75,14 @@ class TabLibs
         }
     }
 
-    public function init(?string $name = null)
+    /**
+     * 获取当前类的实例（用于静态调用）
+     *
+     * @return static 返回当前类的实例
+     */
+    public static function getInstance(): static
     {
-        // 如果 class 未提供，则根据 name 构建默认类名
-        $class = "\\mowzs\\lib\\taglib\\extends\\{$name}";
-
-        // 检查类是否存在
-        if (!class_exists($class)) {
-            throw new Exception("Taglib driver [{$class}] does not exist.");
-        }
-        // 使用依赖注入容器实例化类
-        return Container::getInstance()->make($class);
+        return Container::getInstance()->make(static::class);
     }
 
 

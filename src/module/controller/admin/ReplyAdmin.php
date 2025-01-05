@@ -18,7 +18,7 @@ abstract class ReplyAdmin extends BaseAdmin
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->model = new SystemArticleReply();
+        $this->model = new ArticleReply();
         $this->setParams();
     }
 

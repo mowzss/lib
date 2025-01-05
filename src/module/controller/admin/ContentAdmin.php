@@ -276,7 +276,7 @@ abstract class ContentAdmin extends BaseAdmin
                 [
                     'event' => '',
                     'type' => 'data-open',
-                    'url' => url('edit', ['id' => '__id__'])->build(),
+                    'url' => urls('edit', ['id' => '__id__']),
                     'name' => '编辑',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
                 ],
@@ -314,7 +314,7 @@ abstract class ContentAdmin extends BaseAdmin
      */
     public function add(int $cid = 0, int $mid = 0)
     {
-        if (empty($cid) && empty($mid)) {
+        if (empty($cid) && empty($mid) && $this->request->isGet()) {
             $model_all = $this->modelModel->where('id', '>', 0)->select();
             $this->assign('column', $model_all);
             return $this->fetch('common/module/post');
@@ -360,6 +360,7 @@ abstract class ContentAdmin extends BaseAdmin
         if (!empty($this->forms['pk'])) {
             $forms = $forms->setPk($this->forms['pk']);
         }
+        $forms->setValue(['mid' => $this->mid]);
         $forms->render($this->forms['fields']);
     }
 
@@ -396,6 +397,7 @@ abstract class ContentAdmin extends BaseAdmin
     {
         try {
             $data = $this->request->post();
+            $id = $id ?: $data['id'];
             try {
                 $record = $this->model->getInfo($id);
             } catch (DataNotFoundException|DbException $e) {
@@ -454,6 +456,7 @@ abstract class ContentAdmin extends BaseAdmin
             }
             $this->tagModel->saveTagList($data);//保存tag记录
         }
+        $this->success('保存成功');
     }
 
     /**
@@ -481,7 +484,7 @@ abstract class ContentAdmin extends BaseAdmin
             'label' => 'TAG标签',
             'options' => [
                 'remoteSearch' => true,//搜索数据接口
-                'searchUrl' => url($this->getModuleName() . '.tag/getAjaxList')->build(),//搜索数据接口
+                'searchUrl' => urls('tag/getAjaxList'),//搜索数据接口
                 'autoAdd' => true,
             ]
         ]];

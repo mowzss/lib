@@ -40,12 +40,13 @@ class ContentBaseService extends BaseService
      * @return void
      * @throws Exception
      */
-    protected function initialize_trait(): void
+    protected function initialize(): void
     {
         $this->modelName = $this->getModule();
         $this->table = $this->modelName . '_content';
         $this->model = $this->getModel($this->table);
     }
+
 
     /**
      * @param string $id
@@ -88,6 +89,14 @@ class ContentBaseService extends BaseService
     }
 
     /**
+     * @return void
+     */
+    public function formatContent(&$data = [])
+    {
+
+    }
+
+    /**
      * 获取内容列表
      *
      * @param int $mid 模块 ID
@@ -96,6 +105,7 @@ class ContentBaseService extends BaseService
      * @param array $where_or 或条件
      * @param int $limit 每页显示条数
      * @param bool|string $page 分页参数
+     * @param string $name
      * @param int $cache 缓存时间（秒），-1 表示不使用缓存
      * @return mixed
      * @throws DataNotFoundException
