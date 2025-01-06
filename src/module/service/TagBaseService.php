@@ -46,7 +46,7 @@ class TagBaseService extends BaseService
      * @return void
      * @throws Exception
      */
-    protected function initialize_trait(): void
+    protected function initialize(): void
     {
         $this->modelName = $this->getModule();
         $this->table = $this->modelName . '_tag';

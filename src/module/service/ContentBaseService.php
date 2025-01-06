@@ -68,8 +68,8 @@ class ContentBaseService extends BaseService
         }
         $info = $info->toArray();
         $info['content'] = $this->getContent($info);
-        $info['column'] = ColumnBaseService::getInstance()->getInfo($info['cid']);
-        $info['tags'] = TagBaseService::getInstance()->getTagInfoListByAid($info['id']);
+        $info['column'] = ColumnBaseService::instance()->getInfo($info['cid']);
+        $info['tags'] = TagBaseService::instance()->getTagInfoListByAid($info['id']);
         return $info;
     }
 

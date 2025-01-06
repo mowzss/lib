@@ -25,7 +25,7 @@ class ContentHome extends BaseHome
         if (empty(static::$serviceClass)) {
             throw new \InvalidArgumentException('The $serviceClass must be set in the subclass.');
         }
-        $this->service = new static::$serviceClass();
+        $this->service = new static::$serviceClass($app);
     }
 
     /**

@@ -242,6 +242,7 @@ class Forms
      * 静态实例化
      * @param array $options
      * @return static
+     * @throws Exception
      */
     public static function instance(array $options = []): static
     {
