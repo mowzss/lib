@@ -8,7 +8,7 @@ use mowzs\lib\taglib\TaglibBase;
 class Column extends TaglibBase
 {
 
-    public function Taglib(string $module, mixed $config): mixed
+    public function run(string $module, mixed $config): mixed
     {
         $this->module = $module;
         if (!empty($config['where'])) {
@@ -30,27 +30,30 @@ class Column extends TaglibBase
         $return = $this->app->cache->get($cacheName);
 
         if (empty($return) || $config['cache'] == -1) {
-            $modelName = ucfirst(strtolower($module)) . ucfirst(strtolower('cate'));
-            $list = $this->app->db->name($modelName)->where(['deleted' => 0]);
+            $table = $module . '_column';;
+            $list = $this->app->db->name($table);
             if (!empty($config['status'])) {
-                $list->where(['status' => $config['status']]);
+                $list = $list->where(['status' => $config['status']]);
             }
             if (!empty($config['where']) && is_array($config['where'])) {
-                $list->where($config['where']);
+                $list = $list->where($config['where']);
             }
             if (!empty($config['whereor']) && is_array($config['whereor'])) {
-                $list->where($config['whereor']);
+                $list = $list->whereOr($config['whereor']);
             }
             if (!empty($config['rows'])) {
-                $list->limit($config['rows']);
+                $list = $list->limit($config['rows']);
             }
             if (stristr($config['order'], 'rand()')) {
-                $list->orderRaw('rand()');
+                $list = $list->orderRaw('rand()');
             } else {
-                $list->order($config['order'], $by);
+                $list = $list->order($config['order'], $by);
             }
-
-            $return = DataHelper::instance()->arrToTree($list->select()->toArray());
+            $list = $list->select()->each(function ($item) {
+                $item['url'] = urls($this->module . '/column/index', ['id' => $item['id']]);
+                return $item;
+            });
+            $return = DataHelper::instance()->arrToTree($list->toArray(), 0, 'id', 'pid', 'sub');
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }

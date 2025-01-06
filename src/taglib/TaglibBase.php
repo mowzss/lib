@@ -6,7 +6,7 @@ use think\App;
 use think\Container;
 use think\facade\Log;
 
-class TaglibBase
+abstract class TaglibBase
 {
     protected App $app;
 
@@ -29,6 +29,8 @@ class TaglibBase
     protected function getModel(mixed $module, string $db_name)
     {
     }
+
+    abstract public function run(string $module, mixed $config);
 
     /**
      * 获取指定模块下某个分类及其子分类的ID列表

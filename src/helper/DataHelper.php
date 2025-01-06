@@ -20,10 +20,12 @@ class DataHelper extends Helper
         $arr = [];
         foreach ($data as $k => $v) {
             if ($v[$field2] == $pid) {
-                $v[$field3] = $this->arrToTree($data, $v[$field1]);
+                $v[$field3] = $this->arrToTree($data, $v[$field1], $field1, $field2, $field3);
                 $v['isParent'] = false;
                 if (!empty($v[$field3])) {
                     $v['isParent'] = true;
+                } else {
+                    unset($v[$field3]);
                 }
                 $arr[] = $v;
             }

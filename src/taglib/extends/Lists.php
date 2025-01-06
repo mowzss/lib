@@ -33,7 +33,7 @@ class Lists extends TaglibBase
             $config['whereor'] = $this->parseWhereArray($config['whereor']);
         }
         if (!isset($config['mid'])) {
-            $config['mid'] = null;
+            $config['mid'] = 0;
         }
         if (empty($config['status'])) {
             $config['status'] = 1;
@@ -48,8 +48,6 @@ class Lists extends TaglibBase
 
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
-
-
             $list = $this->setDbQuery($module, $config['mid']);
             if (!empty($config['cid'])) {
                 $config['cid'] = $this->getCateSons($module, $config['cid']);
@@ -91,7 +89,6 @@ class Lists extends TaglibBase
                 $return = $list->select();
             }
             $this->formatData($return);
-            dump($return);
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }
