@@ -52,7 +52,7 @@ class Hp extends \think\template\TagLib
         $val = $tag['val'] ?? false;
         $vals = $tag['val'] ?? $tag['name'];
         $parse = '<?php ';
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\Table::getInstance()->run("' . $table . '",[
+        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Table::getInstance()->run("' . $table . '",[
         "page"=>' . $page . ',
         "status"=>' . $status . ',
         "pagenum"=>' . $pageNum . ',
@@ -105,7 +105,7 @@ class Hp extends \think\template\TagLib
         $empty = $tag['empty'] ?? '';
         $parse = '<?php ';
 
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\Lists::getInstance()->run("' . $module . '",[
+        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
         "status"=>' . $status . ',
         "rows"=>' . $rows . ',
         "name"=>"' . $name . '",
@@ -168,7 +168,7 @@ class Hp extends \think\template\TagLib
         $val = $tag['val'] ?? false;
         $vals = $tag['val'] ?? $tag['name'];
         $parse = '<?php ';
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\Lists::getInstance()->run([
+        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
         "module" => "' . $module . '",
         "page"=>' . $page . ',
         "status"=>' . $status . ',

@@ -14,19 +14,20 @@ class EventHelper extends Helper
      * @param object|string $event 事件名称
      * @param mixed|null $params 传入参数
      * @param bool $once 只获取一个有效返回值
-     * @return array|void
+     * @return void
      */
-    public function listen(object|string $event, mixed &$params = [], bool $once = false)
+    public function listen(object|string $event, mixed &$params = [], bool $once = false): void
     {
         try {
-            $event_plugin = app()->cache->remember('site_event_plugin_' . $event, function () use ($event) {
-                return $this->app->db->name('SystemEventPlugin')->where([
+            $event_plugin = app()->cache->remember('ha_system_event_listen_' . $event, function () use ($event) {
+                return $this->app->db->name('SystemEventListen')->where([
                     'status' => 1,
                     'event_key' => $event
                 ])->column('event_class');
             });
         } catch (\Throwable $e) {
-            return [];
+            $event_plugin = [];
+            $this->app->log->error('事件报错:' . $e->getMessage());
         }
         $this->app->event->listenEvents([$event => $event_plugin]);
         $data = $this->app->event->trigger($event, $params, $once);
@@ -34,11 +35,9 @@ class EventHelper extends Helper
         if (empty($once) && !empty($data) && !empty($params)) {
             $data = $this->array3_merge($data, $params);
         }
-
         if (empty($data)) {
             $data = [];
         }
-
         $params = array_merge($params, $data);
     }
 
