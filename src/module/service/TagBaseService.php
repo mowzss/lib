@@ -7,6 +7,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\Exception;
 use think\Model;
+use think\Paginator;
 
 class TagBaseService extends BaseService
 {
@@ -89,6 +90,31 @@ class TagBaseService extends BaseService
         } catch (DataNotFoundException|DbException $e) {
             new  exception($e);
         }
+    }
+
+    /**
+     * @param int|string $tid
+     * @param int|string $mid
+     * @param string $order
+     * @param string $by
+     * @param int $rows
+     * @return Paginator
+     * @throws DbException
+     * @throws Exception
+     */
+    public function getList(int|string $tid, int|string $mid = 0, string $order = 'id', string $by = 'desc', int $rows = 20): \think\Paginator
+    {
+        if (empty($tid)) {
+            throw new Exception('TAG ID 不能为空');
+        }
+        $query = $this->getDbQuery($this->infoTable)->where(['tid' => $tid]);
+        if (!empty($mid)) {
+            $query = $query->where(['mid' => $mid]);
+        }
+        return $query->field('aid')->paginate($rows)->each(function ($item) {
+            $item = ContentBaseService::instance([$this->getModule()])->getInfo($item['aid']);
+            return $item;
+        });
     }
 
 

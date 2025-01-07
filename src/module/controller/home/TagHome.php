@@ -8,7 +8,7 @@ use mowzs\lib\module\service\TagBaseService;
 use think\App;
 use think\Exception;
 
-class TagHome extends BaseHome
+abstract class TagHome extends BaseHome
 {
     /**
      * 服务类名称
@@ -42,19 +42,21 @@ class TagHome extends BaseHome
     /**
      * tag详情
      * @param int $id
+     * @param int $mid
      * @return string|void
      */
-    public function show(int $id = 0)
+    public function show(int $id = 0, $mid = 0)
     {
         try {
             $info = $this->service->getInfo($id);
             //内容回调
             $this->callback('_info_result', $info);
-
+            $list = $this->service->getList($id, $mid);
             $this->assign([
                 'info' => $info,
                 'id' => $id,
-                'tid' => $id
+                'tid' => $id,
+                'list' => $list
             ]);
             return $this->fetch();
         } catch (Exception $e) {

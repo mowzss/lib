@@ -27,15 +27,15 @@ class Lists extends TaglibBase
         $this->module = $module;
         $params['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');
         $params['rows'] = $config['rows'] ?? 20;
-        $params['page'] = $config['page'] ?? false;
+        $params['paginate'] = $config['page'] ?? false;
         if (!empty($config['where'])) {
             $params['where'] = $this->parseWhereArray($config['where']);
         }
         if (!empty($config['whereor'])) {
             $params['whereor'] = $this->parseWhereArray($config['whereor']);
         }
-        if (!isset($config['mid'])) {
-            $params['mid'] = 0;
+        if (isset($config['mid'])) {
+            $params['mid'] = $config['mid'];
         }
         if (empty($config['status'])) {
             $params['where'][] = ['status', '=', 1];
@@ -55,13 +55,11 @@ class Lists extends TaglibBase
         }
         $name = $config['name'];
 
-
-        $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($config));
+        $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params));
 
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
-            $return = ContentBaseService::instance()->setModule($module)
-                ->getList($params);
+            $return = ContentBaseService::instance([$module])->getList($params);
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }

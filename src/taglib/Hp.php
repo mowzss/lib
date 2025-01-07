@@ -188,8 +188,6 @@ class Hp extends \think\template\TagLib
         ]);';
         if (!empty($page)) {
             $parse .= '$' . $count . ' = $' . $vals . '->total();';
-        }
-        if (!empty($page)) {
             $parse .= '$pages = $' . $vals . '->render();';
         }
         $parse .= ' ?>';

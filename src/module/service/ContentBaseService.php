@@ -64,8 +64,8 @@ class ContentBaseService extends BaseService
         }
         $info = $info->toArray();
         $info['content'] = $this->getContent($info);
-        $info['column'] = ColumnBaseService::instance()->getInfo($info['cid']);
-        $info['tags'] = TagBaseService::instance()->getTagInfoListByAid($info['id']);
+        $info['column'] = ColumnBaseService::instance([$this->getModule()])->getInfo($info['cid']);
+        $info['tags'] = TagBaseService::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
         return $info;
     }
 
@@ -108,13 +108,11 @@ class ContentBaseService extends BaseService
             'rows' => 10,
             'whereor' => []
         ];
-
         // 合并默认参数与传入的参数，并以传入的参数优先
         $options = array_merge(
             $defaults,
             $params
         );
-
         // 检查mid是否为空
         if (empty($options['mid'])) {
             throw new Exception('mid不能为空！');
@@ -146,17 +144,16 @@ class ContentBaseService extends BaseService
         if ($options['paginate']) {
             $return = $query
                 ->paginate([
-                    'list_rows' => $options['pageSize'],
+                    'list_rows' => $options['rows'],
                     'page' => request()->param('page') ?: 1, // 获取当前页码，默认第一页
+                    'query' => request()->get(),
                 ]);
         } else {
             // 不是分页查询，则限制查询条数
-            $return = $query->limit($options['pageSize'])->select();
+            $return = $query->limit($options['rows'])->select();
         }
 
-        $this->formatData(
-            $return
-        );
+        $this->formatData($return);
 
         return $return;
     }
