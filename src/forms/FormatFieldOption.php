@@ -2,6 +2,9 @@
 
 namespace mowzs\lib\forms;
 
+use mowzs\lib\helper\ExecutorHelper;
+use think\Exception;
+
 class FormatFieldOption
 {
     /**
@@ -20,27 +23,33 @@ class FormatFieldOption
      */
     public static function strToArray(mixed $inputString): array
     {
-        // 去除字符串两端的空白字符
-        $inputString = trim($inputString);
-        // 使用换行符分割字符串，得到每一行
-        $lines = explode("\n", $inputString);
-        // 初始化结果数组
-        $result = [];
-        foreach ($lines as $line) {
-            // 去除每行两端的空白字符
-            $line = trim($line);
-            // 如果行为空，跳过
-            if (empty($line)) {
-                continue;
+        try {
+            // 检测并执行方法
+            return ExecutorHelper::runIfValid($inputString);
+        } catch (Exception) {
+            // 去除字符串两端的空白字符
+            $inputString = trim($inputString);
+            // 使用换行符分割字符串，得到每一行
+            $lines = explode("\n", $inputString);
+            // 初始化结果数组
+            $result = [];
+            foreach ($lines as $line) {
+                // 去除每行两端的空白字符
+                $line = trim($line);
+                // 如果行为空，跳过
+                if (empty($line)) {
+                    continue;
+                }
+                // 使用竖线（|）分割行，获取第一个键值对
+                $parts = explode('|', $line); // 限制分割次数为2，以确保只获取第一个键值对
+                list($key, $value) = $parts;
+                // 添加到结果数组
+                $result[$key] = $value;
             }
-            // 使用竖线（|）分割行，获取第一个键值对
-            $parts = explode('|', $line); // 限制分割次数为2，以确保只获取第一个键值对
-            list($key, $value) = $parts;
-            // 添加到结果数组
-            $result[$key] = $value;
+
+            return $result;
         }
 
-        return $result;
     }
 
 }
