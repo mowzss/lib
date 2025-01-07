@@ -86,7 +86,10 @@ class TagBaseService extends BaseService
             return $this->app->db->view($this->table, 'id,title')
                 ->view($this->infoTable, 'aid', $this->infoTable . '.tid=' . $this->table . '.id')
                 ->where('aid', $aid)
-                ->select()->toArray();
+                ->select()->each(function ($item) {
+                    $item['url'] = urls($this->getModule() . '/tag/show', ['id' => $item['id']]);
+                    return $item;
+                })->toArray();
         } catch (DataNotFoundException|DbException $e) {
             new  exception($e);
         }
