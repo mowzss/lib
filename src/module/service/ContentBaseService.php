@@ -3,15 +3,11 @@
 namespace mowzs\lib\module\service;
 
 use app\service\BaseService;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
-use think\db\Query;
+use mowzs\lib\helper\ColumnCacheHelper;
+use mowzs\lib\helper\ModuleFoematHelper;
 use think\Exception;
-use think\facade\Cache;
-use think\facade\Request;
+use think\facade\Db;
 use think\Model;
-use think\Paginator;
 
 /**
  * 模块内容公用服务
@@ -50,7 +46,7 @@ class ContentBaseService extends BaseService
 
     /**
      * @param string $id
-     * @return array|mixed|\think\Model|\think\model\contract\Modelable
+     * @return array|mixed|\think\Model
      * @throws Exception
      */
     public function getInfo(string $id = ''): mixed
@@ -89,138 +85,112 @@ class ContentBaseService extends BaseService
     }
 
     /**
-     * @return void
-     */
-    public function formatContent(&$data = [])
-    {
-
-    }
-
-    /**
-     * 获取内容列表
+     * 获取列表数据
      *
-     * @param int $mid 模块 ID
-     * @param int $cid 栏目 ID
-     * @param array $where 查询条件
-     * @param array $where_or 或条件
-     * @param int $limit 每页显示条数
-     * @param bool|string $page 分页参数
-     * @param string $name
-     * @param int $cache 缓存时间（秒），-1 表示不使用缓存
-     * @return mixed
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws Exception
-     * @throws ModelNotFoundException
+     * @param
+     * array $params 包含查询条件的参数数组
+     * @return
+     * \think\Collection|\think\model\Collection|\think\Paginator
+     * @throws
+     * Exception
+     * @throws
+     * DbException
      */
-    public function getList(int $mid = 0, int $cid = 0, array $where = [], array $where_or = [], int $limit = 20, bool|string $page = '', $name = '', int $cache = 0): mixed
+    public function getList(array $params = []): \think\Collection|\think\model\Collection|\think\Paginator
     {
-        // 解析并设置查询条件
-        $query = $this->buildQuery($mid, $cid, $where, $where_or);
-        // 设置分页或限制条数
-        if ($page) {
-            $query = $this->applyPagination($query, $page, $limit);
-        } else {
-            $query->limit($limit)->select();
-        }
-        // 执行查询并获取结果
-        return $this->executeQuery($query, $name, $cache);
-    }
-
-    /**
-     * 构建查询条件
-     *
-     * @param int $mid 模块 ID
-     * @param int $cid 栏目 ID
-     * @param array $where 查询条件
-     * @param array $where_or 或条件
-     * @return Query|Model
-     * @throws Exception
-     */
-    protected function buildQuery(int $mid, int $cid, array $where, array $where_or): Model|Query
-    {
-
-        $query = $this->model;
-
-        // 添加栏目子栏目条件
-        if ($cid) {
-            $cids = $this->getColumnSons($mid, $cid);
-            $query->whereIn('cid', $cids);
-        }
-
-        // 添加删除状态条件
-        $query->where('deleted', 0);  // 默认只查询未删除的数据
-
-        // 添加状态条件
-        $query->where('status', 1);   // 默认只查询已审核的数据
-
-        // 添加时间范围条件
-        if (isset($where['week']) && $where['week']) {
-            $query->whereWeek('create_time');
-        }
-        if (isset($where['month']) && $where['month']) {
-            $query->whereMonth('create_time');
-        }
-
-        // 添加 where 和 whereOr 条件
-        if (!empty($where)) {
-            $query->where($where);
-        }
-        if (!empty($where_or)) {
-            $query->whereOr($where_or);
-        }
-
-        return $query;
-    }
-
-    /**
-     * 应用分页
-     *
-     * @param Query $query 查询构建器
-     * @param string|bool $page 分页参数
-     * @param int $limit 每页显示条数
-     * @return Paginator
-     * @throws DbException
-     */
-    protected function applyPagination(Query $query, $page, int $limit): \think\Paginator
-    {
-        $pageConfig = [
-            'page' => $page,
-            'list_rows' => $limit,
-            'query' => Request::instance()->get(),
+        // 设置默认参数
+        $defaults = [
+            'mid' => 0,
+            'where' => [],
+            'order' => 'id',
+            'by' => 'desc',
+            'paginate' => false,
+            'rows' => 10,
+            'whereor' => []
         ];
 
-        return $query->paginate($pageConfig);
-    }
+        // 合并默认参数与传入的参数，并以传入的参数优先
+        $options = array_merge(
+            $defaults,
+            $params
+        );
 
-    /**
-     * 执行查询并处理缓存
-     *
-     * @param Query $query 查询构建器
-     * @param $name
-     * @param int $cache 缓存时间（秒），-1 表示不使用缓存
-     * @return mixed
-     */
-    protected function executeQuery(Query $query, $name, int $cache): mixed
-    {
-        // 生成缓存名称
-        $cacheName = 'tpl_list_' . md5(json_encode(['name' => $name, 'page_url' => $this->request->url()]));
+        // 检查mid是否为空
+        if (empty($options['mid'])) {
+            throw new Exception('mid不能为空！');
+        }
 
-        // 尝试从缓存中获取结果
-        $result = Cache::get($cacheName);
+        // 构建表名
+        $content = $this->getModule() . '_content_' . $options['mid'];
+        $contents = $this->getModule() . '_content_' . $options['mid'] . 's';
 
-        if (empty($result) || $cache == -1) {
-            // 如果缓存不存在或禁用缓存，则执行查询
-            $result = $query;
+        // 开始构建查询
+        $query = Db::view($content)->view($contents, 'content', "{$contents}.id={$content}.id", 'LEFT');
 
-            // 如果启用了缓存，则将结果存入缓存
-            if ($cache > 0) {
-                Cache::set($cacheName, $result, $cache);
+        // 添加 where 条件
+        if (!empty($options['where'])) {
+            $query->where($options['where']);
+        }
+
+        // 添加 orWhere 条件
+        if (!empty($options['whereor'])) {
+            foreach ($options['whereor'] as $orCondition) {
+                $query->whereOr($orCondition);
             }
         }
 
-        return $result;
+        // 排序
+        $query->order($options['order'], $options['by']);
+
+        // 如果是分页查询
+        if ($options['paginate']) {
+            $return = $query
+                ->paginate([
+                    'list_rows' => $options['pageSize'],
+                    'page' => request()->param('page') ?: 1, // 获取当前页码，默认第一页
+                ]);
+        } else {
+            // 不是分页查询，则限制查询条数
+            $return = $query->limit($options['pageSize'])->select();
+        }
+
+        $this->formatData(
+            $return
+        );
+
+        return $return;
     }
 
-
+    /**
+     * 格式化查询结果，添加分类和标签信息
+     *
+     * @param \think\Collection|\think\Paginator $data 查询结果对象
+     * @return void
+     */
+    protected function formatData(\think\Collection|\think\Paginator &$data): void
+    {
+        try {
+            $column_data = ColumnCacheHelper::instance()->getColumnsByIdTitle($this->getModule());
+        } catch (\Throwable $e) {
+            $column_data = [];
+        }
+        // 获取标签表和标签关联表的名称
+        $table_tag = $this->getModule() . '_tag';
+        $table_tag_info = $this->getModule() . '_tag_info';
+        // 遍历每个 item，追加分类和标签信息
+        $data->each(function ($item) use ($table_tag, $table_tag_info, $column_data) {
+            // 添加分类标题
+            $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
+            // 获取与当前 content 记录相关的 tag_info 和 tag 记录
+            $tags = Db::view($table_tag_info, 'tid')
+                ->view($table_tag, 'title', "{$table_tag}.id = {$table_tag_info}.tid")
+                ->where('aid', $item['id'])  // 使用 aid 关联 content 表
+                ->column('title');  // 获取 tag 的 title 字段
+            // 将标签信息追加到 item 中
+            $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
+            $item['module_dir'] = $this->getModule();
+            $item = ModuleFoematHelper::instance()->content($item);
+            return $item;
+        });
+    }
 }

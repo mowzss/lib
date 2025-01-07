@@ -6,11 +6,10 @@ namespace mowzs\lib\taglib\extends;
 
 use mowzs\lib\helper\ColumnCacheHelper;
 use mowzs\lib\helper\ModuleFoematHelper;
-use mowzs\lib\module\service\ContentBaseService;
 use mowzs\lib\taglib\TaglibBase;
 use think\facade\Db;
 
-class Lists extends TaglibBase
+class Lists39 extends TaglibBase
 {
     /**
      * 获取列表数据
@@ -23,45 +22,73 @@ class Lists extends TaglibBase
      */
     public function run(string $module, mixed $config): mixed
     {
-        $params = [];
         $this->module = $module;
-        $params['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');
-        $params['rows'] = $config['rows'] ?? 20;
-        $params['page'] = $config['page'] ?? false;
+        $config['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');
+        $config['rows'] = $config['rows'] ?? 20;
+        $config['page'] = $config['page'] ?? false;
         if (!empty($config['where'])) {
-            $params['where'] = $this->parseWhereArray($config['where']);
+            $config['where'] = $this->parseWhereArray($config['where']);
         }
         if (!empty($config['whereor'])) {
-            $params['whereor'] = $this->parseWhereArray($config['whereor']);
+            $config['whereor'] = $this->parseWhereArray($config['whereor']);
         }
         if (!isset($config['mid'])) {
-            $params['mid'] = 0;
+            $config['mid'] = 0;
         }
         if (empty($config['status'])) {
-            $params['where'][] = ['status', '=', 1];
-        } else {
-            $params['where'][] = ['status', '=', $config['status']];
+            $config['status'] = 1;
         }
+        $by = '';
         if (!preg_match('/( asc| desc)$/i', $config['order'])) {
-            $params['by'] = $config['by'] ?? 'desc';
-        }
-        if (stristr($config['order'], 'rand()')) {
-            $params['order'] = 'rand()';
-        } elseif (!empty($config['order'])) {
-            $params['order'] = $config['order'];
-        }
-        if (!empty($config['cid'])) {
-            $params['where'][] = ['cid', 'in', $config['cid']];
+            $by = $config['by'] ?? 'desc';
         }
         $name = $config['name'];
-
 
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($config));
 
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
-            $return = ContentBaseService::instance()->setModule($module)
-                ->getList($params);
+            $list = $this->setDbQuery($module, $config['mid']);
+            if (!empty($config['cid'])) {
+                $config['cid'] = $this->getCateSons($module, $config['cid']);
+                $list->whereIn('cid', $config['cid']);
+            }
+            if (!empty($config['status'])) {
+                $list->where(['status' => 1]);
+            } else {
+                $list->where(['status' => 0]);
+            }
+            if (!empty($config['week'])) {
+                $list->whereWeek('create_time');
+            }
+            if (!empty($config['month'])) {
+                $list->whereMonth('create_time');
+            }
+            if (!empty($config['where']) && is_array($config['where'])) {
+                $list->where($config['where']);
+            }
+            if (!empty($config['whereor']) && is_array($config['whereor'])) {
+                $list->whereOr($config['whereor']);
+            }
+            if (!empty($config['rows']) && empty($config['page'])) {
+                $list->limit($config['rows']);
+            }
+            if (stristr($config['order'], 'rand()')) {
+                $list->orderRaw('rand()');
+            } elseif (!empty($config['order'])) {
+                $list->order($config['order'], $by);
+            }
+            if (!empty($config['page'])) {
+                $pageConfig = [
+                    'page' => $config['pagenum'],
+                    'list_rows' => $config['rows'],
+                    'query' => $this->request->get(),
+                ];
+                $return = $list->paginate($pageConfig);
+            } else {
+                $return = $list->select();
+            }
+            $this->formatData($return);
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }
