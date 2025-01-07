@@ -20,12 +20,6 @@ class ModuleInit extends Command
             ->setHelp('This command initializes custom module configurations from the composer.json files of installed packages with type "happy-module".');
     }
 
-    /**
-     * 执行
-     * @param Input $input
-     * @param Output $output
-     * @return int
-     */
     protected function execute(Input $input, Output $output)
     {
         $output->writeln('Starting module initialization...');
@@ -38,37 +32,47 @@ class ModuleInit extends Command
         }
 
         foreach ($packages as $package) {
-            if ($package['type'] !== 'happy-module') {
-                continue; // 跳过非 happy-module 类型的包
+            // 检查 package 是否是数组，并且包含 'name' 和 'type' 键
+            if (!is_array($package) || !isset($package['name']) || !isset($package['type'])) {
+                $output->writeln("<warning>Skipping invalid package: Missing required keys.</warning>");
+                continue;
             }
 
+            // 只处理类型为 'happy-module' 的包
+            if ($package['type'] !== 'happy-module') {
+                continue;
+            }
+
+            // 检查 extra 中是否包含 'module' 配置项
             $extra = $package['extra'] ?? [];
 
-            // 检查包的 composer.json 是否包含 'module' 配置项
-            if (isset($extra['module'])) {
-                $packageName = $package['name'];
-                $output->writeln("Processing package: <info>$packageName</info>");
+            if (!isset($extra['module'])) {
+                $output->writeln("Package <info>{$package['name']}</info> does not contain a 'module' configuration in its extra section. Skipping.");
+                continue;
+            }
 
-                // 处理 make 节点（创建目录和文件）
-                if (isset($extra['module']['make'])) {
-                    $output->writeln('<info>Starting to process module[\'make\'] node...</info>');
-                    $this->processPaths($extra['module']['make'], true, $output, $packageName);
-                    $output->writeln('<info>Completed processing of module[\'make\'] node.</info>');
-                }
+            $packageName = $package['name'];
+            $output->writeln("Processing package: <info>$packageName</info>");
 
-                // 处理 copy 节点（复制文件，跳过已存在的目标路径）
-                if (isset($extra['module']['copy'])) {
-                    $output->writeln('<info>Starting to process module[\'copy\'] node...</info>');
-                    $this->processPaths($extra['module']['copy'], false, $output, $packageName);
-                    $output->writeln('<info>Completed processing of module[\'copy\'] node.</info>');
-                }
+            // 处理 make 节点（创建目录和文件）
+            if (isset($extra['module']['make'])) {
+                $output->writeln('<info>Starting to process module[\'make\'] node...</info>');
+                $this->processPaths($extra['module']['make'], true, $output, $packageName);
+                $output->writeln('<info>Completed processing of module[\'make\'] node.</info>');
+            }
 
-                // 处理 del 节点（删除包内容）
-                if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
-                    $output->writeln("Starting cleanup of <info>$packageName</info>");
-                    $this->deletePackageContent($packageName, $output);
-                    $output->writeln("<info>$packageName</info> cleanup completed");
-                }
+            // 处理 copy 节点（复制文件，跳过已存在的目标路径）
+            if (isset($extra['module']['copy'])) {
+                $output->writeln('<info>Starting to process module[\'copy\'] node...</info>');
+                $this->processPaths($extra['module']['copy'], false, $output, $packageName);
+                $output->writeln('<info>Completed processing of module[\'copy\'] node.</info>');
+            }
+
+            // 处理 del 节点（删除包内容）
+            if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
+                $output->writeln("Starting cleanup of <info>$packageName</info>");
+                $this->deletePackageContent($packageName, $output);
+                $output->writeln("<info>$packageName</info> cleanup completed");
             }
         }
 
@@ -84,20 +88,31 @@ class ModuleInit extends Command
      */
     protected function getInstalledPackages()
     {
-        $installedPhpPath = $this->app->getRootPath() . 'vendor/composer/installed.php';
         $installedJsonPath = $this->app->getRootPath() . 'vendor/composer/installed.json';
 
-        if (is_file($installedPhpPath)) {
-            return require $installedPhpPath; // Composer 2.0+ 使用 installed.php
-        } elseif (is_file($installedJsonPath)) {
-            $packages = json_decode(@file_get_contents($installedJsonPath), true);
-            if (isset($packages['packages'])) {
-                return $packages['packages']; // 兼容 Composer 2.0
-            } else {
-                return [$packages]; // 确保我们总是处理一个数组
-            }
+        if (!is_file($installedJsonPath)) {
+            throw new \RuntimeException('The file vendor/composer/installed.json was not found.');
+        }
+
+        // 读取并解析 installed.json 文件
+        $jsonContent = @file_get_contents($installedJsonPath);
+        if ($jsonContent === false) {
+            throw new \RuntimeException('Failed to read the contents of vendor/composer/installed.json.');
+        }
+
+        $packagesData = json_decode($jsonContent, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Failed to decode vendor/composer/installed.json: ' . json_last_error_msg());
+        }
+
+        // 检查是否是 Composer 2.x 格式的 installed.json
+        if (isset($packagesData['packages'])) {
+            return $packagesData['packages']; // Composer 2.x 格式
+        } elseif (is_array($packagesData)) {
+            return $packagesData; // Composer 1.x 格式
         } else {
-            throw new \RuntimeException('Neither vendor/composer/installed.php nor vendor/composer/installed.json found.');
+            throw new \RuntimeException('Unexpected format in vendor/composer/installed.json. Expected an array or a "packages" key.');
         }
     }
 
