@@ -2,11 +2,10 @@
 
 namespace mowzs\lib\command;
 
-use League\Flysystem\FilesystemException;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
-use think\facade\Filesystem;
 
 class ModuleInit extends Command
 {
@@ -26,24 +25,16 @@ class ModuleInit extends Command
      * @param Input $input
      * @param Output $output
      * @return int
-     * @throws FilesystemException
      */
     protected function execute(Input $input, Output $output)
     {
         $output->writeln('Starting module initialization...');
 
-        // 检查并读取 installed.json 文件
-        $installedJsonPath = $this->app->getRootPath() . 'vendor/composer/installed.json';
-        if (!is_file($installedJsonPath)) {
-            $output->writeln('<error>File vendor/composer/installed.json not found!</error>');
+        try {
+            $packages = $this->getInstalledPackages();
+        } catch (\Exception $e) {
+            $output->writeln("<error>An error occurred while reading installed packages: {$e->getMessage()}</error>");
             return 1; // 返回非零值表示命令执行失败
-        }
-
-        $packages = json_decode(@file_get_contents($installedJsonPath), true);
-        if (isset($packages['packages'])) {
-            $packages = $packages['packages']; // 兼容 Composer 2.0
-        } else {
-            $packages = [$packages]; // 确保我们总是处理一个数组
         }
 
         foreach ($packages as $package) {
@@ -57,33 +48,57 @@ class ModuleInit extends Command
             if (isset($extra['module'])) {
                 $packageName = $package['name'];
                 $output->writeln("Processing package: <info>$packageName</info>");
+
                 // 处理 make 节点（创建目录和文件）
-                // Process 'make' node (create directories and files)
                 if (isset($extra['module']['make'])) {
                     $output->writeln('<info>Starting to process module[\'make\'] node...</info>');
                     $this->processPaths($extra['module']['make'], true, $output, $packageName);
                     $output->writeln('<info>Completed processing of module[\'make\'] node.</info>');
                 }
 
-                // Process 'copy' node (copy files, skip if destination path exists)
+                // 处理 copy 节点（复制文件，跳过已存在的目标路径）
                 if (isset($extra['module']['copy'])) {
                     $output->writeln('<info>Starting to process module[\'copy\'] node...</info>');
                     $this->processPaths($extra['module']['copy'], false, $output, $packageName);
                     $output->writeln('<info>Completed processing of module[\'copy\'] node.</info>');
                 }
 
-                // Process 'del' node (delete package contents)
+                // 处理 del 节点（删除包内容）
                 if (isset($extra['module']['del']) && $extra['module']['del'] === true) {
                     $output->writeln("Starting cleanup of <info>$packageName</info>");
                     $this->deletePackageContent($packageName, $output);
                     $output->writeln("<info>$packageName</info> cleanup completed");
                 }
-
             }
         }
 
         $output->writeln('Module initialization completed.');
         return 0; // 返回零值表示命令成功执行
+    }
+
+    /**
+     * 获取已安装的 Composer 包
+     *
+     * @return array
+     * @throws \RuntimeException
+     */
+    protected function getInstalledPackages()
+    {
+        $installedPhpPath = $this->app->getRootPath() . 'vendor/composer/installed.php';
+        $installedJsonPath = $this->app->getRootPath() . 'vendor/composer/installed.json';
+
+        if (is_file($installedPhpPath)) {
+            return require $installedPhpPath; // Composer 2.0+ 使用 installed.php
+        } elseif (is_file($installedJsonPath)) {
+            $packages = json_decode(@file_get_contents($installedJsonPath), true);
+            if (isset($packages['packages'])) {
+                return $packages['packages']; // 兼容 Composer 2.0
+            } else {
+                return [$packages]; // 确保我们总是处理一个数组
+            }
+        } else {
+            throw new \RuntimeException('Neither vendor/composer/installed.php nor vendor/composer/installed.json found.');
+        }
     }
 
     /**
@@ -93,10 +108,11 @@ class ModuleInit extends Command
      * @param bool $forceReplace 是否强制替换
      * @param Output $output 输出对象
      * @param string $packageName 包名
-     * @throws FilesystemException
      */
     protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName)
     {
+        $filesystem = new SymfonyFilesystem();
+
         foreach ($paths as $targetKey => $sourcePath) {
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
             $targetFullPath = $this->app->getRootPath() . $targetKey;
@@ -105,12 +121,20 @@ class ModuleInit extends Command
                 $output->writeln("Error: Source path '$sourceFullPath' does not exist.");
                 continue;
             }
-            if ($forceReplace) {
-                Filesystem::deleteDirectory($targetFullPath);
 
+            // 如果强制替换，则先删除目标目录
+            if ($forceReplace && is_dir($targetFullPath)) {
+                $filesystem->remove($targetFullPath);
             }
-            Filesystem::copyDirectory($sourceFullPath, $targetFullPath);
-            $output->writeln("Marked and copied from {$sourceFullPath} to {$targetFullPath}");
+
+            // 复制目录或文件
+            if (is_dir($sourceFullPath)) {
+                $filesystem->mirror($sourceFullPath, $targetFullPath);
+                $output->writeln("Mirrored directory from <info>{$sourceFullPath}</info> to <info>{$targetFullPath}</info>");
+            } else {
+                $filesystem->copy($sourceFullPath, $targetFullPath, true);
+                $output->writeln("Copied file from <info>{$sourceFullPath}</info> to <info>{$targetFullPath}</info>");
+            }
         }
     }
 
@@ -119,12 +143,17 @@ class ModuleInit extends Command
      *
      * @param string $packageName 包名
      * @param Output $output 输出对象
-     * @throws FilesystemException
      */
     protected function deletePackageContent(string $packageName, Output $output): void
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
-        Filesystem::deleteDirectory($packagePath);
-        $output->writeln('Deleted package files.');
+
+        if (is_dir($packagePath)) {
+            $filesystem = new SymfonyFilesystem();
+            $filesystem->remove($packagePath);
+            $output->writeln("Deleted package files from <info>$packagePath</info>.");
+        } else {
+            $output->writeln("Package path <info>$packagePath</info> does not exist.");
+        }
     }
 }
