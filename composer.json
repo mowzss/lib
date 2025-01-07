@@ -12,7 +12,7 @@
     "topthink/think-orm": "^3.0",
     "topthink/think-view": "^2.0",
     "topthink/think-helper": "^3.1",
-    "bacon/bacon-qr-code": "^2.0",
+    "zoujingli/qrcode": "^1.0",
     "ezyang/htmlpurifier": "^4.18",
     "hightman/xunsearch": "^1.4",
     "guzzlehttp/guzzle": "^7.9",
