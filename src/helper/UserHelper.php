@@ -15,4 +15,14 @@ class UserHelper extends Helper
     {
         return $this->app->session->get('user.id', $default);
     }
+
+    /**
+     * 获取登录信息
+     * @param $uid
+     * @return array|false
+     */
+    public function getUserInfo(): array
+    {
+        return $this->app->session->get('user', []);
+    }
 }
