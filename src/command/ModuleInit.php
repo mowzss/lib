@@ -121,6 +121,13 @@ class ModuleInit extends Command
         }
     }
 
+    /**
+     * @param string $sourceFullPath
+     * @param string $targetFullPath
+     * @param bool $forceReplace
+     * @param Output $output
+     * @return void
+     */
     protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
     {
         // 确保目标文件所在的目录存在
