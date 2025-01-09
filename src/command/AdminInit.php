@@ -23,7 +23,6 @@ class AdminInit extends Command
         $commands = [
             'service:discover',
             'vendor:publish',
-            'admin:moduleInit',
         ];
 
         foreach ($commands as $commandName) {
