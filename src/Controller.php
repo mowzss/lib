@@ -59,7 +59,7 @@ abstract class Controller
         if (in_array($app->request->action(), get_class_methods(__CLASS__))) {
             $this->error('禁止访问内置方法！');
         }
-        $this->app = $app->bind('Mowzs\Libs\Controller', $this);
+        $this->app = $app->bind('mowzs\lib\Controller', $this);
         $this->request = $this->app->request;
         $this->get = $this->request->get();
         $this->post = $this->request->post();
