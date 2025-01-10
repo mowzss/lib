@@ -56,7 +56,7 @@ class AuthHelper extends Helper
     {
         $user = $this->getUser();
         if (!empty($user)) {
-            return $user['nodes'] ?: [];
+            return isset($user['nodes']) ?: [];
         }
         return [];
     }
