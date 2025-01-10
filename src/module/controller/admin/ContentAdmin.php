@@ -161,7 +161,7 @@ abstract class ContentAdmin extends BaseAdmin
             return $this->fetch();
         } catch (TemplateNotFoundException $exception) {
             //模板不存在时 尝试读取公用模板
-            return $this->fetch('common/module/content_list');
+            return $this->fetch('common@module/content_list');
         }
     }
 
@@ -317,7 +317,7 @@ abstract class ContentAdmin extends BaseAdmin
         if (empty($cid) && empty($mid) && $this->request->isGet()) {
             $model_all = $this->modelModel->where('id', '>', 0)->select();
             $this->assign('column', $model_all);
-            return $this->fetch('common/module/post');
+            return $this->fetch('common@module/post');
         }
         if (!empty($cid)) {
             $this->mid = $this->columnModel->where('id', $cid)->value('mid');

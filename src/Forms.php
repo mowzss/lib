@@ -204,39 +204,6 @@ class Forms
         }
     }
 
-    /**
-     * 获取模板目录
-     * @param string|null $theme_name
-     * @return string
-     */
-    protected function getFormsViewPath(string $theme_name = null): string
-    {
-        $path = 'forms_style';
-        if (Helper::instance()->app->request->isMobile() && Env::get('CONTROLLER_LAYER') != 'admin') {
-            $theme = 'wap_default';
-            Helper::instance()->app->config->set(['cache_prefix' => 'wap_',], 'view');
-        } else {
-            $theme = 'default';
-        }
-        $theme = $theme_name ?: $theme;
-        return Helper::instance()->app->getRootPath() . 'view' . DIRECTORY_SEPARATOR . $path . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR;
-    }
-
-    /**
-     * 设置模板风格路径
-     * @param $theme
-     * @return void
-     */
-    protected function setFormsViewPath($theme = null): void
-    {
-        $this->old_view_config = Helper::instance()->app->config->get('view');
-        $config = array_merge($this->old_view_config, [
-            'view_path' => $this->getFormsViewPath($theme),
-        ]);
-        View::config(['view_path' => $this->getFormsViewPath($theme)]);
-        Helper::instance()->app->config->set($config, 'view');
-    }
-
 
     /**
      * 静态实例化
@@ -509,8 +476,8 @@ class Forms
         if ($this->outputMode === 'page') {
             throw new HttpResponseException(display($html));
         } else {
-            View::config(['view_path' => $this->old_view_config['view_path']]);
-            Helper::instance()->app->config->set($this->old_view_config, 'view');
+            View::config(['view_path' => '']);
+            Helper::instance()->app->config->set(['view_path' => ''], 'view');
             return $html;
         }
     }
@@ -555,13 +522,46 @@ class Forms
     }
 
     /**
+     * 获取模板目录
+     * @param string|null $theme_name
+     * @return string
+     */
+    protected function getFormsViewPath(string $theme_name = null): string
+    {
+        $path = 'forms_style';
+        if (Helper::instance()->app->request->isMobile() && Env::get('CONTROLLER_LAYER') != 'admin') {
+            $theme = 'wap_default';
+            Helper::instance()->app->config->set(['cache_prefix' => 'wap_',], 'view');
+        } else {
+            $theme = 'default';
+        }
+        $theme = $theme_name ?: $theme;
+        return Helper::instance()->app->getRootPath() . 'view' . DIRECTORY_SEPARATOR . $path . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * 设置模板风格路径
+     * @param $theme
+     * @return void
+     */
+    protected function setFormsViewPath($theme = null): void
+    {
+        $this->old_view_config = Helper::instance()->app->config->get('view');
+        $config = array_merge($this->old_view_config, [
+            'view_path' => $this->getFormsViewPath($theme),
+        ]);
+        View::config(['view_path' => $this->getFormsViewPath($theme)]);
+        Helper::instance()->app->config->set($config, 'view');
+    }
+
+    /**
      * 渲染模板
      * @param string $template
      * @param array $vars
      * @param string $prefix
      * @return string
      */
-    protected function fetch(string $template = '', array $vars = [], $prefix = '/index/'): string
+    protected function fetch(string $template = '', array $vars = [], string $prefix = '/index/'): string
     {
         $template = $prefix . $template;
         return View::fetch($template, $vars);
