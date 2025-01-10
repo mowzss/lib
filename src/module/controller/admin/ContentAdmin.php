@@ -161,7 +161,7 @@ abstract class ContentAdmin extends BaseAdmin
             return $this->fetch();
         } catch (TemplateNotFoundException $exception) {
             //模板不存在时 尝试读取公用模板
-            return $this->fetch('common@module/content_list');
+            return $this->fetch('common@/module/content_list');
         }
     }
 
