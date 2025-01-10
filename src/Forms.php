@@ -476,8 +476,9 @@ class Forms
         if ($this->outputMode === 'page') {
             throw new HttpResponseException(display($html));
         } else {
-            View::config(['view_path' => '']);
-            Helper::instance()->app->config->set(['view_path' => ''], 'view');
+            $config = array_merge($this->old_view_config, ['view_path' => '']);
+            View::config($config);
+            Helper::instance()->app->config->set($config, 'view');
             return $html;
         }
     }
