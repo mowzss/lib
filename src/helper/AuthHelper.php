@@ -67,7 +67,7 @@ class AuthHelper extends Helper
      */
     protected function getAuthAdmin(): mixed
     {
-        return $this->app->config->get('auth.auth_admin');
+        return $this->app->config->get('happy.auth_admin');
     }
 
     /**
