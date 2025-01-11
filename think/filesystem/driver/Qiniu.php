@@ -21,12 +21,14 @@ class Qiniu extends Driver
     protected function createAdapter(): FilesystemAdapter
     {
         // TODO: Implement createAdapter() method.
+
         $qiniuConfig = [
             'access_key' => sys_config('qiniu_access'),
             'secret_key' => sys_config('qiniu_secret'),
             'bucket' => sys_config('qiniu_bucket'),
             'domain' => sys_config('qiniu_domain'),
         ];
+
 
         return new QiniuAdapter($qiniuConfig['access_key'], $qiniuConfig['secret_key'], $qiniuConfig['bucket'], $qiniuConfig['domain']);
     }
