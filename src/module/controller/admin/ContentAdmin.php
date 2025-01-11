@@ -8,6 +8,8 @@ use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use app\common\util\CrudUtil;
 use mowzs\lib\Forms;
+use mowzs\lib\helper\CodeHelper;
+use mowzs\lib\helper\EventHelper;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -335,10 +337,15 @@ abstract class ContentAdmin extends BaseAdmin
             }
             try {
                 $this->checkRequiredFields($data);
+                if (empty($data['id'])) {
+                    $data['id'] = CodeHelper::timestampBasedId();
+                }
+                EventHelper::instance()->listen('ContentAddBefore', $data);
                 if ($this->model->saveContent($data)) {
                     $model = $this->model->getModel();
                     // 结果回调处理
                     $result = true;
+                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $model);
                     if (false === $this->callback('_save_result', $result, $model, $data)) {
                         return $result;
                     }
@@ -429,7 +436,9 @@ abstract class ContentAdmin extends BaseAdmin
                 $forms->render($this->forms['fields']);
             }
             $this->checkRequiredFields($data);
+            EventHelper::instance()->listen('ContentEditBefore', $data);
             $this->model->editContent($data);
+            EventHelper::instance()->triggerNoReturn('ContentEditAfter', $data);
             // 结果回调处理
             $result = true;
             if (false === $this->callback('_save_result', $result, $record, $data)) {

@@ -12,7 +12,7 @@ class CodeHelper
      * @param int $timestamp 时间戳。
      * @return string
      */
-    private function compressTimestamp(int $timestamp): string
+    private static function compressTimestamp(int $timestamp): string
     {
         $timestampStr = (string)$timestamp;
         if (strlen($timestampStr) < 2) {
@@ -33,11 +33,11 @@ class CodeHelper
      * @throws RandomGenerationException
      * @throws RandomException
      */
-    public function timestampBasedId(int $length = 10, string $prefix = ''): string
+    public static function timestampBasedId(int $length = 10, string $prefix = ''): string
     {
         $length = max($length, 10);
         $timestamp = time();
-        $compressedTimestamp = $this->compressTimestamp($timestamp);
+        $compressedTimestamp = self::compressTimestamp($timestamp);
         $remainingLength = $length - strlen($prefix) - strlen($compressedTimestamp);
         if ($remainingLength < 0) {
             throw new \InvalidArgumentException('Prefix is too long for the specified length.');
@@ -63,7 +63,7 @@ class CodeHelper
      * @throws RandomException
      * @throws RandomGenerationException
      */
-    public function randomString(int $length = 12, string $prefix = ''): string
+    public static function randomString(int $length = 12, string $prefix = ''): string
     {
         $length = max($length, 10);
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -90,7 +90,7 @@ class CodeHelper
      * @param string $target 目标编码，默认为'UTF-8'。
      * @return string 返回转换为目标编码后的文本。
      */
-    public function convertToTargetEncoding(string $text, ?string $sourceEncoding = null, string $target = 'UTF-8'): string
+    public static function convertToTargetEncoding(string $text, ?string $sourceEncoding = null, string $target = 'UTF-8'): string
     {
         if (empty($text)) {
             return '';
