@@ -10,20 +10,64 @@ use think\facade\Env;
 use think\facade\Request;
 use think\facade\View;
 
+/**
+ * 表单构建类
+ */
 class Forms
 {
-
+    /**
+     * 表单默认值
+     * @var array|mixed
+     */
     protected array $value = [];
+    /**
+     * 提交地址
+     * @var string|mixed
+     */
     protected string $action;
+    /**
+     * 表单提交类型
+     * @var string|mixed
+     */
     protected string $method = 'post';
+    /**
+     * 表单数组
+     * @var array|mixed
+     */
     protected array $inputData = [];
+    /**
+     * 表单字段处理类
+     * @var FormFieldRenderer
+     */
     protected FormFieldRenderer $renderer;
+    /**
+     * 表单主键
+     * @var string|mixed|null
+     */
     protected ?string $pk = 'id'; // 主键名，默认为 'id'
+    /**
+     * 表单附加说明
+     * @var string|mixed
+     */
     protected string $description = ''; // 表单说明介绍
+    /**
+     * 输出模式 page为直接渲染页面 code 返回html代码
+     * @var string|mixed
+     */
     protected string $outputMode = 'page'; // 输出模式，默认为 'page'
+    /**
+     * 提交按钮
+     * @var array
+     */
     protected array $submit = [];
+    /**
+     * layui选择器
+     * @var mixed|string
+     */
     protected mixed $lay_filter = '';
-
+    /**
+     * @var \think\Template
+     */
     protected \think\Template $view;
     /**
      * @var array|mixed
@@ -37,8 +81,11 @@ class Forms
      * @var mixed|string
      */
     protected mixed $form_html;
-
-    protected array $trigger = [];
+    /**
+     * 联动菜单
+     * @var array|Forms
+     */
+    protected array|Forms $trigger = [];
 
     /**
      * @param array $options

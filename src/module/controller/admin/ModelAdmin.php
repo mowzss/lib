@@ -4,7 +4,6 @@ declare (strict_types=1);
 namespace mowzs\lib\module\controller\admin;
 
 use app\common\controllers\BaseAdmin;
-use app\common\controllers\module\admin\模块;
 use app\common\traits\CrudTrait;
 use app\common\util\TableCreatorUtil;
 use think\App;
