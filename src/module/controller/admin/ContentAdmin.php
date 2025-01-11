@@ -591,7 +591,7 @@ abstract class ContentAdmin extends BaseAdmin
                         return false;
                     }
                     $records->each(function ($record) {
-                        return $this->model->del($record['id']);
+                        return $this->model->del($record);
                     });
                     if (false === $this->callback('_delete_result', $result, $ids)) {
                         return $result;
@@ -607,7 +607,7 @@ abstract class ContentAdmin extends BaseAdmin
                     if (false === $this->callback('_delete_filter', $record, $ids)) {
                         return false;
                     }
-                    $result = $this->model->del($record['id']);
+                    $result = $this->model->del($record);
                     if (false === $this->callback('_delete_result', $result, $ids)) {
                         return $result;
                     }

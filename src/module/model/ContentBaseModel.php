@@ -4,6 +4,9 @@ declare (strict_types=1);
 namespace mowzs\lib\module\model;
 
 use mowzs\lib\Model;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\model\concern\SoftDelete;
 
@@ -88,32 +91,56 @@ abstract class ContentBaseModel extends Model
     /**
      * 通过id获取mid
      * @param $id
-     * @return void
+     * @return mixed
      */
-    protected function getMidByID($id)
+    protected function getMidByID($id): mixed
     {
-
+        return $this->where(['id' => $id])->value('mid');
     }
 
-    public function updataInc($id, $field = '', $mid = '')
+    /**
+     * 更新字段
+     * @param int|string $id
+     * .
+     * @param string $field
+     * @param int $step
+     * @param int|string $mid
+     * @return void
+     */
+    public function updateInc(int|string $id, string $field = '', int $step = 1, int|string $mid = 0): void
     {
         if (empty($mid)) {
-
+            $mid = $this->getMidByID($id);
         }
-        $this->where(['id' => $id])->inc('mid', $mid)->save();
+        $where = ['id' => $mid];
+        $this->where($where)->inc($field, 1)->save();
+        $this->suffix("_{$mid}")->where($where)->update([$field => $id]);
     }
 
     /**
      * 删除
-     * @param $id
-     * @param bool $force
+     * @param mixed $data 数据或模型实例
+     * @param bool $force 是否强制删除
      * @return bool
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
-    public function del($data, bool $force = false): bool
+    public function del(mixed $data, bool $force = false): bool
     {
-        if (!empty($data['mid'])) {
-            $this->suffix("_{$data['mid']}")->destroy($data['id'], $force);
+        // 如果$data是模型实例，则转换为数组
+        if (is_object($data) && method_exists($data, 'toArray')) {
+            $data = $data->toArray();
         }
+        // 确保$data是一个数组
+        if (!is_array($data)) {
+            throw new \InvalidArgumentException('The provided data must be an array or a model instance.');
+        }
+        // 检查是否存在'mid'键，并根据需要执行删除操作
+        if (!empty($data['mid'])) {
+            $this->setSuffix("_{$data['mid']}")->find($data['id'])->delete();
+        }
+
         return $this->destroy($data['id'], $force);
     }
 }
