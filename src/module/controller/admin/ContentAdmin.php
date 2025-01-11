@@ -251,10 +251,13 @@ abstract class ContentAdmin extends BaseAdmin
                 [
                     'field' => 'id',
                     'title' => 'ID',
-                    'width' => 80,
+                    'width' => 120,
                     'sort' => true,
                 ],
                 [
+                    'field' => 'title',
+                    'title' => '标题'
+                ], [
                     'field' => 'model_name',
                     'title' => '所属模型',
                 ],
@@ -263,9 +266,6 @@ abstract class ContentAdmin extends BaseAdmin
                     'title' => '所属栏目'
                 ],
                 [
-                    'field' => 'title',
-                    'title' => '标题'
-                ], [
                     'field' => 'view',
                     'title' => '浏览',
                     'sort' => true,
@@ -571,5 +571,54 @@ abstract class ContentAdmin extends BaseAdmin
         }
     }
 
+    /**
+     * @return false|mixed|void
+     */
+    public function delete()
+    {
+        if ($this->request->isPost()) {
+            $ids = $this->request->param('ids');
 
+            if (is_null($ids)) {
+                $this->error('id不能为空');
+            }
+            if (is_array($ids)) {
+                // 批量删除
+                $records = $this->model->whereIn('id', $ids)->select();
+
+                if (!$records->isEmpty()) {
+                    if (false === $this->callback('_delete_filter', $record, $ids)) {
+                        return false;
+                    }
+                    $records->each(function ($record) {
+                        return $this->model->del($record['id']);
+                    });
+                    if (false === $this->callback('_delete_result', $result, $ids)) {
+                        return $result;
+                    }
+                    $this->success('删除成功');
+                } else {
+                    $this->error('记录不存在');
+                }
+            } else {
+                // 单个删除
+                $record = $this->model->findOrEmpty($ids);
+                if (!$record->isEmpty()) {
+                    if (false === $this->callback('_delete_filter', $record, $ids)) {
+                        return false;
+                    }
+                    $result = $this->model->del($record['id']);
+                    if (false === $this->callback('_delete_result', $result, $ids)) {
+                        return $result;
+                    }
+                    $this->success('删除成功');
+                } else {
+                    $this->error('记录不存在');
+                }
+            }
+        } else {
+            $this->error('请求错误');
+        }
+
+    }
 }

@@ -5,14 +5,19 @@ namespace mowzs\lib\module\model;
 
 use mowzs\lib\Model;
 use think\Exception;
+use think\model\concern\SoftDelete;
 
 abstract class ContentBaseModel extends Model
 {
+    use SoftDelete;
+
+    protected string $deleteTime = 'delete_time';
 
     /**
      * 新增内容
      * @param $data
      * @return false|int|string
+     * @throws Exception
      */
     public function saveContent($data): bool|int|string
     {
@@ -96,5 +101,19 @@ abstract class ContentBaseModel extends Model
 
         }
         $this->where(['id' => $id])->inc('mid', $mid)->save();
+    }
+
+    /**
+     * 删除
+     * @param $id
+     * @param bool $force
+     * @return bool
+     */
+    public function del($data, bool $force = false): bool
+    {
+        if (!empty($data['mid'])) {
+            $this->suffix("_{$data['mid']}")->destroy($data['id'], $force);
+        }
+        return $this->destroy($data['id'], $force);
     }
 }
