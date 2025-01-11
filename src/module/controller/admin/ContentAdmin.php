@@ -587,7 +587,7 @@ abstract class ContentAdmin extends BaseAdmin
                 $records = $this->model->whereIn('id', $ids)->select();
 
                 if (!$records->isEmpty()) {
-                    if (false === $this->callback('_delete_filter', $record, $ids)) {
+                    if (false === $this->callback('_delete_filter', $records, $ids)) {
                         return false;
                     }
                     $records->each(function ($record) {

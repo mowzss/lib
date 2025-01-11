@@ -54,7 +54,6 @@ abstract class ColumnAdmin extends BaseAdmin
     protected function _index_list_filter(&$data): void
     {
         $data['data'] = DataHelper::instance()->arrToTree($data['data']);
-
     }
 
     protected function setParams(): void
