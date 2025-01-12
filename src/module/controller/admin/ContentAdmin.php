@@ -6,6 +6,7 @@ namespace mowzs\lib\module\controller\admin;
 
 use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
+use app\common\util\ContentSaveFilterUtil;
 use app\common\util\CrudUtil;
 use mowzs\lib\Forms;
 use mowzs\lib\helper\CodeHelper;
@@ -375,14 +376,13 @@ abstract class ContentAdmin extends BaseAdmin
      * 新增保存前
      * @param $data
      * @return void
+     * @throws DbException
      */
     protected function _save_filter(&$data): void
     {
-
-
-        if (!empty($data['images'])) {
-            $data['is_pic'] = 1;
-        }
+        // 处理数据
+        $data = ContentSaveFilterUtil::instance()->setProcessingData($data);
+        $data['list'] = !empty($data['list']) ?: time();
     }
 
     /**
