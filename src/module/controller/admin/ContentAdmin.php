@@ -378,6 +378,8 @@ abstract class ContentAdmin extends BaseAdmin
      */
     protected function _save_filter(&$data): void
     {
+
+
         if (!empty($data['images'])) {
             $data['is_pic'] = 1;
         }
