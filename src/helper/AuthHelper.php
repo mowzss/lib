@@ -41,9 +41,6 @@ class AuthHelper extends Helper
         if (empty($check['is_auth']) && !empty($this->getUser())) {
             return true;
         }
-        //用户权限组包含当前节点
-        dump($node);
-        dump($this->getUserNodes());
         if (in_array($node, $this->getUserNodes())) {
             return true;
         }
@@ -58,14 +55,21 @@ class AuthHelper extends Helper
     protected function getUserNodes(): mixed
     {
         $user = $this->getUser();
-        if (!empty($user['auth_id']) && !isset($user['nodes'])) {
-            $user['nodes'] = UserAuth::where('id', $user['auth_id'])->value('nodes');
-            $this->app->session->set('user.nodes', $user['nodes']);
-        }
-        if (!empty($user)) {
-            return $user['nodes'] ?? [];
+        if (!empty($user['auth_id'])) {
+            return UserAuth::where('id', $user['auth_id'])->value('nodes');
         }
         return [];
+    }
+
+    /**
+     * @return array|string[]|\string[][]
+     */
+    public function getUserNodesModule(): array
+    {
+        $nodes = $this->getUserNodes();
+        return array_map(function ($item) {
+            return str_replace('.', '/', $item);
+        }, $nodes);
     }
 
     /**

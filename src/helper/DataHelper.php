@@ -34,6 +34,28 @@ class DataHelper extends Helper
         return $arr;
     }
 
+    /**
+     * @param array $array
+     * @param string $childrenKey
+     * @return mixed
+     */
+    public function removeEmptyChildren(array $array, string $childrenKey = 'children'): mixed
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                if (isset($value[$childrenKey])) {
+                    $value[$childrenKey] = $this->removeEmptyChildren($value[$childrenKey]);
+                    if (empty($value[$childrenKey])) {
+                        unset($array[$key]);
+                    } else {
+                        $array[$key] = $value;
+                    }
+                }
+            }
+        }
+        return $array;
+    }
+
 
     /**
      * 二维数组转数据树表
