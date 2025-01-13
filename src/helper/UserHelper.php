@@ -35,9 +35,7 @@ class UserHelper extends Helper
         } else {
             $user_info = (new UserInfo())->findOrEmpty($uid)->toArray();
         }
-        if (empty($user_info['avatar'])) {
-            $user_info['avatar'] = '/static/libs/image/error/no_avatar.png';
-        }
+
         if (empty($field)) {
             return $user_info;
         }
