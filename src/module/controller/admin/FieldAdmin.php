@@ -220,8 +220,16 @@ abstract class FieldAdmin extends BaseAdmin
                     'type' => 'text',
                     'name' => 'extend[field][default]',
                     'label' => '默认值'
-                ],
-                [
+                ], [
+                    'type' => 'radio',
+                    'name' => 'extend[index][is_open]',
+                    'label' => '索引', 'value' => 0,
+                    'help' => '',
+                    'options' => [
+                        0 => '不添加',
+                        1 => '添加'
+                    ]
+                ], [
                     'type' => 'radio',
                     'name' => 'extend[search][is_open]',
                     'label' => '搜索',

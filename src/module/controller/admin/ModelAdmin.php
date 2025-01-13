@@ -5,6 +5,7 @@ namespace mowzs\lib\module\controller\admin;
 
 use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
+use app\common\util\table\TableStructures;
 use app\common\util\TableCreatorUtil;
 use think\App;
 use think\Model;
@@ -148,11 +149,18 @@ abstract class ModelAdmin extends BaseAdmin
             $retContent = TableCreatorUtil::instance()->createTable($contentTable, 3);
             if (!$retContent['success']) {
                 throw new \Exception("Failed to create table '{$contentTable}': " . $retContent['message']);
-            }// 创建 contents 表
+            }
+            // 创建 contents 表
             $retContents = TableCreatorUtil::instance()->createTable($contentsTable, 4);
             if (!$retContents['success']) {
                 throw new \Exception("Failed to create table '{$contentsTable}': " . $retContents['message']);
-            }// 删除旧的字段记录
+            }
+            //添加索引
+            $retIndex = TableCreatorUtil::instance()->addIndexes($contentTable, TableStructures::getTypeFieldsIndex(3));
+            if (!$retIndex['success']) {
+                throw new \Exception("Failed to add indexes to table '{$contentTable}': " . $retIndex['message']);
+            }
+            // 删除旧的字段记录
             $this->fieldModel->where('mid', $data['id'])->delete();// 准备新的字段数据
             $fieldData = [
                 ['mid' => $data['id'], 'name' => 'title', 'type' => 'text', 'title' => '标题', 'options' => '', 'help' => null, 'required' => '1', 'list' => '1000', 'edit' => '1', 'extend' => '{"field":{"type":"VARCHAR","length":"256","unsigned":"0","null":"0","default":"\'\'"},"search":{"is_open":"1","linq":"like"},"tables":{"is_show":"1","templet":"","switch":{"name":""},"edit":"0"},"add":{"is_show":"1"}}', 'status' => '1', 'create_time' => time(), 'update_time' => time(), 'is_search' => null],
