@@ -66,11 +66,11 @@ abstract class ContentBaseModel extends Model
     }
 
     /**
-     * @param string $id
-     * @return array|mixed|\think\Model|\think\model\contract\Modelable
+     * @param string|int $id
+     * @return mixed
      * @throws Exception
      */
-    public function getInfo(string $id = ''): mixed
+    public function getInfo(string|int $id = ''): mixed
     {
         if (empty($id)) {
             throw new Exception('内容ID不能为空');
@@ -84,7 +84,7 @@ abstract class ContentBaseModel extends Model
             throw new Exception('内容没找到！');
         }
         $info = $info->toArray();
-        $info['content'] = $this->suffix("_{$mid}s")->value('content');
+        $info['content'] = $this->suffix("_{$mid}s")->where(['id' => $id])->value('content');
         return $info;
     }
 

@@ -380,9 +380,11 @@ abstract class ContentAdmin extends BaseAdmin
      */
     protected function _save_filter(&$data): void
     {
-        // 处理数据
-        $data = ContentSaveFilterUtil::instance()->setProcessingData($data);
-        $data['list'] = !empty($data['list']) ?: time();
+        if ($this->request->isPost()) {
+            // 处理数据
+            $data = ContentSaveFilterUtil::instance()->setProcessingData($data);
+            $data['list'] = !empty($data['list']) ?: time();
+        }
     }
 
     /**
