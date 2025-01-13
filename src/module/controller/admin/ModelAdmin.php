@@ -82,6 +82,12 @@ abstract class ModelAdmin extends BaseAdmin
                     'url' => urls('field/index', ['mid' => '__id__']),
                     'name' => '字段设计',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
+                ], [
+                    'event' => '',
+                    'type' => 'data-modal',
+                    'url' => urls('copy', ['mid' => '__id__']),
+                    'name' => '字段设计',
+                    'class' => '',//默认包含 layui-btn layui-btn-xs
                 ],
                 ['event' => 'edit'],
                 ['event' => 'del'],
@@ -104,17 +110,6 @@ abstract class ModelAdmin extends BaseAdmin
         ];
     }
 
-    /**
-     * 列表数据处理
-     * @param $data
-     * @return void
-     */
-//    protected function _index_list_filter(&$data): void
-//    {
-//        foreach ($data['data'] as &$item) {
-//            $item['type_name'] = TableCreatorUtil::instance()->type[$item['type']];
-//        }
-//    }
 
     /**
      * 添加内容回调

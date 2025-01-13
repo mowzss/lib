@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib\helper;
 
+use app\model\user\UserAuth;
 use mowzs\lib\Helper;
 use think\Exception;
 
@@ -41,6 +42,8 @@ class AuthHelper extends Helper
             return true;
         }
         //用户权限组包含当前节点
+        dump($node);
+        dump($this->getUserNodes());
         if (in_array($node, $this->getUserNodes())) {
             return true;
         }
@@ -55,8 +58,12 @@ class AuthHelper extends Helper
     protected function getUserNodes(): mixed
     {
         $user = $this->getUser();
+        if (!empty($user['auth_id']) && !isset($user['nodes'])) {
+            $user['nodes'] = UserAuth::where('id', $user['auth_id'])->value('nodes');
+            $this->app->session->set('user.nodes', $user['nodes']);
+        }
         if (!empty($user)) {
-            return isset($user['nodes']) ?: [];
+            return $user['nodes'] ?? [];
         }
         return [];
     }
