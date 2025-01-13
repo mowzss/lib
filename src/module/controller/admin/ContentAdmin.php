@@ -109,11 +109,11 @@ abstract class ContentAdmin extends BaseAdmin
     /**
      * 内容列表
      * @auth true
-     * @return mixed|string
+     * @return string
      * @throws DbException
      * @throws Exception
      */
-    public function index(): mixed
+    public function index(): string
     {
         $params = $this->request->param();
         //  返回数据表格数据
@@ -576,6 +576,8 @@ abstract class ContentAdmin extends BaseAdmin
     }
 
     /**
+     * 删除
+     * @auth true
      * @return false|mixed|void
      */
     public function delete()
