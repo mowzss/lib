@@ -16,7 +16,7 @@ class MimeHelper extends Helper
     {
         if (empty($this->mimeTypes)) {
             // 假设 mimes.php 文件位于 config 目录下
-            $path = $this->app->getAppPath() . 'common/extra/mimes.php';
+            $path = __DIR__ . '/mimes.php';
             if (file_exists($path)) {
                 $this->mimeTypes = require $path;
             } else {
@@ -42,15 +42,17 @@ class MimeHelper extends Helper
      * 根据 MIME 类型获取扩展名
      *
      * @param string $mimeType MIME 类型
-     * @return string|null 文件扩展名
+     * @return mixed|null
      * @throws \Exception
      */
-    public function getExtensionByMimeType(string $mimeType): ?string
+    public function getExtensionByMimeType(string $mimeType): mixed
     {
         $this->init();
 
-        // 反转数组以查找 MIME 类型对应的扩展名
-        $reversedMimeTypes = array_flip($this->mimeTypes);
+        // 反转数组以支持通过 MIME 类型获取扩展名
+        foreach ($this->mimeTypes as $ext => $type) {
+            $reversedMimeTypes[$type][] = $ext;
+        }
 
         return $reversedMimeTypes[$mimeType] ?? null;
     }
