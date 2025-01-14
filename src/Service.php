@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
+use app\command\SyncTableCommand;
 use mowzs\lib\command\AdminInit;
 use mowzs\lib\command\ModuleInit;
 use think\Service as BaseService;
@@ -49,7 +50,8 @@ class Service extends BaseService
     {
         $this->commands([
             AdminInit::class,
-            ModuleInit::class
+            ModuleInit::class,
+            SyncTableCommand::class
         ]);
     }
 }

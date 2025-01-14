@@ -7,7 +7,12 @@ use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use app\common\util\table\TableStructures;
 use app\common\util\TableCreatorUtil;
+use mowzs\lib\Forms;
 use think\App;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
+use think\Exception;
 use think\Model;
 
 /**
@@ -86,7 +91,7 @@ abstract class ModelAdmin extends BaseAdmin
                     'event' => '',
                     'type' => 'data-modal',
                     'url' => urls('copy', ['mid' => '__id__']),
-                    'name' => '字段设计',
+                    'name' => '复制模型',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
                 ],
                 ['event' => 'edit'],
@@ -110,6 +115,66 @@ abstract class ModelAdmin extends BaseAdmin
         ];
     }
 
+    /**
+     * 复制模型
+     * @auth true
+     * @return bool|void
+     * @throws Exception
+     */
+    public function copy()
+    {
+        $data = $this->request->param();
+        if (empty($data['mid'])) {
+            $this->error('mid不能为空');
+        }
+        if ($data['mid'] < 0) {
+            $this->error('仅支持内容模型复制');
+        }
+        if ($this->request->isPost()) {
+            if (false === $this->callback('_save_filter', $data)) {
+                return false;
+            }
+            try {
+                $this->checkRequiredFields($data);
+                $this->app->db->startTrans();// 获取模块名称并构建表名
+                $this->model->save($data);
+                $model = $this->model->getModel();
+                //原表
+                $module = strtolower($this->getModuleName());
+                $old_content_table = "{$module}_content_{$data['mid']}";
+                $old_contents_table = "{$module}_content_{$data['mid']}s";
+
+                $new_content_table = "{$module}_content_{$model['id']}";
+                $new_contents_table = "{$module}_content_{$model['id']}s";
+
+                $retContent = TableCreatorUtil::instance()->copyTableStructure($old_content_table, $new_content_table);
+                if (!$retContent['success']) {
+                    throw new DbException($retContent['message']);
+                }
+                $retContents = TableCreatorUtil::instance()->copyTableStructure($old_contents_table, $new_contents_table);
+                if (!$retContents['success']) {
+                    throw new DbException($retContents['message']);
+                }
+                //复制字段
+                $retFields = TableCreatorUtil::instance()->copyTableRows($this->fieldModel->getName(), ['mid' => $data['mid']], ['mid' => $model['id']]);
+                if (!$retFields['success']) {
+                    throw new DbException($retFields['message']);
+                }
+                $this->app->db->commit();// 返回成功信息
+                $this->success('添加成功');
+                return true;
+            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+                // 回滚事务
+                $this->app->db->rollback();
+                // 记录错误日志
+                $this->app->log->error("Error in _add_save_result: " . $e->getMessage());
+                // 返回详细的错误信息
+                $this->error('添加失败:' . $e->getMessage());
+                return false;
+            }
+        }
+        Forms::instance()->setInputs([['type' => 'hidden', 'name' => 'mid', 'value' => $this->request->param('mid')]])->render($this->forms['fields']);
+    }
 
     /**
      * 添加内容回调
