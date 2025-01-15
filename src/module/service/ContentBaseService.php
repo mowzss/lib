@@ -46,11 +46,11 @@ class ContentBaseService extends BaseService
 
 
     /**
-     * @param string $id
-     * @return array|mixed|\think\Model
+     * @param string|int $id
+     * @return array|mixed|Model
      * @throws Exception
      */
-    public function getInfo(string $id = ''): mixed
+    public function getInfo(string|int $id = '', $prev_next = false): mixed
     {
         if (empty($id)) {
             throw new Exception('内容ID不能为空');
@@ -67,7 +67,12 @@ class ContentBaseService extends BaseService
         $info['content'] = $this->getContent($info);
         $info['column'] = ColumnBaseService::instance([$this->getModule()])->getInfo($info['cid']);
         $info['tags'] = TagBaseService::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
-        return $info;
+        if ($prev_next) {
+            $info['prev_info'] = $this->model->where('id', '<', $id)->findOrEmpty()->toArray();
+            $info['next_info'] = $this->model->where('id', '>', $id)->findOrEmpty()->toArray();
+        }
+        $info['module_dir'] = $this->getModule();
+        return ModuleFoematHelper::instance()->content($info);
     }
 
     /**

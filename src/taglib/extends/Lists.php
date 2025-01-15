@@ -23,6 +23,7 @@ class Lists extends TaglibBase
      */
     public function run(string $module, mixed $config): mixed
     {
+        p($config);
         $params = [];
         $this->module = $module;
         $params['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');

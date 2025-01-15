@@ -19,7 +19,7 @@ class Column extends TaglibBase
             $config['whereor'] = $this->parseWhereArray($config['whereor']);
         }
         if (empty($config['order'])) {
-            $config['order'] = "sort";
+            $config['order'] = "list";
         }
         $by = '';
         if (!preg_match('/( asc| desc)$/i', $config['order'])) {

@@ -39,10 +39,17 @@ class ContentHome extends BaseHome
             $this->error('内容ID不能为空');
         }
         try {
-            $info = $this->service->getInfo($id);
+            $info = $this->service->getInfo($id, true);
+            if (empty($info)) {
+                $this->error('内容不存在');
+            }
+            if ($info['status'] <= 0) {
+                $this->error('内容审核中');
+            }
         } catch (\Exception $e) {
             $this->error('出错了!');
         }
+
         $this->assign([
             'info' => $info,
             'id' => $id,

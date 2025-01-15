@@ -105,7 +105,7 @@ class Hp extends \think\template\TagLib
         $empty = $tag['empty'] ?? '';
         $parse = '<?php ';
 
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
+        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Column::getInstance()->run("' . $module . '",[
         "status"=>' . $status . ',
         "rows"=>' . $rows . ',
         "name"=>"' . $name . '",

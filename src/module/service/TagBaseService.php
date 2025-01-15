@@ -43,6 +43,7 @@ class TagBaseService extends BaseService
      * @var Model
      */
     protected Model $contentModel;
+    protected Model $tagInfoModel;
 
     /**
      * @return void
@@ -56,6 +57,7 @@ class TagBaseService extends BaseService
         $this->contentTable = $this->modelName . '_content';
         $this->model = $this->getModel($this->table);
         $this->contentModel = $this->getModel($this->contentTable);
+        $this->tagInfoModel = $this->getModel($this->infoTable);
     }
 
     /**
@@ -78,10 +80,10 @@ class TagBaseService extends BaseService
 
     /**
      * 通过内容id获取tag
-     * @param string $aid
+     * @param string|int $aid
      * @return array|void
      */
-    public function getTagInfoListByAid(string $aid = '')
+    public function getTagInfoListByAid(string|int $aid = '')
     {
         try {
             return $this->app->db->view($this->table, 'id,title')
@@ -111,14 +113,18 @@ class TagBaseService extends BaseService
         if (empty($tid)) {
             throw new Exception('TAG ID 不能为空');
         }
-        $query = $this->getDbQuery($this->infoTable)->where(['tid' => $tid]);
+        $query = $this->tagInfoModel->where(['tid' => $tid]);
         if (!empty($mid)) {
             $query = $query->where(['mid' => $mid]);
         }
-        return $query->field('aid')->paginate($rows)->each(function ($item) {
-            $item = ContentBaseService::instance([$this->getModule()])->getInfo($item['aid']);
-            return $item;
-        });
+        return $query->field('aid')->paginate($rows)
+            ->each(function ($item) {
+                $content = ContentBaseService::instance([$this->getModule()])->getInfo($item['aid']);
+                foreach ($content as $key => $value) {
+                    $item[$key] = $value;
+                }
+                return $item;
+            });
     }
 
 
