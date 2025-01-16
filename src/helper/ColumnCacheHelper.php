@@ -40,10 +40,10 @@ class ColumnCacheHelper extends Helper
         $cacheKey = "{$module}_columns_id_title";
 
         // 从缓存中获取栏目数据，如果不存在则查询数据库并缓存
-        return $this->app->cache->remember($cacheKey, 86400, function () use ($module) {
+        return $this->app->cache->remember($cacheKey, function () use ($module) {
             $tableColumn = $module . '_column';
             return Db::name($tableColumn)->column('title', 'id');
-        });
+        }, 86400);
     }
 
     /**

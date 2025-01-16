@@ -45,6 +45,7 @@ class ContentBaseService extends BaseService
     {
 // 构建表名
         $content = $this->getModule() . '_content_' . $options['mid'];
+        $contents = $this->getModule() . '_content_' . $options['mid'] . 's';
         // 开始构建查询
         $query = Db::name($content);
         // 添加 where 条件
@@ -74,7 +75,24 @@ class ContentBaseService extends BaseService
             // 不是分页查询，则限制查询条数
             $return = $query->limit($options['rows'])->select();
         }
+        $content_data = $this->getDbQuery($contents)->whereIn('id', $return->column('id'))
+            ->column('content', 'id');
+        $tags = TagBaseService::instance([$this->getModule()])->getTagInfoListByAids($return->column('id'))->toArray();
+        $return->each(function ($item) use ($content_data, $tags) {
+            foreach ($content_data as $id => $content) {
+                if ($id == $item['id']) {
+                    $item['content'] = $content;
+                }
 
+            }
+            $item['tags'] = [];
+            foreach ($tags as $tag) {
+                if ($tag['aid'] == $item['id']) {
+                    $item['tags'][] = $tag;
+                }
+            }
+            return $item;
+        });
         $this->formatData($return);
         return $return;
     }
@@ -211,7 +229,7 @@ class ContentBaseService extends BaseService
             }
         }
         // 开始构建查询
-        $query = $this->model;
+        $query = $this->getDbQuery($this->table);
 
         // 添加 where 条件
         if (!empty($_where)) {
@@ -255,15 +273,22 @@ class ContentBaseService extends BaseService
             $params['mid'] = $item['mid'];
             $data = array_merge($data, $this->getListByMid($params)->toArray());
         }
-        return $data;
+        return $return->intersect($data, 'id')->each(function ($item) use ($data) {
+            foreach ($data as $value) {
+                if ($item['id'] == $value['id']) {
+                    return $value;
+                }
+            }
+        });
     }
 
 
     /**
      * 格式化查询结果，添加分类和标签信息
      *
-     * @param \think\Collection|\think\Paginator $data 查询结果对象
+     * @param Collection|Paginator $data 查询结果对象
      * @return void
+     * @throws \Throwable
      */
     protected function formatData(\think\Collection|\think\Paginator &$data): void
     {
@@ -272,6 +297,7 @@ class ContentBaseService extends BaseService
         } catch (\Throwable $e) {
             $column_data = [];
         }
+
         // 获取标签表和标签关联表的名称
         $table_tag = $this->getModule() . '_tag';
         $table_tag_info = $this->getModule() . '_tag_info';
@@ -279,15 +305,7 @@ class ContentBaseService extends BaseService
         $data->each(function ($item) use ($table_tag, $table_tag_info, $column_data) {
             // 添加分类标题
             $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
-            // 获取与当前 content 记录相关的 tag_info 和 tag 记录
-            $tags = Db::view($table_tag_info, 'tid')
-                ->view($table_tag, 'title', "{$table_tag}.id = {$table_tag_info}.tid")
-                ->where('aid', $item['id'])  // 使用 aid 关联 content 表
-                ->column('title', 'tid');  // 获取 tag 的 title 字段
-            // 将标签信息追加到 item 中
-            $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
             $item['module_dir'] = $this->getModule();
-            $item['content'] = $this->getContent($item);
             $item = ModuleFoematHelper::instance()->content($item);
             return $item;
         });

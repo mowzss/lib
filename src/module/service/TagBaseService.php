@@ -99,6 +99,25 @@ class TagBaseService extends BaseService
     }
 
     /**
+     * 通过内容id获取tag
+     * @param array $aids
+     * @return \think\Collection|\think\model\Collection
+     */
+    public function getTagInfoListByAids(array $aids = []): \think\model\Collection|\think\Collection
+    {
+        $tagList = $this->tagInfoModel->whereIn('aid', $aids)->field('tid,aid')->select();
+        $tagInfo = $this->model->whereIn('id', $tagList->column('tid'))->column('title', 'id');
+        return $tagList->each(function ($item) use ($tagInfo) {
+            foreach ($tagInfo as $key => $value) {
+                if ($item['tid'] == $key) {
+                    $item['title'] = $value;
+                }
+            }
+            return $item;
+        });
+    }
+
+    /**
      * @param int|string $tid
      * @param int|string $mid
      * @param string $order
