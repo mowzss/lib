@@ -6,9 +6,12 @@ namespace mowzs\lib\module\service;
 use app\service\BaseService;
 use mowzs\lib\helper\ColumnCacheHelper;
 use mowzs\lib\helper\ModuleFoematHelper;
+use think\Collection;
+use think\db\exception\DbException;
 use think\Exception;
 use think\facade\Db;
 use think\Model;
+use think\Paginator;
 
 /**
  * 模块内容公用服务
@@ -34,103 +37,16 @@ class ContentBaseService extends BaseService
     protected string $table;
 
     /**
-     * @return void
-     * @throws Exception
+     * @param array $options
+     * @return Collection|\think\model\Collection|Paginator
+     * @throws DbException
      */
-    protected function initialize(): void
+    public function getListByMid(array $options): Paginator|Collection|\think\model\Collection
     {
-        $this->modelName = $this->getModule();
-        $this->table = $this->modelName . '_content';
-        $this->model = $this->getModel($this->table);
-    }
-
-
-    /**
-     * @param string|int $id
-     * @return array|mixed|Model
-     * @throws Exception
-     */
-    public function getInfo(string|int $id = '', $prev_next = false): mixed
-    {
-        if (empty($id)) {
-            throw new Exception('内容ID不能为空');
-        }
-        $mid = $this->model->where(['id' => $id])->value('mid');
-        if (empty($mid)) {
-            throw new Exception('内容不存在');
-        }
-        $info = $this->model->suffix("_{$mid}")->findOrEmpty($id);
-        if ($info->isEmpty()) {
-            throw new Exception('内容没找到！');
-        }
-        $info = $info->toArray();
-        $info['content'] = $this->getContent($info);
-        $info['column'] = ColumnBaseService::instance([$this->getModule()])->getInfo($info['cid']);
-        $info['tags'] = TagBaseService::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
-        if ($prev_next) {
-            $info['prev_info'] = $this->model->where('id', '<', $id)->findOrEmpty()->toArray();
-            $info['next_info'] = $this->model->where('id', '>', $id)->findOrEmpty()->toArray();
-        }
-        $info['module_dir'] = $this->getModule();
-        return ModuleFoematHelper::instance()->content($info);
-    }
-
-    /**
-     * 获取内容字段
-     * @param array $info
-     * @return mixed
-     */
-    protected function getContent(array $info = []): mixed
-    {
-        if (empty($info)) {
-            return [];
-        }
-        $id = $info['id'];
-        $mid = $info['mid'];
-        return $this->model->suffix("_{$mid}s")->where('id', $id)->value('content');
-    }
-
-    /**
-     * 获取列表数据
-     *
-     * @param
-     * array $params 包含查询条件的参数数组
-     * @return
-     * \think\Collection|\think\model\Collection|\think\Paginator
-     * @throws
-     * Exception
-     * @throws
-     * DbException
-     */
-    public function getList(array $params = []): \think\Collection|\think\model\Collection|\think\Paginator
-    {
-        // 设置默认参数
-        $defaults = [
-            'mid' => 0,
-            'where' => [],
-            'order' => 'id',
-            'by' => 'desc',
-            'paginate' => false,
-            'rows' => 10,
-            'whereor' => []
-        ];
-        // 合并默认参数与传入的参数，并以传入的参数优先
-        $options = array_merge(
-            $defaults,
-            $params
-        );
-        // 检查mid是否为空
-        if (empty($options['mid'])) {
-            throw new Exception('mid不能为空！');
-        }
-
-        // 构建表名
+// 构建表名
         $content = $this->getModule() . '_content_' . $options['mid'];
-        $contents = $this->getModule() . '_content_' . $options['mid'] . 's';
-
         // 开始构建查询
-        $query = Db::view($content)->view($contents, 'content', "{$contents}.id={$content}.id", 'LEFT');
-
+        $query = Db::name($content);
         // 添加 where 条件
         if (!empty($options['where'])) {
             $query->where($options['where']);
@@ -160,9 +76,188 @@ class ContentBaseService extends BaseService
         }
 
         $this->formatData($return);
-
         return $return;
     }
+
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    protected function initialize(): void
+    {
+        $this->modelName = $this->getModule();
+        $this->table = $this->modelName . '_content';
+        $this->model = $this->getModel($this->table);
+    }
+
+
+    /**
+     * @param string|int $id
+     * @param bool $prev_next
+     * @return array
+     * @throws Exception
+     */
+    public function getInfo(string|int $id = '', bool $prev_next = false): array
+    {
+        if (empty($id)) {
+            throw new Exception('内容ID不能为空');
+        }
+        $mid = $this->model->where(['id' => $id])->value('mid');
+        if (empty($mid)) {
+            throw new Exception('内容不存在');
+        }
+        $info = $this->getInfoByMid($id, $mid);
+        if ($prev_next && !empty($info)) {
+            $info['prev_info'] = $this->model->where('id', '<', $id)->findOrEmpty()->toArray();
+            $info['next_info'] = $this->model->where('id', '>', $id)->findOrEmpty()->toArray();
+        }
+        $info['module_dir'] = $this->getModule();
+        return ModuleFoematHelper::instance()->content($info);
+    }
+
+    /**
+     * 通过id和mid获取内容
+     * @param $id
+     * @param $mid
+     * @return array
+     * @throws Exception
+     */
+    protected function getInfoByMid($id, $mid): array
+    {
+        $info = $this->model->suffix("_{$mid}")->findOrEmpty($id);
+        if ($info->isEmpty()) {
+            throw new Exception('内容没找到！');
+        }
+        $info = $info->toArray();
+        $info['content'] = $this->getContent($info);
+        $info['column'] = ColumnBaseService::instance([$this->getModule()])->getInfo($info['cid']);
+        $info['tags'] = TagBaseService::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
+        return $info;
+    }
+
+    /**
+     * 获取内容字段
+     * @param array $info
+     * @return mixed
+     */
+    protected function getContent(array $info = []): mixed
+    {
+        if (empty($info)) {
+            return [];
+        }
+        $id = $info['id'];
+        $mid = $info['mid'];
+        return $this->model->suffix("_{$mid}s")->where('id', $id)->value('content');
+    }
+
+    /**
+     * 获取列表数据
+     *
+     * @param array $params
+     * @return Collection|\think\model\Collection|Paginator \think\Collection|\think\model\Collection|\think\Paginator
+     * \think\Collection|\think\model\Collection|\think\Paginator
+     * @throws Exception
+     * @throws DbException
+     */
+    public function getList(array $params = []): \think\Collection|\think\model\Collection|\think\Paginator
+    {
+        // 设置默认参数
+        $defaults = [
+            'mid' => 0,
+            'where' => [],
+            'order' => 'id',
+            'by' => 'desc',
+            'paginate' => false,
+            'rows' => 10,
+            'whereor' => []
+        ];
+        // 合并默认参数与传入的参数，并以传入的参数优先
+        $options = array_merge(
+            $defaults,
+            $params
+        );
+        // 检查mid是否为空
+        if (empty($options['mid'])) {
+            return $this->getListNoMid($options);
+        }
+        return $this->getListByMid($options);
+    }
+
+    /**
+     * 未指定mid时 获取全部数据列表
+     * @param $params
+     * @return Collection
+     * @throws DbException
+     */
+    protected function getListNoMid($params)
+    {
+        // 主表支持的字段列表
+        $supportedFields = ['uid', 'cid', 'view', 'status', 'list', 'create_time', 'update_time'];
+        $_where = [];
+        $_where_or = [];
+        foreach ($params['where'] as $condition) {
+            // 检查条件中的字段是否在支持的字段列表中
+            if (in_array($condition[0], $supportedFields)) {
+                // 如果字段被支持，添加到筛选后的数组中
+                $_where[] = $condition;
+            }
+        }
+        foreach ($params['whereor'] as $condition) {
+            // 检查条件中的字段是否在支持的字段列表中
+            if (in_array($condition[0], $supportedFields)) {
+                // 如果字段被支持，添加到筛选后的数组中
+                $_where_or[] = $condition;
+            }
+        }
+        // 开始构建查询
+        $query = $this->model;
+
+        // 添加 where 条件
+        if (!empty($_where)) {
+            $query = $query->where($_where);
+        }
+
+        // 添加 orWhere 条件
+        if (!empty($_where_or)) {
+            foreach ($_where_or as $orCondition) {
+                $query = $query->whereOr($orCondition);
+            }
+        }
+
+        // 排序
+        $query = $query->order($params['order'], $params['by'])->field('mid,id');
+
+        // 如果是分页查询
+        if ($params['paginate']) {
+            $return = $query
+                ->paginate([
+                    'list_rows' => $params['rows'],
+                    'page' => request()->param('page') ?: 1, // 获取当前页码，默认第一页
+                    'query' => request()->get(),
+                ]);
+        } else {
+            // 不是分页查询，则限制查询条数
+            $return = $query->limit($params['rows'])->select();
+        }
+        $mids = [];
+        foreach ($return->toArray() as $item) {
+            // 使用 mid 作为键值来分组
+            $mid = $item['mid'];
+            if (!isset($mids[$mid])) {
+                $mids[$mid] = ['mid' => $mid, 'ids' => []];
+            }
+            $mids[$mid]['ids'][] = $item['id'];
+        }
+        $data = [];
+        foreach ($mids as $key => $item) {
+            $params['where'][] = ['id', 'in', $item['ids']];
+            $params['mid'] = $item['mid'];
+            $data = array_merge($data, $this->getListByMid($params)->toArray());
+        }
+        return $data;
+    }
+
 
     /**
      * 格式化查询结果，添加分类和标签信息
@@ -192,6 +287,7 @@ class ContentBaseService extends BaseService
             // 将标签信息追加到 item 中
             $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
             $item['module_dir'] = $this->getModule();
+            $item['content'] = $this->getContent($item);
             $item = ModuleFoematHelper::instance()->content($item);
             return $item;
         });

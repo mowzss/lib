@@ -6,6 +6,7 @@ namespace mowzs\lib\taglib\extends;
 
 use mowzs\lib\helper\ColumnCacheHelper;
 use mowzs\lib\helper\ModuleFoematHelper;
+use mowzs\lib\module\service\ColumnBaseService;
 use mowzs\lib\module\service\ContentBaseService;
 use mowzs\lib\taglib\TaglibBase;
 use think\facade\Db;
@@ -34,9 +35,7 @@ class Lists extends TaglibBase
         if (!empty($config['whereor'])) {
             $params['whereor'] = $this->parseWhereArray($config['whereor']);
         }
-        if (isset($config['mid'])) {
-            $params['mid'] = $config['mid'];
-        }
+
         if (empty($config['status'])) {
             $params['where'][] = ['status', '=', 1];
         } else {
@@ -50,13 +49,21 @@ class Lists extends TaglibBase
         } elseif (!empty($config['order'])) {
             $params['order'] = $config['order'];
         }
+        if (isset($config['mid'])) {
+            $params['mid'] = $config['mid'];
+        } else {
+            //指定cid的情况下 可以通过cid获取mid
+            if (isset($config['cid'])) {
+                $params['mid'] = ColumnBaseService::instance([$module])->getMidById($config['cid']);
+            }
+        }
         if (!empty($config['cid'])) {
+            $config['cid'] = ColumnBaseService::instance([$module])->getColumnSonsById($config['cid']);
             $params['where'][] = ['cid', 'in', $config['cid']];
         }
         $name = $config['name'];
 
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params));
-
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
             $return = ContentBaseService::instance([$module])->getList($params);
