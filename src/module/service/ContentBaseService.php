@@ -188,7 +188,7 @@ class ContentBaseService extends BaseService
             $tags = Db::view($table_tag_info, 'tid')
                 ->view($table_tag, 'title', "{$table_tag}.id = {$table_tag_info}.tid")
                 ->where('aid', $item['id'])  // 使用 aid 关联 content 表
-                ->column('title');  // 获取 tag 的 title 字段
+                ->column('title', 'tid');  // 获取 tag 的 title 字段
             // 将标签信息追加到 item 中
             $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
             $item['module_dir'] = $this->getModule();
