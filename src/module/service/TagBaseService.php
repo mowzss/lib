@@ -7,6 +7,7 @@ use app\service\BaseService;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\Paginator;
 
@@ -105,16 +106,13 @@ class TagBaseService extends BaseService
      */
     public function getTagInfoListByAids(array $aids = []): \think\model\Collection|\think\Collection
     {
-        $tagList = $this->tagInfoModel->whereIn('aid', $aids)->field('tid,aid')->select();
-        $tagInfo = $this->model->whereIn('id', $tagList->column('tid'))->column('title', 'id');
-        return $tagList->each(function ($item) use ($tagInfo) {
-            foreach ($tagInfo as $key => $value) {
-                if ($item['tid'] == $key) {
-                    $item['title'] = $value;
-                }
-            }
-            return $item;
-        });
+        return Db::view($this->infoTable, 'aid,tid')
+            ->view($this->table, 'title', $this->infoTable . '.tid=' . $this->table . '.id')
+            ->whereIn('aid', $aids)
+            ->select()->each(function ($item) {
+                $item['url'] = urls($this->getModule() . '/tag/show', ['id' => $item['tid']]);
+                return $item;
+            });
     }
 
     /**
