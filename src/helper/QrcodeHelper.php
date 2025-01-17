@@ -26,7 +26,7 @@ class QrcodeHelper
             ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
             ->errorCorrectionLevel(new ErrorCorrectionLevelHigh());
         if (!empty($logo)) {
-            $return = $return->logoPath($logo);
+            $return = $return->logoPath($logo)->logoResizeToWidth(60);
         }
         return $return->build();
     }
