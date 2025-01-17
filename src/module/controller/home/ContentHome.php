@@ -4,7 +4,10 @@ declare(strict_types=1);
 namespace mowzs\lib\module\controller\home;
 
 use app\common\controllers\BaseHome;
+use app\model\user\UserFav;
+use mowzs\lib\helper\AuthHelper;
 use mowzs\lib\module\service\ContentBaseService;
+use think\Exception;
 
 class ContentHome extends BaseHome
 {
@@ -49,7 +52,7 @@ class ContentHome extends BaseHome
         } catch (\Exception $e) {
             $this->error('出错了!');
         }
-
+        ContentBaseService::instance()->updateInc($id, 'view', 1, $info['mid']);
         $this->assign([
             'info' => $info,
             'id' => $id,
@@ -58,8 +61,66 @@ class ContentHome extends BaseHome
         return $this->fetch();
     }
 
-    protected function addView($id, $mid = 0)
+    /**
+     * 点赞
+     * @return void
+     */
+    public function agree(): void
     {
+        $id = $this->request->param('id');
+        if (!$this->request->isAjax()) {
+            $this->error('非法请求');
+        }
+        if (empty($id)) {
+            $this->error('内容ID不能为空');
+        }
+        // 记录点赞信息 ,阻止重复点赞 无数据库记录信息 使用缓存 记录用户 ip 或其它环境唯一标识 判断 有效期 60分钟
+        $key = 'ContentAgree_' . md5($id . $this->request->ip() . $this->request->layer());
+        if (!cache($key)) {
+            cache($key, 1, 3600);
+        } else {
+            $this->error('您已经点赞过了');
+        }
+        if (ContentBaseService::instance()->updateInc($id, 'agree')) {
+            $this->success('点赞成功');
+        }
+        $this->error('点赞失败');
+    }
 
+    /**
+     * 收藏
+     * @param int $id
+     * @return void
+     * @throws Exception
+     */
+    public function fav(int $id = 0): void
+    {
+        if (!$this->request->isAjax()) {
+            $this->error('非法请求');
+        }
+        if (empty($id)) {
+            $this->error('内容ID不能为空');
+        }
+        if (!AuthHelper::instance()->isLogin()) {
+            $this->error('请先登录', '', urls('index/login/index'));
+        }
+        $info = $this->service->getInfo($id, true);
+        if (empty($info)) {
+            $this->error('内容不存在');
+        }
+        $data = [
+            'uid' => $this->user['id'],
+            'module' => $this->request->layer(true),
+            'mid' => $info['mid'],
+            'content_id' => $info['id'],
+            'content_title' => $info['title'],
+            'content_cid' => $info['cid'],
+            'content_url' => $info['url']
+        ];
+        if (UserFav::create($data)) {
+            $this->success('收藏成功');
+        } else {
+            $this->error('收藏失败');
+        }
     }
 }

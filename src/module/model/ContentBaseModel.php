@@ -98,24 +98,6 @@ abstract class ContentBaseModel extends Model
         return $this->where(['id' => $id])->value('mid');
     }
 
-    /**
-     * 更新字段
-     * @param int|string $id
-     * .
-     * @param string $field
-     * @param int $step
-     * @param int|string $mid
-     * @return void
-     */
-    public function updateInc(int|string $id, string $field = '', int $step = 1, int|string $mid = 0): void
-    {
-        if (empty($mid)) {
-            $mid = $this->getMidByID($id);
-        }
-        $where = ['id' => $mid];
-        $this->where($where)->inc($field, 1)->save();
-        $this->suffix("_{$mid}")->where($where)->update([$field => $id]);
-    }
 
     /**
      * 删除

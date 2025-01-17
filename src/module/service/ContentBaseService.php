@@ -36,6 +36,65 @@ class ContentBaseService extends BaseService
      */
     protected string $table;
 
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    protected function initialize(): void
+    {
+        $this->modelName = $this->getModule();
+        $this->table = $this->modelName . '_content';
+        $this->model = $this->getModel($this->table);
+    }
+
+    /**
+     * 更新字段
+     * @param int|string $id
+     * @param string $field
+     * @param int $step
+     * @param int|string $mid
+     * @return bool
+     */
+    public function updateInc(int|string $id, string $field = '', int $step = 1, int|string $mid = 0): bool
+    {
+        if (empty($mid)) {
+            $mid = $this->model->where(['id' => $id])->value('mid');
+        }
+        try {
+            $where = ['id' => $id];
+            $this->getDbQuery($this->table)->where($where)->inc($field, $step)->update();
+            $this->getDbQuery($this->table . '_' . $mid)->where($where)->inc($field, $step)->update();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param string|int $id
+     * @param bool $prev_next
+     * @return array
+     * @throws Exception
+     */
+    public function getInfo(string|int $id = '', bool $prev_next = false): array
+    {
+        if (empty($id)) {
+            throw new Exception('内容ID不能为空');
+        }
+        $mid = $this->model->where(['id' => $id])->value('mid');
+        if (empty($mid)) {
+            throw new Exception('内容不存在');
+        }
+        $info = $this->getInfoByMid($id, $mid);
+        if ($prev_next && !empty($info)) {
+            $info['prev_info'] = $this->model->where('id', '<', $id)->findOrEmpty()->toArray();
+            $info['next_info'] = $this->model->where('id', '>', $id)->findOrEmpty()->toArray();
+        }
+        $info['module_dir'] = $this->getModule();
+        return ModuleFoematHelper::instance()->content($info);
+    }
+
     /**
      * @param array $options
      * @return Collection|\think\model\Collection|Paginator
@@ -97,42 +156,6 @@ class ContentBaseService extends BaseService
         return $return;
     }
 
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    protected function initialize(): void
-    {
-        $this->modelName = $this->getModule();
-        $this->table = $this->modelName . '_content';
-        $this->model = $this->getModel($this->table);
-    }
-
-
-    /**
-     * @param string|int $id
-     * @param bool $prev_next
-     * @return array
-     * @throws Exception
-     */
-    public function getInfo(string|int $id = '', bool $prev_next = false): array
-    {
-        if (empty($id)) {
-            throw new Exception('内容ID不能为空');
-        }
-        $mid = $this->model->where(['id' => $id])->value('mid');
-        if (empty($mid)) {
-            throw new Exception('内容不存在');
-        }
-        $info = $this->getInfoByMid($id, $mid);
-        if ($prev_next && !empty($info)) {
-            $info['prev_info'] = $this->model->where('id', '<', $id)->findOrEmpty()->toArray();
-            $info['next_info'] = $this->model->where('id', '>', $id)->findOrEmpty()->toArray();
-        }
-        $info['module_dir'] = $this->getModule();
-        return ModuleFoematHelper::instance()->content($info);
-    }
 
     /**
      * 通过id和mid获取内容
@@ -279,6 +302,7 @@ class ContentBaseService extends BaseService
                     return $value;
                 }
             }
+            return $item;
         });
     }
 
@@ -297,12 +321,8 @@ class ContentBaseService extends BaseService
         } catch (\Throwable $e) {
             $column_data = [];
         }
-
-        // 获取标签表和标签关联表的名称
-        $table_tag = $this->getModule() . '_tag';
-        $table_tag_info = $this->getModule() . '_tag_info';
         // 遍历每个 item，追加分类和标签信息
-        $data->each(function ($item) use ($table_tag, $table_tag_info, $column_data) {
+        $data->each(function ($item) use ($column_data) {
             // 添加分类标题
             $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
             $item['module_dir'] = $this->getModule();
