@@ -88,13 +88,33 @@ class ContentHome extends BaseHome
     }
 
     /**
-     * 收藏
+     * 海报
      * @param int $id
+     * @return string
+     * @throws Exception
+     */
+    public function posters(int $id = 0): string
+    {
+        if (!$this->request->isAjax()) {
+            $this->error('非法请求');
+        }
+        if (empty($id)) {
+            $this->error('出错了');
+        }
+        $info = $this->service->getInfo($id);
+        $info['qrcode'] = $this->request->domain() . $info['url'] . '?form=posters';
+        $this->assign('info', $info);
+        return $this->fetch();
+    }
+
+    /**
+     * 收藏
      * @return void
      * @throws Exception
      */
-    public function fav(int $id = 0): void
+    public function fav(): void
     {
+        $id = $this->request->param('id');
         if (!$this->request->isAjax()) {
             $this->error('非法请求');
         }
