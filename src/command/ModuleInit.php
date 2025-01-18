@@ -94,7 +94,7 @@ class ModuleInit extends Command
         return 0; // 返回零值表示命令成功执行
     }
 
-    protected function executeCommands(Input $input, Output $output)
+    protected function executeCommands(Input $input, Output $output): int
     {
         // 定义要执行的命令列表
         $commands = [
