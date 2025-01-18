@@ -88,8 +88,8 @@ class ContentBaseService extends BaseService
         }
         $info = $this->getInfoByMid($id, $mid);
         if ($prev_next && !empty($info)) {
-            $info['prev_info'] = $this->model->where('id', '<', $id)->findOrEmpty()->toArray();
-            $info['next_info'] = $this->model->where('id', '>', $id)->findOrEmpty()->toArray();
+            $info['prev_info'] = $this->model->where([['cid', '=', $info['cid']], ['id', '<', $id]])->findOrEmpty()->toArray();
+            $info['next_info'] = $this->model->where([['cid', '=', $info['cid']], ['id', '>', $id]])->findOrEmpty()->toArray();
         }
         $info['module_dir'] = $this->getModule();
         return ModuleFoematHelper::instance()->content($info);
@@ -118,9 +118,8 @@ class ContentBaseService extends BaseService
                 $query->whereOr($orCondition);
             }
         }
-
         // 排序
-        $query->order($options['order'], $options['by']);
+        $query->order($options['order'], $options['by'])->whereNull('delete_time');
 
         // 如果是分页查询
         if ($options['paginate']) {

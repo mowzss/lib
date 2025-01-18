@@ -278,6 +278,12 @@ abstract class ContentAdmin extends BaseAdmin
             'right_button' => [
                 [
                     'event' => '',
+                    'type' => 'data-win-open',
+                    'url' => hurl('content/index', ['id' => '__id__']),
+                    'name' => '预览',
+                    'class' => 'layui-btn-primary layui-border-green',//默认包含 layui-btn layui-btn-xs
+                ], [
+                    'event' => '',
                     'type' => 'data-open',
                     'url' => urls('edit', ['id' => '__id__']),
                     'name' => '编辑',

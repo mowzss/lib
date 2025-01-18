@@ -88,6 +88,15 @@ abstract class ColumnAdmin extends BaseAdmin
                     'title' => '创建时间',
                 ],
             ],
+            'right_button' => [
+                [
+                    'event' => '',
+                    'type' => 'data-win-open',
+                    'url' => hurl('column/index') . '?id=__id__',
+                    'name' => '预览',
+                    'class' => 'layui-btn-primary layui-border-green',//默认包含 layui-btn layui-btn-xs
+                ], ['event' => 'edit'], ['event' => 'del']
+            ]
         ];
         $this->forms = [
             'fields' => [

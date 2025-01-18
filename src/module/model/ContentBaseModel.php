@@ -60,8 +60,8 @@ abstract class ContentBaseModel extends Model
             $data['list'] = time();
         }
         $this->where($where)->update($data);
-        $this->suffix("_{$data['mid']}")->where($where)->update($data);
-        $this->suffix("_{$data['mid']}s")->where($where)->update($data);
+        $this->suffix("_{$data['mid']}")->where($where)->replace()->insert($data);
+        $this->suffix("_{$data['mid']}s")->where($where)->replace()->insert($data);
         return true;
     }
 
