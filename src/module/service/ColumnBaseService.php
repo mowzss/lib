@@ -42,10 +42,10 @@ class ColumnBaseService extends BaseService
 
     /**
      * 通过id获取mid
-     * @param $id
+     * @param int|string $id
      * @return mixed
      */
-    public function getMidById($id)
+    public function getMidById(int|string $id): mixed
     {
         return $this->model->where('id', $id)->value('mid');
     }
@@ -70,10 +70,10 @@ class ColumnBaseService extends BaseService
 
     /**
      * 通过id获取子类id
-     * @param int $id
+     * @param int|string $id
      * @return array 子id数组
      */
-    public function getColumnSonsById(int $id): array
+    public function getColumnSonsById(int|string $id): array
     {
         // 构建缓存键名
         $cacheKey = 'cate_sons_' . strtolower($this->modelName) . '_' . $id;
