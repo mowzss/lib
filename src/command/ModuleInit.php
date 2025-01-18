@@ -90,7 +90,26 @@ class ModuleInit extends Command
         }
 
         $output->writeln('Module initialization completed.');
+        $this->executeCommands($input, $output);
         return 0; // 返回零值表示命令成功执行
+    }
+
+    protected function executeCommands(Input $input, Output $output)
+    {
+        // 定义要执行的命令列表
+        $commands = [
+            'optimize:route',
+            'optimize:schema',
+        ];
+
+        foreach ($commands as $commandName) {
+            $output->writeln("Running <info>$commandName</info>...");
+            $commandOutput = $this->app->console->call($commandName)->fetch();
+            $output->writeln($commandOutput);
+        }
+
+        $output->writeln('<comment>All initialization steps have been completed.</comment>');
+        return 0;
     }
 
     /**
