@@ -52,7 +52,6 @@ class AdminUpgrade extends Command
                 //删除文件后缀.php
                 $className = str_replace('.php', '', $file['filename']);
                 $class = "\\app\common\upgrade\\{$module}\\{$className}";
-                dump($class);
                 if (is_string($file['filename']) && !class_exists($class)) {
                     // 假设是SQL文件
                     $sqlFilePath = DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $file['filename'];
