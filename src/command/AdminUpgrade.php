@@ -11,7 +11,10 @@ use think\console\Output;
 
 class AdminUpgrade extends Command
 {
-    protected function configure()
+    /**
+     * @return void
+     */
+    protected function configure(): void
     {
         // 设置命令名称、描述和帮助信息
         $this->setName('admin:upgrade')
