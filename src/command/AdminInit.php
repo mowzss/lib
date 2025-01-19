@@ -34,8 +34,8 @@ class AdminInit extends Command
     {
         // 定义要执行的命令列表
         $commands = [
-            'service:discover',
             'vendor:publish',
+            'admin:moduleInit'
         ];
         if ($this->app->config->get('happy.installed', false)) {
             $commands[] = 'admin:upgrade';
