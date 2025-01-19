@@ -71,10 +71,7 @@ class AdminUpgrade extends Command
                         throw new \Exception('运行安装类失败: ' . $e->getMessage());
                     }
                 }
-                SystemUpgradeLog::create(['module' => $module,
-                    'filename' => $fileOrClass,
-                    'create_time' => time(),
-                ]);
+                SystemUpgradeLog::create(['module' => $module, 'filename' => $fileOrClass,]);
                 $output->writeln("升级文件 {$fileOrClass} 成功");
             }
         }
