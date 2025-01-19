@@ -7,9 +7,16 @@ use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 
+/**
+ * 系统初始化命令
+ */
 class AdminInit extends Command
 {
-    protected function configure()
+    /**
+     * 配置命令
+     * @return void
+     */
+    protected function configure(): void
     {
         // 设置命令名称、描述和帮助信息
         $this->setName('admin:init')
@@ -18,6 +25,7 @@ class AdminInit extends Command
     }
 
     /**
+     * 执行命令
      * @param Input $input
      * @param Output $output
      * @return int
