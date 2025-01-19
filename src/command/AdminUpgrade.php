@@ -46,12 +46,13 @@ class AdminUpgrade extends Command
         // 执行install_files中的SQL文件及类的run方法
         foreach ($files as $module => $moduleFiles) {
             foreach ($moduleFiles as $file) {
-                if ($file['is_upgraded']) {
+                if (UpgradeService::instance()->isUpgrade($module, $file['filename'])) {
                     continue;
                 }
                 //删除文件后缀.php
                 $className = str_replace('.php', '', $file['filename']);
                 $class = "\\app\common\upgrade\\{$module}\\{$className}";
+                dump($class);
                 if (is_string($file['filename']) && !class_exists($class)) {
                     // 假设是SQL文件
                     $sqlFilePath = DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $file['filename'];
