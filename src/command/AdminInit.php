@@ -39,6 +39,7 @@ class AdminInit extends Command
         ];
         if ($this->app->config->get('happy.installed', false)) {
             $commands[] = 'admin:upgrade';
+            $commands[] = 'admin:entrance';
         }
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
