@@ -10,7 +10,6 @@ class ModuleInstallHelper extends Helper
     /**
      * 扫描并读取指定目录下的所有 info.php 文件。
      *
-     * @param string|array $directories 单个或多个目标目录路径。
      * @return array 返回包含文件路径及其内容的数组。
      */
     public function scanAndReadInfoPhpFiles(): array

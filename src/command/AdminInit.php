@@ -17,15 +17,21 @@ class AdminInit extends Command
             ->setHelp('This command runs a series of initialization steps including service discovery, vendor publishing, and module configuration.');
     }
 
-
-    protected function execute(Input $input, Output $output)
+    /**
+     * @param Input $input
+     * @param Output $output
+     * @return int
+     */
+    protected function execute(Input $input, Output $output): int
     {
         // 定义要执行的命令列表
         $commands = [
             'service:discover',
             'vendor:publish',
         ];
-
+        if ($this->app->config->get('happy.installed', false)) {
+            $commands[] = 'admin:upgrade';
+        }
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
             $commandOutput = $this->app->console->call($commandName)->fetch();
