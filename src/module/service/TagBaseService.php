@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace mowzs\lib\module\service;
 
 use app\service\BaseService;
+use mowzs\lib\helper\UserHelper;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\Exception;
@@ -77,6 +78,20 @@ class TagBaseService extends BaseService
             throw new Exception('标签不存在！');
         }
         return $info->toArray();
+    }
+
+    /**
+     * 通过名称获取tagID
+     * @param string $title
+     * @return int|mixed|string
+     */
+    public function getTagIdByTitle(string $title = ''): mixed
+    {
+        $id = $this->model->where('title', $title)->value('id');
+        if (empty($id)) {
+            $id = $this->model->insertGetId(['status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
+        }
+        return $id;
     }
 
     /**
