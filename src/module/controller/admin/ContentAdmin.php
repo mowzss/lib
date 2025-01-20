@@ -20,6 +20,7 @@ use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\db\Query;
 use think\Exception;
+use think\facade\View;
 use think\Model;
 use think\template\exception\TemplateNotFoundException;
 
@@ -64,7 +65,7 @@ abstract class ContentAdmin extends BaseAdmin
      * 栏目模型
      * @var mixed
      */
-    protected mixed $columnModel;
+    protected Model $columnModel;
     /**
      * 栏目模型
      * @var Model
@@ -488,14 +489,19 @@ abstract class ContentAdmin extends BaseAdmin
             $this->error('无权限');
         }
         if ($this->request->isGet()) {
-            $this->success('ok', $this->columnModel->where('status', 1)->where('mid', $this->mid)->column('title', 'id'));
+            $html = '';
+            $column = $this->columnModel->where(['status' => 1])->column('title', 'id');
+            foreach ($column as $key => $value) {
+                $html .= '<span id="' . $key . '">' . $value . '</span>';
+            }
+            return View::display($html);
         } else {
             $data = $this->request->post();
             if (empty($data['cid'])) {
                 $this->error('栏目不能为空');
             }
             if (empty($data['mid'])) {
-                $data = ColumnBaseService::instance()->getMidById($data['cid']);
+                $data['mid'] = ColumnBaseService::instance()->getMidById($data['cid']);
             }
             $data['list'] = $data['create_time'] = $data['update_time'] = time();
             if (false === $this->callback('_save_filter', $data)) {

@@ -271,7 +271,7 @@ abstract class Controller
      * @param array $header 发送的Header信息
      * @return void
      */
-    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = '', array $header = []): void
+    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = 'json', array $header = []): void
     {
         $result = [
             'code' => $code,
@@ -279,7 +279,6 @@ abstract class Controller
             'time' => time(),
             'data' => $data,
         ];
-        $type = $type ?: $this->getResponseType();
         $response = Response::create($result, $type)->header($header);
         throw new HttpResponseException($response);
     }
