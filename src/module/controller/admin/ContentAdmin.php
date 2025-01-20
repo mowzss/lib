@@ -8,9 +8,12 @@ use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use app\common\util\ContentSaveFilterUtil;
 use app\common\util\CrudUtil;
+use mowzs\lib\Exception\RandomGenerationException;
 use mowzs\lib\Forms;
 use mowzs\lib\helper\CodeHelper;
 use mowzs\lib\helper\EventHelper;
+use mowzs\lib\module\service\ColumnBaseService;
+use Random\RandomException;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -457,6 +460,68 @@ abstract class ContentAdmin extends BaseAdmin
             $this->success('更新成功');
         } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
             $this->error('记录不存在：' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 无密码发布
+     * @return bool|void
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     * @throws RandomException
+     * @throws RandomGenerationException
+     */
+    public function publish()
+    {
+        if (empty(sys_config('no_password_publish'))) {
+            $this->error('设置不正确');
+        }
+        $auth_token = $this->request->param('token');
+        if (empty($auth_token)) {
+            $auth_token = $this->request->header('publish_token');
+        }
+        if (empty($auth_token)) {
+            $this->error('权限认证失败');
+        }
+        if (sys_config('no_password_publish') != $auth_token) {
+            $this->error('无权限');
+        }
+        if ($this->request->isGet()) {
+            $this->success('ok', $this->columnModel->where('status', 1)->where('mid', $this->mid)->column('title', 'id'));
+        } else {
+            $data = $this->request->post();
+            if (empty($data['cid'])) {
+                $this->error('栏目不能为空');
+            }
+            if (empty($data['mid'])) {
+                $data = ColumnBaseService::instance()->getMidById($data['cid']);
+            }
+            $data['list'] = $data['create_time'] = $data['update_time'] = time();
+            if (false === $this->callback('_save_filter', $data)) {
+                return false;
+            }
+            try {
+                $this->checkRequiredFields($data);
+                if (empty($data['id'])) {
+                    $data['id'] = CodeHelper::timestampBasedId();
+                }
+                EventHelper::instance()->listen('ContentAddBefore', $data);
+                if ($this->model->saveContent($data)) {
+                    $model = $this->model->getModel();
+                    // 结果回调处理
+                    $result = true;
+                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $model);
+                    if (false === $this->callback('_save_result', $result, $model, $data)) {
+                        return $result;
+                    }
+                    $this->success('添加成功');
+                } else {
+                    $this->error('添加失败');
+                }
+            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+                $this->error('添加失败：' . $e->getMessage());
+            }
         }
     }
 
