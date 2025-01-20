@@ -5,7 +5,6 @@ namespace mowzs\lib\helper;
 
 use app\model\user\UserAuth;
 use mowzs\lib\Helper;
-use think\Exception;
 
 class AuthHelper extends Helper
 {
@@ -22,16 +21,18 @@ class AuthHelper extends Helper
             return true;
         }
         $node = NodeHelper::instance()->wholeNode($node);
-        try {
-            $nodes = NodeHelper::instance()->getMethods();
-        } catch (Exception $e) {
-            return false;
-        }
+//        try {
+        $nodes = NodeHelper::instance()->getMethods();
+//        } catch (Exception $e) {
+//            $this->app->log->error($e->getMessage());
+//            return false;
+//        }
         //权限节点未记录 则表示无需校验权限
         if (!isset($nodes[$node])) {
             return true;
         }
         $check = $nodes[$node];
+
         //无需校验页面 is_auth 为true时 is_login 永远为 true
         if (empty($check['is_login'])) {
             return true;
