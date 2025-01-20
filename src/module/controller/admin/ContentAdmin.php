@@ -445,8 +445,9 @@ abstract class ContentAdmin extends BaseAdmin
                 }
                 $forms->render($this->forms['fields']);
             }
-            $this->checkRequiredFields($data);
             EventHelper::instance()->listen('ContentEditBefore', $data);
+            $this->checkRequiredFields($data);
+
             $this->model->editContent($data);
             EventHelper::instance()->triggerNoReturn('ContentEditAfter', $data);
             // 结果回调处理
@@ -633,4 +634,5 @@ abstract class ContentAdmin extends BaseAdmin
         }
 
     }
+
 }
