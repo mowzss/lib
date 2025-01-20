@@ -475,6 +475,7 @@ abstract class ContentAdmin extends BaseAdmin
      */
     public function publish()
     {
+        
         if (empty(sys_config('no_password_publish'))) {
             $this->error('设置不正确');
         }
