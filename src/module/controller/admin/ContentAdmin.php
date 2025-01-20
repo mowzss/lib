@@ -447,7 +447,6 @@ abstract class ContentAdmin extends BaseAdmin
             }
             EventHelper::instance()->listen('ContentEditBefore', $data);
             $this->checkRequiredFields($data);
-
             $this->model->editContent($data);
             EventHelper::instance()->triggerNoReturn('ContentEditAfter', $data);
             // 结果回调处理

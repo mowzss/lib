@@ -7,7 +7,7 @@ use think\Exception;
 
 class AipNlp extends BaseBaiduAip
 {
-    protected $keywordUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/keyword?charset=UTF-8&access_token=';
+    protected $keywordUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/keyword?charset=UTF-8';
 
     /**
      * 获取字符型Tag
@@ -30,6 +30,7 @@ class AipNlp extends BaseBaiduAip
                 $tags[] = $value['tag'];
             }
         }
+
         return implode($delimiter, $tags);
     }
 
@@ -42,18 +43,21 @@ class AipNlp extends BaseBaiduAip
      */
     public function getTag($title, $content)
     {
-        $access = $this->Auth();
+        $access = $this->Auth(); // 假设 Auth() 返回有效的 access_token
 
-        $this->keywordUrl = $this->keywordUrl . $access;
+        // 构建完整的请求 URL
+        $url = $this->keywordUrl . '&access_token=' . $access;
+
+        // 准备请求数据
         $post_data = [
             'title' => $title,
             'content' => $content
         ];
 
-        $data = HttpHelper::instance()->post(
-            $this->keywordUrl, ['form_params' => $post_data, 'headers' => ['Content-Type: application/json']]
+        // 发起 POST 请求
+        $data = HttpHelper::instance()->post($url,
+            ['json' => $post_data, 'headers' => ['Content-Type' => 'application/json']]
         );
-
         return $data['data'];
     }
 }
