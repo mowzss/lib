@@ -49,11 +49,11 @@ class Lists extends TaglibBase
         } elseif (!empty($config['order'])) {
             $params['order'] = $config['order'];
         }
-        if (isset($config['mid'])) {
+        if (!empty($config['mid'])) {
             $params['mid'] = $config['mid'];
         } else {
             //指定cid的情况下 可以通过cid获取mid
-            if (isset($config['cid'])) {
+            if (!empty($config['cid'])) {
                 $params['mid'] = ColumnBaseService::instance([$module])->getMidById($config['cid']);
             }
         }
