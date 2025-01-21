@@ -16,7 +16,6 @@ class AuthHelper extends Helper
      */
     public function cheek(string $node = ''): bool
     {
-
         //超管
         if ($this->isAuthAdmin()) {
             return true;

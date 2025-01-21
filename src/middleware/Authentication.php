@@ -41,7 +41,7 @@ class Authentication
             if ($request->isAjax()) {
                 throw new HttpResponseException(json(['code' => 0, 'info' => lang('请重新登录！'), 'url' => $login_url]));
             } else {
-//                return redirect($login_url);
+                return redirect($login_url);
             }
         }
         return $next($request);
