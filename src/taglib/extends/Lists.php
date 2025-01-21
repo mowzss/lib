@@ -63,10 +63,10 @@ class Lists extends TaglibBase
         }
         $name = $config['name'];
 
-        $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params));
+        $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode(array_merge($params, $config)));
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
-            $return = ContentBaseService::instance([$module])->getList($params);
+            $return = ContentBaseService::instance([$module], true)->getList($params);
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }
