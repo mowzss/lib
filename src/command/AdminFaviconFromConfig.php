@@ -2,7 +2,6 @@
 
 namespace mowzs\lib\command;
 
-
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -58,7 +57,7 @@ class AdminFaviconFromConfig extends Command
             // 创建一个新的真彩色图像
             $newImage = imagecreatetruecolor(32, 32);
             imagecopyresampled($newImage, $image, 0, 0, 0, 0, 32, 32, imagesx($image), imagesy($image));
-            
+
             // 设置目标路径（确保没有多余的斜杠）
             $targetPath = public_path() . DIRECTORY_SEPARATOR . 'favicon.ico'; // 确保使用正确的路径分隔符
 
@@ -93,11 +92,6 @@ class AdminFaviconFromConfig extends Command
      */
     private function imageico($image, $filename)
     {
-        // Create a blank true color image for the icon header
-        $header = imagecreatetruecolor(16, 16);
-        $white = imagecolorallocate($header, 255, 255, 255);
-        imagefill($header, 0, 0, $white);
-
         // Start packing data
         $icoData = '';
         $icoData .= "\x00\x00"; // Reserved
@@ -105,15 +99,24 @@ class AdminFaviconFromConfig extends Command
         $icoData .= "\x01\x00"; // Number of images
 
         // First image entry
-        $icoData .= pack("Vvvvv", 32, 32, 0, 0, 40); // Dimensions and bit count
-        $icoData .= pack("V", strlen($icoData)); // Size of image data
-        $icoData .= pack("V", 22); // Offset of image data
+        $icoData .= pack("Vvvvv", 32, 32, 1, 32, 40); // Dimensions, color depth, and size of image data
 
+        // Create a temporary PNG in memory
         ob_start();
         imagepng($image);
         $pngData = ob_get_clean();
 
+        // Calculate sizes and offsets
+        $icoHeaderSize = strlen($icoData);
+        $pngSize = strlen($pngData);
+        $icoData .= pack("V", $pngSize); // Size of image data
+        $icoData .= pack("V", $icoHeaderSize); // Offset of image data
+
+        // Combine ICO header with PNG data
         $fp = fopen($filename, 'wb');
+        if ($fp === false) {
+            return false;
+        }
         fwrite($fp, $icoData);
         fwrite($fp, $pngData);
         fclose($fp);
