@@ -58,9 +58,9 @@ class AdminFaviconFromConfig extends Command
             // 创建一个新的真彩色图像
             $newImage = imagecreatetruecolor(32, 32);
             imagecopyresampled($newImage, $image, 0, 0, 0, 0, 32, 32, imagesx($image), imagesy($image));
-
-            // 设置目标路径
-            $targetPath = public_path('favicon.ico');
+            
+            // 设置目标路径（确保没有多余的斜杠）
+            $targetPath = public_path() . DIRECTORY_SEPARATOR . 'favicon.ico'; // 确保使用正确的路径分隔符
 
             // 将图像转换为 ICO 格式并保存
             $success = $this->imageico($newImage, $targetPath);
