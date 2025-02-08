@@ -39,7 +39,7 @@ class ModuleFoematHelper extends Helper
             $item['description'] = get_word($item['_content'], 120);
         }
         if (!empty($item['module_dir'])) {
-            $item['url'] = urls("{$item['module_dir']}/content/index", ['id' => $item['id']]);
+            $item['url'] = hurl("{$item['module_dir']}/content/index", ['id' => $item['id']]);
         }
         return $item;
     }
