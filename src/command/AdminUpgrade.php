@@ -18,9 +18,9 @@ class AdminUpgrade extends Command
     {
         // 设置命令名称、描述和帮助信息
         $this->setName('admin:upgrade')
-            ->setDescription('执行管理员相关数据表的升级操作，包括但不限于数据库结构更新、默认数据添加等。')
+            ->setDescription('执行相关数据表的升级操作，包括但不限于数据库结构更新、默认数据添加等。')
             ->setHelp(
-                "该命令用于对系统中的管理员模块进行升级。\n" .
+                "该命令用于对系统中的模块进行升级。\n" .
                 "它可以自动检测并应用必要的数据库结构变更，同时可以添加或修改默认数据。\n" .
                 "使用方法:\n" .
                 "  php think admin:upgrade\n" .

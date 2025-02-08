@@ -11,14 +11,26 @@ use think\facade\Request;
 
 class AdminFaviconFromConfig extends Command
 {
-    protected function configure()
+    /**
+     * @return void
+     */
+    protected function configure(): void
     {
         // 配置命令信息
         $this->setName('admin:favicon')
             ->setDescription('根据配置生成favicon.ico并保存到public目录');
     }
 
-    protected function execute(Input $input, Output $output)
+    /**
+     * @param Input $input
+     * @param Output $output
+     * @return void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     *
+     */
+    protected function execute(Input $input, Output $output): void
     {
         // 获取配置值
         $logoUrl = sys_config('square_logo');
