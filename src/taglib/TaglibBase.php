@@ -71,9 +71,8 @@ abstract class TaglibBase
             return $data;
 
         } catch (\Exception $e) {
-            // 记录异常日志（假设有一个日志记录器）
+            // 记录异常日志
             Log::error("Error fetching column sons for module [{$module}] and cid [{$cid}]: " . $e->getMessage());
-            // 根据业务需求决定是否抛出异常或返回空数组
             return [];
         }
     }
