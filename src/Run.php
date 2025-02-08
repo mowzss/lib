@@ -16,7 +16,7 @@ class Run
         // 执行HTTP应用并响应
         $http = (new App());
         if (!empty($env)) {
-            $http = $http->setEnvName('admin');
+            $http = $http->setEnvName($env);
         }
         $http = $http->http;
         $response = $http->run();
