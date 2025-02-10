@@ -7,7 +7,15 @@ use think\App;
 
 class Run
 {
-    protected static string $run_env = './runtime/.env';
+    protected static string $run_env = '.env';
+
+    /**
+     * @return string
+     */
+    protected static function getRunEnv(): string
+    {
+        return Helper::instance()->app->getRuntimePath() . self::$run_env;
+    }
 
     /**
      * @return App
@@ -25,12 +33,12 @@ class Run
      */
     public static function setRun(bool $debug = false): void
     {
-        $currentContent = file_exists(self::$run_env) ? file_get_contents(self::$run_env) : '';
+        $currentContent = file_exists(self::getRunEnv()) ? file_get_contents(self::getRunEnv()) : '';
         $newContent = self::updateEnvContent($currentContent, 'APP_DEBUG', $debug ? 'true' : 'false');
 
         // 写入新的.env文件内容
-        if (file_put_contents(self::$run_env, $newContent) === false) {
-            throw new \RuntimeException("Failed to write to " . self::$run_env);
+        if (file_put_contents(self::getRunEnv(), $newContent) === false) {
+            throw new \RuntimeException("Failed to write to " . self::getRunEnv());
         }
     }
 
@@ -60,8 +68,8 @@ class Run
      */
     public static function isDebug(): mixed
     {
-        if (is_file(self::$run_env)) {
-            Helper::instance()->app->env->load(self::$run_env);
+        if (is_file(self::getRunEnv())) {
+            Helper::instance()->app->env->load(self::getRunEnv());
             return Helper::instance()->app->env->get('APP_DEBUG');
         }
         return false;
