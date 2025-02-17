@@ -8,6 +8,10 @@ use mowzs\lib\Model;
 
 abstract class ColumnBaseModel extends Model
 {
+    protected $json = ['view_file'];
+
+    protected $jsonAssoc = true;
+
     /**
      * @param array $where
      * @return array

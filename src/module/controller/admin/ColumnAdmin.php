@@ -6,6 +6,7 @@ namespace mowzs\lib\module\controller\admin;
 use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use mowzs\lib\helper\DataHelper;
+use mowzs\lib\helper\ViewFileHelper;
 use think\App;
 use think\Model;
 
@@ -137,6 +138,16 @@ abstract class ColumnAdmin extends BaseAdmin
                     'type' => 'textarea',
                     'name' => 'seo_description',
                     'label' => 'SEO介绍',
+                ], [
+                    'type' => 'select',
+                    'name' => 'view_file[pc]',
+                    'label' => '栏目PC模板',
+                    'options' => ViewFileHelper::instance()->getThemeView($this->request->layer(), 'column', false),
+                ], [
+                    'type' => 'select',
+                    'name' => 'view_file[wap]',
+                    'label' => '栏目wap模板',
+                    'options' => ViewFileHelper::instance()->getThemeView($this->request->layer(), 'column', true)
                 ]
             ]
         ];
