@@ -61,7 +61,7 @@ class AdminUpgrade extends Command
                     try {
                         // 创建SqlExecutor实例并执行SQL文件
                         $sqlExecutor = new SqlExecutor();
-                        $sqlExecutor->execute($sqlFilePath);
+                        $sqlExecutor->execute($sqlFilePath, 'update');
                         $output->writeln("执行SQL文件成功: " . $sqlFilePath);
                     } catch (\Exception $e) {
                         $output->writeln("执行SQL文件失败: " . $e->getMessage());
