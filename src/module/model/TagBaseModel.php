@@ -5,6 +5,9 @@ namespace mowzs\lib\module\model;
 
 use mowzs\lib\Model;
 use think\Collection;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 
 abstract class TagBaseModel extends Model
 {
@@ -52,6 +55,9 @@ abstract class TagBaseModel extends Model
     /**
      * @param string|int $aid
      * @return array|Collection|\think\model\Collection
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
     public function getTagListByAid(string|int $aid = 0): \think\model\Collection|Collection|array
     {

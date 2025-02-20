@@ -89,7 +89,7 @@ class TagBaseService extends BaseService
     {
         $id = $this->model->where('title', $title)->value('id');
         if (empty($id)) {
-            $id = $this->model->insertGetId(['status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
+            $id = $this->model->insertGetId(['title' => $title, 'status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
         }
         return $id;
     }
