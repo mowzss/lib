@@ -140,6 +140,8 @@ class ContentBaseService extends BaseService
             foreach ($content_data as $id => $content) {
                 if ($id == $item['id']) {
                     $item['content'] = $content;
+                } else {
+                    $item['content'] = '';
                 }
 
             }
