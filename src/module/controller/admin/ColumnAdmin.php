@@ -58,7 +58,7 @@ abstract class ColumnAdmin extends BaseAdmin
         $data['data'] = DataHelper::instance()->arrToTree($data['data']);
         $models = $this->moduleModel->column('title', 'id');
         foreach ($data['data'] as &$item) {
-            $item['mid_name'] = $models[$item['mid']]['title'];
+            $item['mid_name'] = $models[$item['mid']];
         }
     }
 
