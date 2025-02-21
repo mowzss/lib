@@ -32,6 +32,7 @@ abstract class ColumnAdmin extends BaseAdmin
     protected array $default_order = [
         'list' => 'desc'
     ];
+    protected string $title = "栏目管理";
 
     public function __construct(App $app)
     {
@@ -55,6 +56,10 @@ abstract class ColumnAdmin extends BaseAdmin
     protected function _index_list_filter(&$data): void
     {
         $data['data'] = DataHelper::instance()->arrToTree($data['data']);
+        $models = $this->moduleModel->column('title', 'id');
+        foreach ($data['data'] as &$item) {
+            $item['mid_name'] = $models[$item['mid']]['title'];
+        }
     }
 
     protected function setParams(): void
@@ -71,6 +76,10 @@ abstract class ColumnAdmin extends BaseAdmin
                     'field' => 'title',
                     'title' => '名称',
                     'edit' => "text",
+                    'align' => 'left'
+                ], [
+                    'field' => 'mid_name',
+                    'title' => '所属模型',
                     'align' => 'left'
                 ], [
                     'field' => 'seo_description',
