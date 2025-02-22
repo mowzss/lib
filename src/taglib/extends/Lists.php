@@ -5,7 +5,6 @@ declare (strict_types=1);
 namespace mowzs\lib\taglib\extends;
 
 use mowzs\lib\helper\ColumnCacheHelper;
-use mowzs\lib\helper\ModuleFoematHelper;
 use mowzs\lib\module\service\ColumnBaseService;
 use mowzs\lib\module\service\ContentBaseService;
 use mowzs\lib\taglib\TaglibBase;
@@ -102,8 +101,7 @@ class Lists extends TaglibBase
             // 将标签信息追加到 item 中
             $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
             $item['module_dir'] = $this->module;
-            $item = ModuleFoematHelper::instance()->content($item);
-            return $item;
+            return ContentBaseService::instance()->formatContentData($item);
         });
     }
 

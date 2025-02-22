@@ -5,7 +5,6 @@ namespace mowzs\lib\module\service;
 
 use app\service\BaseService;
 use mowzs\lib\helper\ColumnCacheHelper;
-use mowzs\lib\helper\ModuleFoematHelper;
 use think\Collection;
 use think\db\exception\DbException;
 use think\Exception;
@@ -92,7 +91,42 @@ class ContentBaseService extends BaseService
             $info['next_info'] = $this->model->where([['cid', '=', $info['cid']], ['id', '>', $id]])->findOrEmpty()->toArray();
         }
         $info['module_dir'] = $this->getModule();
-        return ModuleFoematHelper::instance()->content($info);
+        return $this->formatContentData($info);
+    }
+
+    /**
+     * 格式化内容数据
+     * @param array $item 单组数据
+     * @return array
+     */
+    public function formatContentData(array $item)
+    {
+        $item['_images'] = $item['images'] ?? '';
+        $item['_image'] = $item['image'] ?? '';
+        $item['images'] = [];
+        if (!empty($item['_images'])) {
+            $item['images'] = str2arr($item['_images']);
+            $item['image'] = $item['images'][0];
+        }
+        $time = $item['update_time'];
+        if (empty($item['update_time'])) {
+            $time = $item['create_time'];
+        }
+        $item['time'] = format_datetime($time, 'Y-m-d');
+        $item['published_time'] = format_datetime($item['create_time'], 'Y-m-d\TH:i:sP');
+        $item['updated_time'] = format_datetime($item['update_time'], 'Y-m-d\TH:i:sP');
+        $item['_time'] = format_time($item['create_time'], true);
+        if (isset($item['view'])) {
+            $item['_view'] = format_view($item['view']);
+        }
+        $item['_content'] = isset($item['content']) ? del_html($item['content']) : '';
+        if (empty($item['description'])) {
+            $item['description'] = get_word($item['_content'], 120);
+        }
+        if (!empty($item['module_dir'])) {
+            $item['url'] = hurl("{$item['module_dir']}/content/index", ['id' => $item['id']]);
+        }
+        return $item;
     }
 
     /**
@@ -324,8 +358,7 @@ class ContentBaseService extends BaseService
             // 添加分类标题
             $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
             $item['module_dir'] = $this->getModule();
-            $item = ModuleFoematHelper::instance()->content($item);
-            return $item;
+            return $this->formatContentData($item);
         });
     }
 }
