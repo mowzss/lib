@@ -6,6 +6,7 @@ namespace mowzs\lib;
 use mowzs\lib\command\AdminEntranceRename;
 use mowzs\lib\command\AdminFaviconFromConfig;
 use mowzs\lib\command\AdminInit;
+use mowzs\lib\command\AdminTasks;
 use mowzs\lib\command\AdminUpgrade;
 use mowzs\lib\command\ModuleInit;
 use think\Service as BaseService;
@@ -55,7 +56,8 @@ class Service extends BaseService
             ModuleInit::class,
             AdminUpgrade::class,
             AdminEntranceRename::class,
-            AdminFaviconFromConfig::class
+            AdminFaviconFromConfig::class,
+            AdminTasks::class
         ]);
     }
 }
