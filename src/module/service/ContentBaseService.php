@@ -137,13 +137,10 @@ class ContentBaseService extends BaseService
             ->column('content', 'id');
         $tags = TagBaseService::instance([$this->getModule()])->getTagInfoListByAids($return->column('id'))->toArray();
         $return->each(function ($item) use ($content_data, $tags) {
-            foreach ($content_data as $id => $content) {
-                if ($id == $item['id']) {
-                    $item['content'] = $content;
-                } else {
-                    $item['content'] = '';
-                }
-
+            if (isset($content_data[$item['id']])) {
+                $item['content'] = $content_data[$item['id']];
+            } else {
+                $item['content'] = '';
             }
             $item['tags'] = [];
             foreach ($tags as $tag) {
