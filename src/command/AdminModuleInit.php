@@ -16,7 +16,7 @@ use function rmdir;
 use function scandir;
 use function unlink;
 
-class ModuleInit extends Command
+class AdminModuleInit extends Command
 {
     /**
      * 配置命令
