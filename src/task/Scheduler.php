@@ -168,7 +168,8 @@ class Scheduler
             $this->app->cache->set($lockKey, true, $lockTTL);
 
             // 执行命令
-            $outputContent = $this->app->console->call($task_info['task'])->fetch();
+            $command = explode(' ', $task_info['task']);
+            $outputContent = $this->app->console->call($command[0], array_slice($command, 1))->fetch();
 
             // 处理输出内容
             $this->handleCommandOutput($task_info, $outputContent);

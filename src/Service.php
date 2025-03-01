@@ -19,7 +19,6 @@ class Service extends BaseService
 {
     public function register()
     {
-        // 加载 sys.php 文件
         $this->loadSysFiles();
     }
 
