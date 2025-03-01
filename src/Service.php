@@ -19,6 +19,8 @@ class Service extends BaseService
 {
     public function register()
     {
+        // 加载 sys.php 文件
+        $this->loadSysFiles();
     }
 
     public function boot(): void
@@ -31,9 +33,6 @@ class Service extends BaseService
         $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
         // 注册命令行
         $this->registerCommand();
-
-        // 加载 sys.php 文件
-        $this->loadSysFiles();
     }
 
     /**
@@ -74,7 +73,6 @@ class Service extends BaseService
         $paths = [
             $baseDir . 'sys.php',
             $baseDir,
-            __DIR__ . DIRECTORY_SEPARATOR . 'sys.php',
         ];
 
         foreach ($paths as $path) {
