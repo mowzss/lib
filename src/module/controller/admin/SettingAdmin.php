@@ -7,7 +7,6 @@ use app\common\controllers\BaseAdmin;
 use app\model\system\SystemConfig;
 use app\model\system\SystemConfigGroup;
 use mowzs\lib\Forms;
-use PHPMailer\PHPMailer\Exception;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -53,17 +52,8 @@ abstract class SettingAdmin extends BaseAdmin
     {
         if ($this->request->isPost()) {
             $data = $this->request->post();
-
             if (empty($data['group_id'])) {
                 $this->error('group_id不能为空');
-            }
-            if (!empty($data['mail_test']) && !empty($data['mail_send_user'])) {
-                //发送邮件
-                try {
-                    send_email($data['mail_send_user'], '测试邮件', '您申请的测试邮件');
-                } catch (Exception $e) {
-                    $this->error('测试邮件发送失败:' . $e->getMessage());
-                }
             }
             if ($this->model->saveConfig($data)) {
                 $this->success('保存成功');
