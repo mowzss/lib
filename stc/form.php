@@ -17,6 +17,7 @@ return [
     'datetime' => '日期+时间',
     'icon' => 'Icon图标',
     'color' => '颜色选择器',
+    'cron' => 'Cron表达式',
     'editor' => '富文本编辑器(默认)',
     'tinymce' => 'tinymce编辑器',
     'wangeditor' => 'WangEditor',

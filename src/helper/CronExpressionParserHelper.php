@@ -6,132 +6,165 @@ use InvalidArgumentException;
 
 class CronExpressionParserHelper
 {
-    /**
-     * @var array|string[]
-     */
-    private array $cronFields = ['分钟', '小时', '日', '月', '星期'];
+    private const MONTH_NAMES = [
+        1 => '一月', 2 => '二月', 3 => '三月', 4 => '四月',
+        5 => '五月', 6 => '六月', 7 => '七月', 8 => '八月',
+        9 => '九月', 10 => '十月', 11 => '十一月', 12 => '十二月'
+    ];
 
-    /**
-     * 解析 Cron 表达式
-     * @param string $expression
-     * @return string
-     */
+    private const WEEKDAY_NAMES = [
+        0 => '周日', 1 => '周一', 2 => '周二', 3 => '周三',
+        4 => '周四', 5 => '周五', 6 => '周六', 7 => '周日'
+    ];
+
     public function parse(string $expression): string
     {
-        // 拆分 Cron 表达式
-        $parts = explode(' ', $expression);
-        if (count($parts) !== count($this->cronFields)) {
-            throw new InvalidArgumentException('无效的 Cron 表达式');
+        $fields = explode(' ', trim($expression));
+        if (count($fields) !== 5) {
+            throw new InvalidArgumentException('无效的cron表达式');
         }
 
-        // 转换为语义化描述
-        $descriptions = [];
-        foreach ($parts as $index => $value) {
-            $field = $this->cronFields[$index];
-            $descriptions[] = $this->getFieldDescription($field, $value);
-        }
+        [$minute, $hour, $day, $month, $weekday] = $fields;
 
-        // 组合描述
-        return implode('，', $descriptions) . '执行任务。';
+        return implode(' ', array_filter([
+            $this->parseMinute($minute),
+            $this->parseHour($hour),
+            $this->parseDay($day),
+            $this->parseMonth($month),
+            $this->parseWeekday($weekday),
+            '运行'
+        ]));
     }
 
-    /**
-     * 获取字段描述
-     * @param string $field
-     * @param string $value
-     * @return string
-     */
-    private function getFieldDescription(string $field, string $value): string
+    private function parseMinute(string $field): string
     {
-        switch ($field) {
-            case '分钟':
-                return $this->describeTimeField($value, '分钟');
-            case '小时':
-                return $this->describeTimeField($value, '小时');
-            case '日':
-                return $this->describeDateField($value, '日');
-            case '月':
-                return $this->describeDateField($value, '月');
-            case '星期':
-                return $this->describeWeekdayField($value);
-            default:
-                return '未知字段';
+        if ($field === '*') {
+            return '每分钟';
         }
+
+        if ($field === '0') {
+            return '每小时整点';
+        }
+
+        return $this->parseField($field, 0, 59, '分钟', function ($value) {
+            return sprintf('%02d', $value);
+        });
     }
 
-    /**
-     * 获取时间字段描述
-     * @param string $value
-     * @param string $unit
-     * @return string
-     */
-    private function describeTimeField(string $value, string $unit): string
+    private function parseHour(string $field): string
     {
-        if ($value === '*') {
-            return "每{$unit}";
-        } elseif (strpos($value, '/') !== false) {
-            [$start, $step] = explode('/', $value);
-            return "每隔{$step}{$unit}" . ($start === '*' ? '' : "从{$start}开始");
-        } elseif (strpos($value, '-') !== false) {
-            [$start, $end] = explode('-', $value);
-            return "从{$start}到{$end}{$unit}";
-        } elseif (strpos($value, ',') !== false) {
-            return "在" . str_replace(',', '、', $value) . "{$unit}";
-        } else {
-            return "在$value{$unit}";
-        }
-    }
+        $result = $this->parseField($field, 0, 23, '小时', function ($value) {
+            return sprintf('%02d', $value);
+        });
 
-    /**
-     * 获取日期字段描述
-     * @param string $value
-     * @param string $unit
-     * @return string
-     */
-    private function describeDateField(string $value, string $unit): string
-    {
-        if ($value === '*') {
-            return "每{$unit}";
-        } elseif (strpos($value, '/') !== false) {
-            [$start, $step] = explode('/', $value);
-            return "每隔{$step}{$unit}" . ($start === '*' ? '' : "从{$start}开始");
-        } elseif (strpos($value, '-') !== false) {
-            [$start, $end] = explode('-', $value);
-            return "从{$start}到{$end}{$unit}";
-        } elseif (strpos($value, ',') !== false) {
-            return "在" . str_replace(',', '、', $value) . "{$unit}";
-        } else {
-            return "在{$value}{$unit}";
-        }
-    }
-
-    /**
-     * 获取星期字段描述
-     * @param string $value
-     * @return string
-     */
-    private function describeWeekdayField(string $value): string
-    {
-        if ($value === '?') {
-            return '不指定具体星期';
-        } elseif ($value === '*') {
+        if ($field === '*' && strpos($result, '每') === 0) {
             return '每天';
-        } elseif (strpos($value, '#') !== false) {
-            [$day, $occurrence] = explode('#', $value);
-            $daysOfWeek = ['SUN' => '周日', 'MON' => '周一', 'TUE' => '周二', 'WED' => '周三', 'THU' => '周四', 'FRI' => '周五', 'SAT' => '周六'];
-            $dayName = $daysOfWeek[intval($day)] ?? '未知';
-            return "每月第{$occurrence}个{$dayName}";
-        } elseif (strpos($value, 'L') !== false) {
-            $day = substr($value, 0, -1);
-            $daysOfWeek = ['SUN' => '周日', 'MON' => '周一', 'TUE' => '周二', 'WED' => '周三', 'THU' => '周四', 'FRI' => '周五', 'SAT' => '周六'];
-            $dayName = $daysOfWeek[intval($day)] ?? '未知';
-            return "每月最后一个$dayName";
-        } elseif (strpos($value, ',') !== false) {
-            return "在" . str_replace(',', '、', $value) . "执行";
-        } else {
-            $daysOfWeek = ['SUN' => '周日', 'MON' => '周一', 'TUE' => '周二', 'WED' => '周三', 'THU' => '周四', 'FRI' => '周五', 'SAT' => '周六'];
-            $dayName = $daysOfWeek[intval($value)] ?? '未知';
-            return "在{$dayName}";
+        }
+
+        return $result;
+    }
+
+    private function parseDay(string $field): string
+    {
+        return $this->parseField($field, 1, 31, '日');
+    }
+
+    private function parseMonth(string $field): string
+    {
+        return $this->parseField($field, 1, 12, '月', function ($value) {
+            return self::MONTH_NAMES[$value] ?? $value;
+        });
+    }
+
+    private function parseWeekday(string $field): string
+    {
+        $parsed = $this->parseField($field, 0, 7, '周', function ($value) {
+            return self::WEEKDAY_NAMES[$value] ?? $value;
+        });
+
+        // 处理周日可能的两种表示方式（0和7）
+        if (strpos($field, '0') !== false || strpos($field, '7') !== false) {
+            $parsed = str_replace(['0', '7'], '周日', $parsed);
+        }
+
+        return $parsed;
+    }
+
+    private function parseField(
+        string    $field,
+        int       $min,
+        int       $max,
+        string    $unit,
+        ?callable $valueFormatter = null
+    ): string
+    {
+        $valueFormatter ??= fn($v) => $v;
+
+        // 处理特殊字符
+        if ($field === '*') {
+            return "每{$unit}";
+        }
+
+        // 处理步长值（*/n 或 m-n/n）
+        if (preg_match('/^(\*|\d+-\d+)\/(\d+)$/', $field, $matches)) {
+            $range = $matches[1] === '*' ? "{$min}-{$max}" : $matches[1];
+            $step = (int)$matches[2];
+            return $this->parseStep($range, $step, $unit, $valueFormatter);
+        }
+
+        // 处理逗号分隔的列表
+        if (strpos($field, ',') !== false) {
+            $values = array_map('trim', explode(',', $field));
+            $parsedValues = [];
+            foreach ($values as $value) {
+                $parsedValues[] = $this->parseSingleValue($value, $min, $max, $valueFormatter);
+            }
+            return "{$unit}的" . implode('、', $parsedValues);
+        }
+
+        // 处理单个值
+        return "每{$unit}的" . $this->parseSingleValue($field, $min, $max, $valueFormatter);
+    }
+
+    private function parseStep(string $range, int $step, string $unit, callable $formatter): string
+    {
+        if ($range === '0-23' && $unit === '小时') {
+            return "每隔{$step}小时";
+        }
+
+        if ($range === '*') {
+            return "每隔{$step}{$unit}";
+        }
+
+        [$start, $end] = explode('-', $range);
+        return "从{$formatter($start)}到{$formatter($end)}每隔{$step}{$unit}";
+    }
+
+    private function parseSingleValue(string $value, int $min, int $max, callable $formatter): string
+    {
+        // 处理范围值
+        if (strpos($value, '-') !== false) {
+            [$start, $end] = explode('-', $value);
+            $this->validateRange($start, $end, $min, $max);
+            return "{$formatter($start)}到{$formatter($end)}";
+        }
+
+        // 验证数值范围
+        $numericValue = (int)$value;
+        if ($numericValue < $min || $numericValue > $max) {
+            throw new InvalidArgumentException("无效的数值范围: {$value}");
+        }
+
+        return $formatter($numericValue);
+    }
+
+    private function validateRange($start, $end, $min, $max): void
+    {
+        $start = (int)$start;
+        $end = (int)$end;
+
+        if ($start < $min || $end > $max || $start > $end) {
+            throw new InvalidArgumentException("无效的数值范围: {$start}-{$end}");
         }
     }
 }
