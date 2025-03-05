@@ -143,7 +143,7 @@ abstract class Task
         $update = $this->task_info;
         $update['last_time'] = date('Y-m-d H:i:s');
         // 获取下次执行时间
-        $nextRunDate = $cronExpression->getNextRunDate($currentTime, 1, true);
+        $nextRunDate = $cronExpression->getNextRunDate($currentTime, 0, true);
         $update['next_time'] = $nextRunDate->format('Y-m-d H:i:s');
         $update['count'] = $this->app->db->raw('count+1');
         $this->model->update($update);

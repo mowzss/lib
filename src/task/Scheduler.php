@@ -138,7 +138,7 @@ class Scheduler
         $currentTime = new \DateTime('now', new \DateTimeZone(date_default_timezone_get()));
         $update = $task_info;
         $update['last_time'] = date('Y-m-d H:i:s');
-        $nextRunDate = $cronExpression->getNextRunDate($currentTime, 1, true);
+        $nextRunDate = $cronExpression->getNextRunDate($currentTime, 0, true);
         $update['next_time'] = $nextRunDate->format('Y-m-d H:i:s');
         $update['count'] = $this->app->db->raw('count+1');
         $update['output_msg'] = $finalContent; // 使用最终处理后的内容
