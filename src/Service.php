@@ -60,12 +60,6 @@ class Service extends BaseService
             TaskRun::class,
             TaskSchedule::class,
         ]);
-        if (is_file($this->app->getBasePath() . 'commands.php')) {
-            $command = include $this->app->getBasePath() . 'commands.php';
-            if (is_array($command)) {
-                $this->commands($command);
-            }
-        }
     }
 
     /**
@@ -74,10 +68,31 @@ class Service extends BaseService
      */
     protected function loadSysFiles(): void
     {
-        $baseDir = $this->app->getBasePath() . DIRECTORY_SEPARATOR;
+        $baseDir = $this->app->getAppPath() . DIRECTORY_SEPARATOR;
+        $paths = [
+            $baseDir . 'sys.php',
+            $baseDir,
+        ];
 
+        foreach ($paths as $path) {
+            if (is_dir($path)) {
+                // 如果是目录，则遍历子目录寻找 sys.php 文件
+                $this->scanDirectoryForSysFiles($path);
+            } elseif (is_file($path)) {
+                // 如果是文件，则直接加载
+                $this->includeSysFile($path);
+            }
+        }
+    }
+
+    /**
+     * 遍历目录寻找 sys.php 文件
+     * @param string $directory
+     */
+    protected function scanDirectoryForSysFiles(string $directory): void
+    {
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($baseDir),
+            new \RecursiveDirectoryIterator($directory),
             \RecursiveIteratorIterator::SELF_FIRST
         );
 
