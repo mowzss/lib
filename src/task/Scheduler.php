@@ -154,7 +154,6 @@ class Scheduler
     {
         // 生成锁的唯一键
         $lockKey = 'task_lock_' . md5($task_info['task'] . $task_info['exptime'] . date('Y-m-d H:i'));
-        $lockTTL = 60; // 锁的有效期（秒）
 
         // 尝试获取锁
         if ($this->app->cache->has($lockKey)) {
@@ -165,7 +164,7 @@ class Scheduler
 
         try {
             // 设置锁
-            $this->app->cache->set($lockKey, true, $lockTTL);
+            $this->app->cache->set($lockKey, true, 0);
 
             // 执行命令
             $command = explode(' ', $task_info['task']);
@@ -176,6 +175,8 @@ class Scheduler
 
             // 触发任务完成事件
             $this->app->event->trigger(new TaskProcessed($task_info['task'], $outputContent));
+            // 设置锁
+            $this->app->cache->delete($lockKey);
         } catch (\Exception $e) {
             // 如果命令执行失败，触发任务失败事件
             $this->app->event->trigger(new TaskFailed($task_info['task'], $e));

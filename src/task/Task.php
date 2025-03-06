@@ -35,7 +35,7 @@ abstract class Task
     /**
      * @var int 最大执行时间(重叠执行检查用)
      */
-    public int $expiresAt = 1440;
+    public int $expiresAt = 0;
 
     /**
      * @var bool 分布式部署 是否仅在一台服务器上运行
