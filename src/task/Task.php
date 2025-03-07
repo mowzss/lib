@@ -106,6 +106,12 @@ abstract class Task
     }
 
     /**
+     * 任务执行入口
+     * @return mixed
+     */
+    abstract public function handle();
+
+    /**
      * 运行任务
      * @return void
      * @throws \Exception
