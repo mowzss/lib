@@ -28,9 +28,8 @@ class TaskSchedule extends Command
         $output->info('守护任务启动成功');
         while (true) {
             $process->run();
-            $output->info('守护任务运行中...');
-            $output->info('当前时间:' . date('Y-m-d H:i:s'));
-            sleep(30);
+            $this->output->writeln("{$process->getOutput()}");//输出任务内的打印信息
+            sleep(60);
         }
     }
 }

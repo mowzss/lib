@@ -13,9 +13,9 @@ use think\App;
 class Scheduler
 {
     /** @var App */
-    protected $app;
+    protected App $app;
 
-    protected $tasks = [];
+    protected array $tasks = [];
 
     /**
      * @var SystemTasks
@@ -31,20 +31,12 @@ class Scheduler
 
     public function run(): void
     {
-        if (empty($this->tasks)) {
-            $this->app->log->write('数据库无任务数据', 'task');
-            return;
-        }
         foreach ($this->tasks as $task_info) {
             $task_class = $task_info['task'];
             // 检查如果是任务类 则实例化
             if (is_subclass_of($task_class, Task::class)) {
                 /** @var Task $task */
                 $task = $this->app->invokeClass($task_class, [$task_info]);
-                if ($this->app->isDebug()) {
-                    $this->app->log->write('task class info: ' . $task_class, 'task');
-                    $this->app->log->write('task info: ' . json_encode($task_info), 'task');
-                }
                 if (!$task->filtersPass()) {
                     continue;
                 }
@@ -53,7 +45,6 @@ class Scheduler
                 } else {
                     $this->runTask($task);
                 }
-                $this->app->event->trigger(new TaskProcessed($task));
             } else {
                 $this->runCommandWithLock($task_info);
             }
@@ -66,20 +57,19 @@ class Scheduler
     protected function getTasks(): void
     {
         $this->tasks = $this->model->getTaskList();
-        $this->app->log->write(json_encode($this->tasks), 'task');
     }
 
     /**
      * @param $task Task
      * @return bool
      */
-    protected function serverShouldRun($task): bool
+    protected function serverShouldRun(Task $task): bool
     {
-        $key = $task->mutexName() . md5(date('y-m-d H:i'));
+        $key = $task->mutexName() . md5($task->mutexName());
         if ($this->app->cache->has($key)) {
             return false;
         }
-        $this->app->cache->set($key, true, 60);
+        $this->app->cache->set($key, true, $task->expiresAt);
         return true;
     }
 
@@ -95,12 +85,14 @@ class Scheduler
     /**
      * @param $task Task
      */
-    protected function runTask($task)
+    protected function runTask(Task $task): void
     {
         try {
             $task->run();
         } catch (Exception $e) {
             $this->app->event->trigger(new TaskFailed($task, $e));
+        } finally {
+            $this->app->cache->delete($task->mutexName() . md5($task->mutexName()));
         }
     }
 
@@ -113,9 +105,6 @@ class Scheduler
      */
     protected function handleCommandOutput(mixed $task_info, string $outputContent): void
     {
-        if ($this->app->isDebug()) {
-            $this->app->log->write('任务返回信息：' . $outputContent, 'task');
-        }
         // 分割为行数组
         $lines = explode(PHP_EOL, $outputContent);
         // 判断行数是否小于等于 10
@@ -165,7 +154,6 @@ class Scheduler
         try {
             // 设置锁
             $this->app->cache->set($lockKey, true, 0);
-
             // 执行命令
             $command = explode(' ', $task_info['task']);
             $outputContent = $this->app->console->call($command[0], array_slice($command, 1))->fetch();

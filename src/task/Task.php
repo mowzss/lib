@@ -11,8 +11,6 @@ use think\Cache;
 abstract class Task
 {
 
-    use ManagesFrequencies;
-
     /**
      * @var SystemTasks
      */
@@ -20,12 +18,12 @@ abstract class Task
     /**
      * @var string|null 时区
      */
-    public $timezone = null;
+    public ?string $timezone = null;
 
     /**
      * @var string 任务周期
      */
-    public $expression = '* * * * *';
+    public mixed $expression = '* * * * *';
 
     /**
      * @var bool 任务是否可以重叠执行
@@ -35,7 +33,7 @@ abstract class Task
     /**
      * @var int 最大执行时间(重叠执行检查用)
      */
-    public int $expiresAt = 0;
+    public int $expiresAt = 1440;
 
     /**
      * @var bool 分布式部署 是否仅在一台服务器上运行
@@ -175,9 +173,7 @@ abstract class Task
      */
     public function mutexName(): string
     {
-        $name = 'task-' . sha1(static::class);
-        $this->app->log->write('任务标识：' . $name, 'task');
-        return $name;
+        return 'task-' . sha1(static::class);
     }
 
     /**

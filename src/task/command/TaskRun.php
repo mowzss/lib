@@ -35,21 +35,24 @@ class TaskRun extends Command
     /**
      * 注册事件
      */
-    protected function listenForEvents()
+    protected function listenForEvents(): void
     {
         // 任务开始
         $this->app->event->listen(TaskProcessed::class, function (TaskProcessed $event) {
-            $this->output->writeln("任务 {$event->getName()} 已于 " . Carbon::now()->toDateTimeString() . " 开始执行");
+            $this->output->info("任务 {$event->getName()} 已于 " . Carbon::now()->toDateTimeString() . " 执行完毕");
+            $this->app->log->error("任务 {$event->getName()} 已于 " . Carbon::now()->toDateTimeString() . " 执行完毕");
         });
 
         // 任务跳过
         $this->app->event->listen(TaskSkipped::class, function (TaskSkipped $event) {
-            $this->output->writeln('<info>跳过任务（已在其他服务器上运行）：</info> ' . $event->getName());
+            $this->output->info("任务 {$event->getName()} 已于 " . Carbon::now()->toDateTimeString() . " 跳过");
+            $this->app->log->error("任务 {$event->getName()} 已于 " . Carbon::now()->toDateTimeString() . " 跳过");
         });
 
         // 任务失败
         $this->app->event->listen(TaskFailed::class, function (TaskFailed $event) {
-            $this->output->writeln("任务 {$event->getName()} 于 " . Carbon::now()->toDateTimeString() . " 执行失败");
+            $this->output->error("任务 {$event->getName()} 于 " . Carbon::now()->toDateTimeString() . " 执行失败");
+            $this->app->log->error("任务 {$event->getName()} 于 " . Carbon::now()->toDateTimeString() . " 执行失败");
 
             /** @var Handle $handle */
             $handle = $this->app->make(Handle::class);
