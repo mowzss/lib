@@ -33,7 +33,10 @@ abstract class FieldAdmin extends BaseAdmin
      * @var string
      */
     protected static string $columnModelClass;
-
+    /*
+     * 保留字段
+     */
+    protected array $reserve_field = ['id', 'mid', 'cid', 'content', 'status', 'list', 'create_time', 'update_time'];
     /**
      * 栏目模型
      * @var mixed
@@ -374,6 +377,9 @@ abstract class FieldAdmin extends BaseAdmin
                     $sql_fields = $this->contentModel->setSuffix('_' . $data['mid'])->getTableFields();
                 }
             }
+            if ($this->request->action() == 'add' && in_array($data['name'], $this->reserve_field)) {
+                $this->error('系统保留字段，不可添加');
+            }
             if ($this->request->action() == 'add' && isset($sql_fields) && in_array($data['name'], $sql_fields)) {
                 $this->error('数据库已存在' . $data['name'] . '字段');
             }
@@ -400,9 +406,13 @@ abstract class FieldAdmin extends BaseAdmin
             $this->error('模型id不能不能为空');
         }
         $module = strtolower($this->getModuleName());
+        if ($data['name'] == 'content') {
+            return "{$module}_content_{$data['mid']}s";
+        }
         if ($data['mid'] > 0) {
             return "{$module}_content_{$data['mid']}";
         }
+
         if ($data['mid'] == '-1') {
             return "{$module}_column";
         }
@@ -428,7 +438,7 @@ abstract class FieldAdmin extends BaseAdmin
         if (in_array($fields['type'], ['TINYINT', 'SMALLINT', 'MEDIUMINT', 'INT', 'BIGINT'])) {
             $fields['unsigned'] = (bool)$data['extend']['field']['unsigned'];
         }
-        if (!in_array($fields['type'], ['TEXT', 'BLOB', 'GEOMETRY', 'JSON'])) {
+        if (!in_array($fields['type'], ['TEXT', 'BLOB', 'GEOMETRY', 'JSON', 'LONGTEXT'])) {
             $fields['default'] = (bool)$data['extend']['field']['default'];
         }
         p($fields);
