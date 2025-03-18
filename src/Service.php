@@ -19,7 +19,7 @@ class Service extends BaseService
 {
     public function register()
     {
-        $this->loadSysFiles();
+//        $this->loadSysFiles();
     }
 
     public function boot(): void
