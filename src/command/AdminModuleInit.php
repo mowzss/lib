@@ -101,7 +101,9 @@ class AdminModuleInit extends Command
             'optimize:route',
             'optimize:schema',
         ];
-
+        if (!is_dir($this->app->getRuntimePath())) {
+            mkdir($this->app->getRuntimePath(), 0755, true);
+        }
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
             $commandOutput = $this->app->console->call($commandName)->fetch();
