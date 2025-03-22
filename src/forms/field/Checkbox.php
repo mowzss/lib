@@ -24,6 +24,9 @@ class Checkbox extends FormFieldRenderer implements RendererInterface
         if (!is_array($option)) {
             $option = FormatFieldOption::strToArray($option);
         }
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
         $required = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('checkbox', [
             'name' => $name,
