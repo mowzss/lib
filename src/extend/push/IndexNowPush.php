@@ -32,7 +32,7 @@ class IndexNowPush
      * @param string $key 秘钥
      * @param string $keyLocation 秘钥文本可为空
      */
-    public function __construct(string $domain, string $key = '', string $keyLocation = '')
+    public function __construct(string $domain, string|null $key = null, string $keyLocation = '')
     {
         $this->host = format_url($domain, 'host');
         $this->key = $key ? md5($this->host . '-happyAdmin') : '';
