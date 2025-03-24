@@ -50,6 +50,7 @@ class AdminUpgrade extends Command
         foreach ($files as $module => $moduleFiles) {
             foreach ($moduleFiles as $file) {
                 if (UpgradeService::instance()->isUpgrade($module, $file['filename'])) {
+                    $output->writeln("升级文件 {$file['filename']} 已升级，跳过");
                     continue;
                 }
                 //删除文件后缀.php
