@@ -5,8 +5,8 @@ declare (strict_types=1);
 namespace mowzs\lib\taglib\extends;
 
 use mowzs\lib\helper\ColumnCacheHelper;
-use mowzs\lib\module\service\ColumnBaseService;
-use mowzs\lib\module\service\ContentBaseService;
+use mowzs\lib\module\logic\ColumnBaseLogic;
+use mowzs\lib\module\logic\ContentBaseLogic;
 use mowzs\lib\taglib\TaglibBase;
 use think\facade\Db;
 
@@ -53,11 +53,11 @@ class Lists extends TaglibBase
         } else {
             //指定cid的情况下 可以通过cid获取mid
             if (!empty($config['cid'])) {
-                $params['mid'] = ColumnBaseService::instance([$module])->getMidById($config['cid']);
+                $params['mid'] = ColumnBaseLogic::instance([$module])->getMidById($config['cid']);
             }
         }
         if (!empty($config['cid'])) {
-            $config['cid'] = ColumnBaseService::instance([$module])->getColumnSonsById($config['cid']);
+            $config['cid'] = ColumnBaseLogic::instance([$module])->getColumnSonsById($config['cid']);
             $params['where'][] = ['cid', 'in', $config['cid']];
         }
         $name = $config['name'];
@@ -65,7 +65,7 @@ class Lists extends TaglibBase
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode(array_merge($params, $config)));
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
-            $return = ContentBaseService::instance([$module], true)->getList($params);
+            $return = ContentBaseLogic::instance([$module], true)->getList($params);
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }
@@ -101,7 +101,7 @@ class Lists extends TaglibBase
             // 将标签信息追加到 item 中
             $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
             $item['module_dir'] = $this->module;
-            return ContentBaseService::instance()->formatContentData($item);
+            return ContentBaseLogic::instance()->formatContentData($item);
         });
     }
 

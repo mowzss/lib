@@ -1,14 +1,14 @@
 <?php
 
-namespace mowzs\lib\module\service;
+namespace mowzs\lib\module\logic;
 
-use app\service\BaseService;
+use app\logic\BaseLogic;
 use think\Exception;
 
 /**
  * 模块下模型服务基类
  */
-class ModelBaseService extends BaseService
+class ModelBaseLogic extends BaseLogic
 {
     /**
      * 调用模块名称

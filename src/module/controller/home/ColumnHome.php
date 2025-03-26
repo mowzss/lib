@@ -5,7 +5,7 @@ namespace mowzs\lib\module\controller\home;
 
 use app\common\controllers\BaseHome;
 use mowzs\lib\helper\SystemHelper;
-use mowzs\lib\module\service\ColumnBaseService;
+use mowzs\lib\module\logic\ColumnBaseLogic;
 use think\App;
 use think\Exception;
 
@@ -15,12 +15,12 @@ class ColumnHome extends BaseHome
      * 服务类名称
      * @var string
      */
-    protected static string $serviceClass = ColumnBaseService::class;
+    protected static string $serviceClass = ColumnBaseLogic::class;
     /**
      * 服务类
      * @var
      */
-    protected ColumnBaseService $service;
+    protected ColumnBaseLogic $service;
 
     public function __construct(App $app)
     {

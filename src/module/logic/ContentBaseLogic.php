@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\module\service;
+namespace mowzs\lib\module\logic;
 
-use app\service\BaseService;
+use app\logic\BaseLogic;
 use mowzs\lib\helper\ColumnCacheHelper;
 use think\Collection;
 use think\db\exception\DbException;
@@ -15,7 +15,7 @@ use think\Paginator;
 /**
  * 模块内容公用服务
  */
-class ContentBaseService extends BaseService
+class ContentBaseLogic extends BaseLogic
 {
     /**
      * 当前操作模块名
@@ -173,7 +173,7 @@ class ContentBaseService extends BaseService
         }
         $content_data = $this->getDbQuery($contents)->whereIn('id', $return->column('id'))
             ->column('content', 'id');
-        $tags = TagBaseService::instance([$this->getModule()])->getTagInfoListByAids($return->column('id'))->toArray();
+        $tags = TagBaseLogic::instance([$this->getModule()])->getTagInfoListByAids($return->column('id'))->toArray();
         $return->each(function ($item) use ($content_data, $tags) {
             if (isset($content_data[$item['id']])) {
                 $item['content'] = $content_data[$item['id']];
@@ -210,8 +210,8 @@ class ContentBaseService extends BaseService
         $info = $info->toArray();
 
         $info['content'] = $this->getContent($info);
-        $info['column'] = ColumnBaseService::instance([$this->getModule()])->getInfo($info['cid']);
-        $info['tags'] = TagBaseService::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
+        $info['column'] = ColumnBaseLogic::instance([$this->getModule()])->getInfo($info['cid']);
+        $info['tags'] = TagBaseLogic::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
         return $info;
     }
 

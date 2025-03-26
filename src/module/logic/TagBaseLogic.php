@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\module\service;
+namespace mowzs\lib\module\logic;
 
-use app\service\BaseService;
+use app\logic\BaseLogic;
 use mowzs\lib\helper\UserHelper;
 use think\Collection;
 use think\db\exception\DataNotFoundException;
@@ -14,7 +14,7 @@ use think\facade\Db;
 use think\Model;
 use think\Paginator;
 
-class TagBaseService extends BaseService
+class TagBaseLogic extends BaseLogic
 {
     /**
      * 当前操作模块名
@@ -174,7 +174,7 @@ class TagBaseService extends BaseService
         }
         return $query->field('aid')->paginate($rows)
             ->each(function ($item) {
-                $content = ContentBaseService::instance([$this->getModule()])->getInfo($item['aid']);
+                $content = ContentBaseLogic::instance([$this->getModule()])->getInfo($item['aid']);
                 foreach ($content as $key => $value) {
                     $item[$key] = $value;
                 }

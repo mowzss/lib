@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace mowzs\lib\module\controller\home;
 
 use app\common\controllers\BaseHome;
-use mowzs\lib\module\service\ContentBaseService;
-use mowzs\lib\module\service\TagBaseService;
+use mowzs\lib\module\logic\ContentBaseLogic;
+use mowzs\lib\module\logic\TagBaseLogic;
 use think\App;
 use think\Exception;
 
@@ -15,12 +15,12 @@ abstract class TagHome extends BaseHome
      * 服务类名称
      * @var string
      */
-    protected static string $serviceClass = TagBaseService::class;
+    protected static string $serviceClass = TagBaseLogic::class;
     /**
      * 服务类
-     * @var ContentBaseService|mixed
+     * @var ContentBaseLogic|mixed
      */
-    protected TagBaseService $service;
+    protected TagBaseLogic $service;
 
     public function __construct(App $app)
     {

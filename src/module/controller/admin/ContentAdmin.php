@@ -12,9 +12,9 @@ use mowzs\lib\Exception\RandomGenerationException;
 use mowzs\lib\Forms;
 use mowzs\lib\helper\CodeHelper;
 use mowzs\lib\helper\EventHelper;
-use mowzs\lib\module\service\ColumnBaseService;
-use mowzs\lib\module\service\ContentBaseService;
-use mowzs\lib\module\service\TagBaseService;
+use mowzs\lib\module\logic\ColumnBaseLogic;
+use mowzs\lib\module\logic\ContentBaseLogic;
+use mowzs\lib\module\logic\TagBaseLogic;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -74,14 +74,14 @@ abstract class ContentAdmin extends BaseAdmin
     protected int $mid = 0;
     /**
      * 当前内容模型服务
-     * @var ContentBaseService
+     * @var ContentBaseLogic
      */
-    protected ContentBaseService $service;
+    protected ContentBaseLogic $service;
     /**
      * tag服务
-     * @var TagBaseService
+     * @var TagBaseLogic
      */
-    protected TagBaseService $tagService;
+    protected TagBaseLogic $tagService;
 
 
     public function __construct(App $app)
@@ -104,8 +104,8 @@ abstract class ContentAdmin extends BaseAdmin
         }
         $this->modelModel = new static::$modelModelClass();
 
-        $this->service = new ContentBaseService();
-        $this->tagService = new TagBaseService();
+        $this->service = new ContentBaseLogic();
+        $this->tagService = new TagBaseLogic();
         $this->mid = $this->request->param('mid/d', 0);
         $this->setParams();
     }
@@ -501,7 +501,7 @@ abstract class ContentAdmin extends BaseAdmin
                 $this->error('栏目不能为空');
             }
             if (empty($data['mid'])) {
-                $data['mid'] = ColumnBaseService::instance()->getMidById($data['cid']);
+                $data['mid'] = ColumnBaseLogic::instance()->getMidById($data['cid']);
             }
             $data['list'] = $data['create_time'] = $data['update_time'] = time();
             if (false === $this->callback('_save_filter', $data)) {
