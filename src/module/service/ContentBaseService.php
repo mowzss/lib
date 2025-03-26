@@ -23,11 +23,6 @@ class ContentBaseService extends BaseService
      */
     protected string $modelName;
 
-    /**
-     * 当前模型
-     * @var Model
-     */
-    protected Model $model;
 
     /**
      * 数据表
@@ -44,7 +39,15 @@ class ContentBaseService extends BaseService
     {
         $this->modelName = $this->getModule();
         $this->table = $this->modelName . '_content';
-        $this->model = $this->getModel($this->table);
+    }
+
+    /**
+     * @return Model
+     * @throws Exception
+     */
+    protected function ContentModel(): Model
+    {
+        return $this->getModel($this->table);
     }
 
     /**
@@ -54,11 +57,12 @@ class ContentBaseService extends BaseService
      * @param int $step
      * @param int|string $mid
      * @return bool
+     * @throws Exception
      */
     public function updateInc(int|string $id, string $field = '', int $step = 1, int|string $mid = 0): bool
     {
         if (empty($mid)) {
-            $mid = $this->model->where(['id' => $id])->value('mid');
+            $mid = $this->ContentModel()->where(['id' => $id])->value('mid');
         }
         try {
             $where = ['id' => $id];
@@ -81,14 +85,14 @@ class ContentBaseService extends BaseService
         if (empty($id)) {
             throw new Exception('内容ID不能为空');
         }
-        $mid = $this->model->where(['id' => $id])->value('mid');
+        $mid = $this->ContentModel()->where(['id' => $id])->value('mid');
         if (empty($mid)) {
             throw new Exception('内容不存在');
         }
         $info = $this->getInfoByMid($id, $mid);
         if ($prev_next && !empty($info)) {
-            $info['prev_info'] = $this->model->where([['cid', '=', $info['cid']], ['id', '<', $id]])->findOrEmpty()->toArray();
-            $info['next_info'] = $this->model->where([['cid', '=', $info['cid']], ['id', '>', $id]])->findOrEmpty()->toArray();
+            $info['prev_info'] = $this->ContentModel()->where([['cid', '=', $info['cid']], ['id', '<', $id]])->findOrEmpty()->toArray();
+            $info['next_info'] = $this->ContentModel()->where([['cid', '=', $info['cid']], ['id', '>', $id]])->findOrEmpty()->toArray();
         }
         $info['module_dir'] = $this->getModule();
         return $this->formatContentData($info);
@@ -198,11 +202,13 @@ class ContentBaseService extends BaseService
      */
     protected function getInfoByMid($id, $mid): array
     {
-        $info = $this->model->suffix("_{$mid}")->findOrEmpty($id);
+        $info = $this->ContentModel()->setSuffix("_{$mid}")->findOrEmpty($id);
+
         if ($info->isEmpty()) {
             throw new Exception('内容没找到！');
         }
         $info = $info->toArray();
+
         $info['content'] = $this->getContent($info);
         $info['column'] = ColumnBaseService::instance([$this->getModule()])->getInfo($info['cid']);
         $info['tags'] = TagBaseService::instance([$this->getModule()])->getTagInfoListByAid($info['id']);
@@ -213,6 +219,7 @@ class ContentBaseService extends BaseService
      * 获取内容字段
      * @param array $info
      * @return mixed
+     * @throws Exception
      */
     protected function getContent(array $info = []): mixed
     {
@@ -221,7 +228,7 @@ class ContentBaseService extends BaseService
         }
         $id = $info['id'];
         $mid = $info['mid'];
-        return $this->model->suffix("_{$mid}s")->where('id', $id)->value('content');
+        return $this->ContentModel()->setSuffix("_{$mid}s")->where('id', $id)->value('content');
     }
 
     /**
@@ -360,5 +367,54 @@ class ContentBaseService extends BaseService
             $item['module_dir'] = $this->getModule();
             return $this->formatContentData($item);
         });
+    }
+
+    /**
+     * 新增内容
+     * @param $data
+     * @return int|string
+     * @throws Exception
+     */
+    public function saveContent($data): int|string
+    {
+        if (empty($data['mid'])) {
+            throw new Exception('模型id不能为空');
+        }
+        $model = $this->ContentModel()->create($data);
+        if ($data['create_time']) {
+            $data['create_time'] = time();
+        }
+        if ($data['update_time']) {
+            $data['update_time'] = time();
+        }
+        if ($data['list']) {
+            $data['list'] = time();
+        }
+        $this->ContentModel()->setSuffix("_{$data['mid']}")->save($data);
+        $this->ContentModel()->setSuffix("_{$data['mid']}s")->allowField(['id', 'content'])->save($data);
+        return $model->id;
+    }
+
+    /**
+     * @param $data
+     * @return bool
+     * @throws Exception
+     */
+    public function editContent($data): bool
+    {
+        if (empty($data['id'])) {
+            return false;
+        }
+        $where = ['id' => $data['id']];
+        if (empty($data['update_time'])) {
+            $data['update_time'] = time();
+        }
+        if (empty($data['list'])) {
+            $data['list'] = time();
+        }
+        $this->ContentModel()->where($where)->update($data);
+        $this->ContentModel()->setSuffix("_{$data['mid']}")->where($where)->replace()->insert($data);
+        $this->ContentModel()->setSuffix("_{$data['mid']}s")->where($where)->replace()->insert($data);
+        return true;
     }
 }

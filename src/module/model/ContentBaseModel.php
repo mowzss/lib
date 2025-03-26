@@ -17,60 +17,11 @@ abstract class ContentBaseModel extends Model
     protected string $deleteTime = 'delete_time';
 
     /**
-     * 新增内容
-     * @param $data
-     * @return false|int|string
-     * @throws Exception
-     */
-    public function saveContent($data): bool|int|string
-    {
-        if (empty($data['mid'])) {
-            throw new Exception('模型id不能为空');
-        }
-        $newId = $this->insertGetId($data);
-        $data['id'] = $newId;
-        if ($data['create_time']) {
-            $data['create_time'] = time();
-        }
-        if ($data['update_time']) {
-            $data['update_time'] = time();
-        }
-        if ($data['list']) {
-            $data['list'] = time();
-        }
-        $this->suffix("_{$data['mid']}")->insert($data);
-        $this->suffix("_{$data['mid']}s")->insert($data);
-        return $newId;
-    }
-
-    /**
-     * @param $data
-     * @return bool
-     */
-    public function editContent($data): bool
-    {
-        if (empty($data['id'])) {
-            return false;
-        }
-        $where = ['id' => $data['id']];
-        if (empty($data['update_time'])) {
-            $data['update_time'] = time();
-        }
-        if (empty($data['list'])) {
-            $data['list'] = time();
-        }
-        $this->where($where)->update($data);
-        $this->suffix("_{$data['mid']}")->where($where)->replace()->insert($data);
-        $this->suffix("_{$data['mid']}s")->where($where)->replace()->insert($data);
-        return true;
-    }
-
-    /**
      * @param string|int $id
-     * @return mixed
+     * @return array
      * @throws Exception
      */
-    public function getInfo(string|int $id = ''): mixed
+    public function getInfo(string|int $id = ''): array
     {
         if (empty($id)) {
             throw new Exception('内容ID不能为空');
@@ -79,12 +30,12 @@ abstract class ContentBaseModel extends Model
         if (empty($mid)) {
             throw new Exception('内容不存在');
         }
-        $info = $this->suffix("_{$mid}")->findOrEmpty($id);
+        $info = $this->setSuffix("_{$mid}")->findOrEmpty($id);
         if ($info->isEmpty()) {
             throw new Exception('内容没找到！');
         }
         $info = $info->toArray();
-        $info['content'] = $this->suffix("_{$mid}s")->where(['id' => $id])->value('content');
+        $info['content'] = $this->setSuffix("_{$mid}s")->where(['id' => $id])->value('content');
         return $info;
     }
 

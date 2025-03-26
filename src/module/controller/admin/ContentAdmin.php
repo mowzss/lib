@@ -13,7 +13,7 @@ use mowzs\lib\Forms;
 use mowzs\lib\helper\CodeHelper;
 use mowzs\lib\helper\EventHelper;
 use mowzs\lib\module\service\ColumnBaseService;
-use Random\RandomException;
+use mowzs\lib\module\service\ContentBaseService;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -80,6 +80,11 @@ abstract class ContentAdmin extends BaseAdmin
      * @var int
      */
     protected int $mid = 0;
+    /**
+     * 当前内容模型服务
+     * @var ContentBaseService
+     */
+    protected ContentBaseService $service;
 
 
     public function __construct(App $app)
@@ -105,7 +110,7 @@ abstract class ContentAdmin extends BaseAdmin
             throw new \InvalidArgumentException('The $tagModelClass must be set in the subclass.');
         }
         $this->tagModel = new static::$tagModelClass();
-
+        $this->service = new ContentBaseService();
         $this->mid = $this->request->param('mid/d', 0);
         $this->setParams();
     }
@@ -346,27 +351,27 @@ abstract class ContentAdmin extends BaseAdmin
             if (false === $this->callback('_save_filter', $data)) {
                 return false;
             }
-            try {
-                $this->checkRequiredFields($data);
-                if (empty($data['id'])) {
-                    $data['id'] = CodeHelper::timestampBasedId();
-                }
-                EventHelper::instance()->listen('ContentAddBefore', $data);
-                if ($this->model->saveContent($data)) {
-                    $model = $this->model->getModel();
-                    // 结果回调处理
-                    $result = true;
-                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $model);
-                    if (false === $this->callback('_save_result', $result, $model, $data)) {
-                        return $result;
-                    }
-                    $this->success('添加成功');
-                } else {
-                    $this->error('添加失败');
-                }
-            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-                $this->error('添加失败：' . $e->getMessage());
+//            try {
+            $this->checkRequiredFields($data);
+            if (empty($data['id'])) {
+                $data['id'] = CodeHelper::timestampBasedId();
             }
+            EventHelper::instance()->listen('ContentAddBefore', $data);
+            if ($this->service->saveContent($data)) {
+                // 结果回调处理
+                $result = true;
+                EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
+                if (false === $this->callback('_save_result', $result, $model, $data)) {
+                    return $result;
+                }
+                $this->success('添加成功');
+            } else {
+                $this->error('添加失败');
+            }
+//            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+//
+//                $this->error('添加失败：' . $e->getMessage());
+//            }
         }
         if (empty($this->forms['fields'])) {
             $this->error('未设置 forms 参数');
@@ -451,7 +456,7 @@ abstract class ContentAdmin extends BaseAdmin
             }
             EventHelper::instance()->listen('ContentEditBefore', $data);
             $this->checkRequiredFields($data);
-            $this->model->editContent($data);
+            $this->service->editContent($data);
             EventHelper::instance()->triggerNoReturn('ContentEditAfter', $data);
             // 结果回调处理
             $result = true;
@@ -470,12 +475,11 @@ abstract class ContentAdmin extends BaseAdmin
      * @throws DataNotFoundException
      * @throws DbException
      * @throws ModelNotFoundException
-     * @throws RandomException
      * @throws RandomGenerationException
      */
     public function publish()
     {
-        
+
         if (empty(sys_config('no_password_publish'))) {
             $this->error('设置不正确');
         }
@@ -514,11 +518,10 @@ abstract class ContentAdmin extends BaseAdmin
                     $data['id'] = CodeHelper::timestampBasedId();
                 }
                 EventHelper::instance()->listen('ContentAddBefore', $data);
-                if ($this->model->saveContent($data)) {
-                    $model = $this->model->getModel();
+                if ($this->service->saveContent($data)) {
                     // 结果回调处理
                     $result = true;
-                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $model);
+                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
                     if (false === $this->callback('_save_result', $result, $model, $data)) {
                         return $result;
                     }
