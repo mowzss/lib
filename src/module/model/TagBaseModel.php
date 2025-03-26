@@ -23,7 +23,7 @@ abstract class TagBaseModel extends Model
         }
 
         // 获取当前所有与 aid 关联的 tid
-        $existingTids = $this->suffix('_info')->where('aid', $data['id'])->column('tid');
+        $existingTids = $this->setSuffix('_info')->where('aid', $data['id'])->column('tid');
 
         // 将现有和新的 tag 转换为集合以便进行比较
         $existingSet = array_flip($existingTids);
@@ -38,7 +38,7 @@ abstract class TagBaseModel extends Model
             // 减少 tag 表中对应的 count
             $this->where('id', $tid)->dec('count')->save();
             // 删除 tag_info 中的记录
-            $this->suffix('_info')->where(['aid' => $data['id'], 'tid' => $tid])->delete();
+            $this->setSuffix('_info')->where(['aid' => $data['id'], 'tid' => $tid])->delete();
         }
 
         // 处理新增的标签
@@ -46,7 +46,7 @@ abstract class TagBaseModel extends Model
             // 增加 tag 表中对应的 count
             $this->where('id', $tid)->inc('count')->save();
             // 插入 tag_info 中的新记录
-            $this->suffix('_info')->insert(['tid' => $tid, 'mid' => $data['mid'], 'aid' => $data['id']]);
+            $this->setSuffix('_info')->insert(['tid' => $tid, 'mid' => $data['mid'], 'aid' => $data['id']]);
         }
 
         return true;
@@ -66,7 +66,7 @@ abstract class TagBaseModel extends Model
             return [];
         }
         // 从 tag_info 表中获取与给定 aid 相关的所有 tid
-        $tids = $this->suffix('_info')
+        $tids = $this->setSuffix('_info')
             ->where('aid', $aid)
             ->column('tid');
         // 如果没有找到任何 tid，直接返回空数组
