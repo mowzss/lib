@@ -351,27 +351,27 @@ abstract class ContentAdmin extends BaseAdmin
             if (false === $this->callback('_save_filter', $data)) {
                 return false;
             }
-//            try {
-            $this->checkRequiredFields($data);
-            if (empty($data['id'])) {
-                $data['id'] = CodeHelper::timestampBasedId();
-            }
-            EventHelper::instance()->listen('ContentAddBefore', $data);
-            if ($this->service->saveContent($data)) {
-                // 结果回调处理
-                $result = true;
-                EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
-                if (false === $this->callback('_save_result', $result, $model, $data)) {
-                    return $result;
+            try {
+                $this->checkRequiredFields($data);
+                if (empty($data['id'])) {
+                    $data['id'] = CodeHelper::timestampBasedId();
                 }
-                $this->success('添加成功');
-            } else {
-                $this->error('添加失败');
+                EventHelper::instance()->listen('ContentAddBefore', $data);
+                if ($this->service->saveContent($data)) {
+                    // 结果回调处理
+                    $result = true;
+                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
+                    if (false === $this->callback('_save_result', $result, $model, $data)) {
+                        return $result;
+                    }
+                    $this->success('添加成功');
+                } else {
+                    $this->error('添加失败');
+                }
+            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+
+                $this->error('添加失败：' . $e->getMessage());
             }
-//            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-//
-//                $this->error('添加失败：' . $e->getMessage());
-//            }
         }
         if (empty($this->forms['fields'])) {
             $this->error('未设置 forms 参数');
@@ -421,52 +421,52 @@ abstract class ContentAdmin extends BaseAdmin
      */
     public function edit(string $id = '')
     {
+//        try {
+        $data = $this->request->post();
+        $id = $id ?: $data['id'];
         try {
-            $data = $this->request->post();
-            $id = $id ?: $data['id'];
-            try {
-                $record = $this->model->getInfo($id);
-            } catch (DataNotFoundException|DbException $e) {
-                $this->error('出错了:' . $e->getMessage());
-            }
-            if (empty($record)) {
-                $this->error('记录不存在');
-            }
-            $this->mid = $record['mid'];
-            $data['update_time'] = time();
-            $this->getFormsField($this->mid);
-            if (false === $this->callback('_save_filter', $data, $record)) {
-                return false;
-            }
-            if ($this->request->isGet()) {
-                if (empty($record['tag'])) {
-                    $record['tag'] = $this->tagModel->getTagListByAid($id);
-                }
-                if (empty($this->forms['fields'])) {
-                    $this->error('未设置 forms 参数');
-                }
-                $forms = Forms::instance()->setValue($record);
-                if (!empty($this->forms['trigger'])) {
-                    $forms = $forms->setTriggers($this->forms['trigger']);
-                }
-                if (!empty($this->forms['pk'])) {
-                    $forms = $forms->setPk($this->forms['pk']);
-                }
-                $forms->render($this->forms['fields']);
-            }
-            EventHelper::instance()->listen('ContentEditBefore', $data);
-            $this->checkRequiredFields($data);
-            $this->service->editContent($data);
-            EventHelper::instance()->triggerNoReturn('ContentEditAfter', $data);
-            // 结果回调处理
-            $result = true;
-            if (false === $this->callback('_save_result', $result, $record, $data)) {
-                return $result;
-            }
-            $this->success('更新成功');
-        } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-            $this->error('记录不存在：' . $e->getMessage());
+            $record = $this->service->getInfo($id);
+        } catch (DataNotFoundException|DbException $e) {
+            $this->error('出错了:' . $e->getMessage());
         }
+        if (empty($record)) {
+            $this->error('记录不存在');
+        }
+        $this->mid = $record['mid'];
+        $data['update_time'] = time();
+        $this->getFormsField($this->mid);
+        if (false === $this->callback('_save_filter', $data, $record)) {
+            return false;
+        }
+        if ($this->request->isGet()) {
+            if (empty($record['tag'])) {
+                $record['tag'] = $this->tagModel->getTagListByAid($id);
+            }
+            if (empty($this->forms['fields'])) {
+                $this->error('未设置 forms 参数');
+            }
+            $forms = Forms::instance()->setValue($record);
+            if (!empty($this->forms['trigger'])) {
+                $forms = $forms->setTriggers($this->forms['trigger']);
+            }
+            if (!empty($this->forms['pk'])) {
+                $forms = $forms->setPk($this->forms['pk']);
+            }
+            $forms->render($this->forms['fields']);
+        }
+        EventHelper::instance()->listen('ContentEditBefore', $data);
+        $this->checkRequiredFields($data);
+        $this->service->editContent($data);
+        EventHelper::instance()->triggerNoReturn('ContentEditAfter', $data);
+        // 结果回调处理
+        $result = true;
+        if (false === $this->callback('_save_result', $result, $record, $data)) {
+            return $result;
+        }
+        $this->success('更新成功');
+//        } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+//            $this->error('记录不存在：' . $e->getMessage());
+//        }
     }
 
     /**
