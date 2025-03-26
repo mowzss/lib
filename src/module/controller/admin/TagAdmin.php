@@ -111,7 +111,7 @@ abstract class TagAdmin extends BaseAdmin
         $page = $this->request->get('page', 1);
         $keyword = $this->request->post('keyword', '');
         $add = $this->request->post('add', '');
-        $model = $this->model->where(['status' => 1])->field('id,title');
+        $model = $this->tagModel()->where(['status' => 1])->field('id,title');
         $pages = ['page' => $page, 'list_rows' => '20'];
         $where_like = [['title', 'like', "%{$keyword}%"]];
         if (!empty($keyword)) {
@@ -119,9 +119,17 @@ abstract class TagAdmin extends BaseAdmin
         }
         $list = $model->paginate($pages);
         if (!empty($add) && $list->isEmpty() && !empty($keyword)) {
-            $this->model->create(['title' => $keyword, 'status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
-            $list = $this->model->field('id,title')->where($where_like)->paginate($pages);
+            $this->tagModel()->create(['title' => $keyword, 'status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
+            $list = $this->tagModel()->field('id,title')->where($where_like)->paginate($pages);
         }
         $this->success($list);
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function tagModel(): mixed
+    {
+        return new static::$modelClass;
     }
 }

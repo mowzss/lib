@@ -14,6 +14,7 @@ use mowzs\lib\helper\CodeHelper;
 use mowzs\lib\helper\EventHelper;
 use mowzs\lib\module\service\ColumnBaseService;
 use mowzs\lib\module\service\ContentBaseService;
+use mowzs\lib\module\service\TagBaseService;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -52,11 +53,6 @@ abstract class ContentAdmin extends BaseAdmin
      */
     protected static string $modelModelClass;
     /**
-     * tag模型 类名
-     * @var string
-     */
-    protected static string $tagModelClass;
-    /**
      * 字段信息模型
      * @var mixed
      */
@@ -72,10 +68,6 @@ abstract class ContentAdmin extends BaseAdmin
      */
     protected Model $modelModel;
     /**
-     * @var \think\Model
-     */
-    protected \think\Model $tagModel;
-    /**
      * 当前模型id
      * @var int
      */
@@ -85,6 +77,11 @@ abstract class ContentAdmin extends BaseAdmin
      * @var ContentBaseService
      */
     protected ContentBaseService $service;
+    /**
+     * tag服务
+     * @var TagBaseService
+     */
+    protected TagBaseService $tagService;
 
 
     public function __construct(App $app)
@@ -106,11 +103,9 @@ abstract class ContentAdmin extends BaseAdmin
             throw new \InvalidArgumentException('The $modelModelClass must be set in the subclass.');
         }
         $this->modelModel = new static::$modelModelClass();
-        if (empty(static::$tagModelClass)) {
-            throw new \InvalidArgumentException('The $tagModelClass must be set in the subclass.');
-        }
-        $this->tagModel = new static::$tagModelClass();
+
         $this->service = new ContentBaseService();
+        $this->tagService = new TagBaseService();
         $this->mid = $this->request->param('mid/d', 0);
         $this->setParams();
     }
@@ -351,27 +346,27 @@ abstract class ContentAdmin extends BaseAdmin
             if (false === $this->callback('_save_filter', $data)) {
                 return false;
             }
-            try {
-                $this->checkRequiredFields($data);
-                if (empty($data['id'])) {
-                    $data['id'] = CodeHelper::timestampBasedId();
-                }
-                EventHelper::instance()->listen('ContentAddBefore', $data);
-                if ($this->service->saveContent($data)) {
-                    // 结果回调处理
-                    $result = true;
-                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
-                    if (false === $this->callback('_save_result', $result, $model, $data)) {
-                        return $result;
-                    }
-                    $this->success('添加成功');
-                } else {
-                    $this->error('添加失败');
-                }
-            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-
-                $this->error('添加失败：' . $e->getMessage());
+//            try {
+            $this->checkRequiredFields($data);
+            if (empty($data['id'])) {
+                $data['id'] = CodeHelper::timestampBasedId();
             }
+            EventHelper::instance()->listen('ContentAddBefore', $data);
+            if ($this->service->saveContent($data)) {
+                // 结果回调处理
+                $result = true;
+                EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
+                if (false === $this->callback('_save_result', $result, $model, $data)) {
+                    return $result;
+                }
+                $this->success('添加成功');
+            } else {
+                $this->error('添加失败');
+            }
+//            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+//
+//                $this->error('添加失败：' . $e->getMessage());
+//            }
         }
         if (empty($this->forms['fields'])) {
             $this->error('未设置 forms 参数');
@@ -440,7 +435,7 @@ abstract class ContentAdmin extends BaseAdmin
             }
             if ($this->request->isGet()) {
                 if (empty($record['tag'])) {
-                    $record['tag'] = $this->tagModel->getTagListByAid($id);
+                    $record['tag'] = $this->tagService->getTagListByAid($id);
                 }
                 if (empty($this->forms['fields'])) {
                     $this->error('未设置 forms 参数');
@@ -548,7 +543,7 @@ abstract class ContentAdmin extends BaseAdmin
             if (empty($data['id'])) {
                 $data['id'] = $model['id'];
             }
-            $this->tagModel->saveTagList($data);//保存tag记录
+            $this->tagService->saveTagList($data);//保存tag记录
         }
         $this->success('保存成功');
     }
