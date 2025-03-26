@@ -108,7 +108,6 @@ abstract class TagAdmin extends BaseAdmin
      */
     public function getAjaxList(): void
     {
-        dump(6995);
         $page = $this->request->get('page', 1);
         $keyword = $this->request->post('keyword', '');
         $add = $this->request->post('add', '');
