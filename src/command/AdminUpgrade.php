@@ -3,8 +3,8 @@
 namespace mowzs\lib\command;
 
 use app\common\util\SqlExecutor;
+use app\logic\system\UpgradeLogic;
 use app\model\system\SystemUpgradeLog;
-use app\service\system\UpgradeService;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -45,11 +45,11 @@ class AdminUpgrade extends Command
         }
         // 示例输出信息到控制台
         $output->writeln("开始执行管理员模块升级...");
-        $files = UpgradeService::instance()->getUpgradeFiles();
+        $files = UpgradeLogic::instance()->getUpgradeFiles();
         // 执行install_files中的SQL文件及类的run方法
         foreach ($files as $module => $moduleFiles) {
             foreach ($moduleFiles as $file) {
-                if (UpgradeService::instance()->isUpgrade($module, $file['filename'])) {
+                if (UpgradeLogic::instance()->isUpgrade($module, $file['filename'])) {
                     $output->writeln("升级文件 {$file['filename']} 已升级，跳过");
                     continue;
                 }
