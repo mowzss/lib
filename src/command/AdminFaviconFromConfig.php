@@ -2,6 +2,7 @@
 
 namespace mowzs\lib\command;
 
+use app\logic\system\SystemConfigLogic;
 use Exception;
 use mowzs\lib\helper\ImageToIcoHelper;
 use think\console\Command;
@@ -33,7 +34,7 @@ class AdminFaviconFromConfig extends Command
     protected function execute(Input $input, Output $output): void
     {
         // 获取配置值
-        $logoUrl = \app\model\system\SystemConfig::getConfigValue('square_logo');
+        $logoUrl = SystemConfigLogic::instance()->getConfigValue('square_logo');
 
         if (empty($logoUrl)) {
             $output->writeln("配置项 'square_logo' 的值为空，无法生成 favicon.");
