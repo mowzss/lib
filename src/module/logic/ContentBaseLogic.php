@@ -6,7 +6,9 @@ namespace mowzs\lib\module\logic;
 use app\logic\BaseLogic;
 use mowzs\lib\helper\ColumnCacheHelper;
 use think\Collection;
+use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\facade\Db;
 use think\Model;
@@ -48,6 +50,35 @@ class ContentBaseLogic extends BaseLogic
     protected function ContentModel(): Model
     {
         return $this->getModel($this->table);
+    }
+
+    /**
+     * 删除
+     * @param mixed $data 数据或模型实例
+     * @param bool $force 是否强制删除
+     * @return bool
+     * @throws DbException
+     * @throws Exception
+     * @throws DataNotFoundException
+     * @throws ModelNotFoundException
+     */
+    public function del(mixed $data, bool $force = false): bool
+    {
+        // 如果$data是模型实例，则转换为数组
+        if (is_object($data) && method_exists($data, 'toArray')) {
+            $data = $data->toArray();
+        }
+        // 确保$data是一个数组
+        if (!is_array($data)) {
+            throw new \InvalidArgumentException('The provided data must be an array or a model instance.');
+        }
+        // 检查是否存在'mid'键，并根据需要执行删除操作
+        if (!empty($data['mid'])) {
+            $this->ContentModel()->setSuffix("_{$data['mid']}")->find($data['id'])->delete();
+            $this->ContentModel()->setSuffix("_{$data['mid']}s")->find($data['id'])->delete();
+        }
+
+        return $this->ContentModel()->destroy($data['id'], $force);
     }
 
     /**
