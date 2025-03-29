@@ -673,7 +673,7 @@ abstract class ContentAdmin extends BaseAdmin
                         return false;
                     }
                     $records->each(function ($record) {
-                        return ContentBaseLogic::instance()->del($record);
+                        ContentBaseLogic::instance()->del($record);
                     });
                     if (false === $this->callback('_delete_result', $result, $ids)) {
                         return $result;

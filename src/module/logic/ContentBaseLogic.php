@@ -74,8 +74,8 @@ class ContentBaseLogic extends BaseLogic
         }
         // 检查是否存在'mid'键，并根据需要执行删除操作
         if (!empty($data['mid'])) {
-            $this->ContentModel()->setSuffix("_{$data['mid']}")->find($data['id'])->delete();
-            $this->ContentModel()->setSuffix("_{$data['mid']}s")->find($data['id'])->delete();
+            Db::name("{$this->table}_{$data['mid']}")->where('id', $data['id'])->useSoftDelete('delete_time', time())->delete();
+            Db::name("{$this->table}_{$data['mid']}s")->where('id', $data['id'])->useSoftDelete('delete_time', time())->delete();
         }
 
         return $this->ContentModel()->destroy($data['id'], $force);
