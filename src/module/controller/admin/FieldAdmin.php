@@ -371,10 +371,10 @@ abstract class FieldAdmin extends BaseAdmin
         if ($this->request->isPost()) {
             if (!empty($data['mid'])) {
                 if ($data['mid'] == '-1') {//栏目
-                    $sql_fields = $this->columnModel->getTableFields();
+                    $sql_fields = (new static::$columnModelClass())->getTableFields();
                 }
                 if ($data['mid'] >= 1) {//内容模型
-                    $sql_fields = $this->contentModel->setSuffix('_' . $data['mid'])->getTableFields();
+                    $sql_fields = (new static::$contentModelClass())->setSuffix('_' . $data['mid'])->getTableFields();
                 }
             }
             if ($this->request->action() == 'add' && in_array($data['name'], $this->reserve_field)) {
