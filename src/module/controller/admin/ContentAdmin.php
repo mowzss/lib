@@ -655,6 +655,10 @@ abstract class ContentAdmin extends BaseAdmin
      * 删除
      * @auth true
      * @return false|mixed|void
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws Exception
+     * @throws ModelNotFoundException
      */
     public function delete()
     {
