@@ -8,9 +8,16 @@ use mowzs\lib\Model;
 
 abstract class ColumnBaseModel extends Model
 {
-    protected $json = ['view_file'];
-
-    protected $jsonAssoc = true;
+    protected function getOptions(): array
+    {
+        return [
+            'type' => [
+                // 设置JSON字段的类型
+                'view_file' => 'json'
+            ],
+            'jsonAssoc' => true,  // 设置JSON数据返回数组
+        ];
+    }
 
     /**
      * @param array $where
