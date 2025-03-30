@@ -20,6 +20,9 @@ class Images extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string
     {
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
         $required = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('images', [
             'name' => $name,
