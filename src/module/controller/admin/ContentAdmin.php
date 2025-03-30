@@ -346,27 +346,27 @@ abstract class ContentAdmin extends BaseAdmin
             if (false === $this->callback('_save_filter', $data)) {
                 return false;
             }
-//            try {
-            $this->checkRequiredFields($data);
-            if (empty($data['id'])) {
-                $data['id'] = CodeHelper::timestampBasedId();
-            }
-            EventHelper::instance()->listen('ContentAddBefore', $data);
-            if ($this->service->saveContent($data)) {
-                // 结果回调处理
-                $result = true;
-                EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
-                if (false === $this->callback('_save_result', $result, $model, $data)) {
-                    return $result;
+            try {
+                $this->checkRequiredFields($data);
+                if (empty($data['id'])) {
+                    $data['id'] = CodeHelper::timestampBasedId();
                 }
-                $this->success('添加成功');
-            } else {
-                $this->error('添加失败');
+                EventHelper::instance()->listen('ContentAddBefore', $data);
+                if ($this->service->saveContent($data)) {
+                    // 结果回调处理
+                    $result = true;
+                    EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
+                    if (false === $this->callback('_save_result', $result, $model, $data)) {
+                        return $result;
+                    }
+                    $this->success('添加成功');
+                } else {
+                    $this->error('添加失败');
+                }
+            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+
+                $this->error('添加失败：' . $e->getMessage());
             }
-//            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-//
-//                $this->error('添加失败：' . $e->getMessage());
-//            }
         }
         if (empty($this->forms['fields'])) {
             $this->error('未设置 forms 参数');
@@ -395,6 +395,7 @@ abstract class ContentAdmin extends BaseAdmin
             $data = ContentSaveFilterUtil::instance()->setProcessingData($data);
             $data['list'] = !empty($data['list']) ?: time();
         }
+
     }
 
     /**

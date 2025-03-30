@@ -443,12 +443,9 @@ class ContentBaseLogic extends BaseLogic
         if (empty($data['list'])) {
             $data['list'] = time();
         }
-        $content = $this->ContentModel()->find($data['id']);
-        $content->save($data);
-        $content_m = $this->ContentModel()->setSuffix("_{$data['mid']}")->find($data['id']);
-        $content_m->save($data);
-        $content_ms = $this->ContentModel()->setSuffix("_{$data['mid']}s")->find($data['id']);
-        $content_ms->allowField(['id', 'content'])->save($data);
+        $this->ContentModel()->where($where)->update($data);
+        Db::name("{$this->table}_{$data['mid']}")->where($where)->update($data);
+        Db::name("{$this->table}_{$data['mid']}s")->where($where)->update($data);
         return true;
     }
 }
