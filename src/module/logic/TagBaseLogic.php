@@ -59,7 +59,6 @@ class TagBaseLogic extends BaseLogic
         $this->table = $this->modelName . '_tag';
         $this->infoTable = $this->modelName . '_tag_info';
         $this->contentTable = $this->modelName . '_content';
-        $this->model = $this->getModel($this->table);
         $this->contentModel = $this->getModel($this->contentTable);
         $this->tagInfoModel = $this->getModel($this->infoTable);
     }
@@ -93,7 +92,7 @@ class TagBaseLogic extends BaseLogic
         if (empty($tid)) {
             throw new Exception('标签ID不能为空');
         }
-        $info = $this->model->findOrEmpty($tid);
+        $info = $this->tagModel()->findOrEmpty($tid);
         if ($info->isEmpty()) {
             throw new Exception('标签不存在！');
         }
@@ -104,12 +103,13 @@ class TagBaseLogic extends BaseLogic
      * 通过名称获取tagID
      * @param string $title
      * @return int|mixed|string
+     * @throws Exception
      */
     public function getTagIdByTitle(string $title = ''): mixed
     {
-        $id = $this->model->where('title', $title)->value('id');
+        $id = $this->tagModel()->where('title', $title)->value('id');
         if (empty($id)) {
-            $id = $this->model->insertGetId(['title' => $title, 'status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
+            $id = $this->tagModel()->insertGetId(['title' => $title, 'status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
         }
         return $id;
     }
@@ -168,7 +168,7 @@ class TagBaseLogic extends BaseLogic
         if (empty($tid)) {
             throw new Exception('TAG ID 不能为空');
         }
-        $query = $this->tagInfoModel->where(['tid' => $tid]);
+        $query = $this->tagInfoModel()->where(['tid' => $tid]);
         if (!empty($mid)) {
             $query = $query->where(['mid' => $mid]);
         }
