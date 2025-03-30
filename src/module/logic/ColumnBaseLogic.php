@@ -17,12 +17,6 @@ class ColumnBaseLogic extends BaseLogic
     protected string $modelName;
 
     /**
-     * 当前模型
-     * @var Model
-     */
-    protected Model $model;
-
-    /**
      * 数据表
      * @var string
      */
@@ -36,9 +30,16 @@ class ColumnBaseLogic extends BaseLogic
     {
         $this->modelName = $this->getModule();
         $this->table = $this->modelName . '_column';
-        $this->model = $this->getModel($this->table);
     }
 
+    /**
+     * @return Model
+     * @throws Exception
+     */
+    public function columnModel()
+    {
+        return $this->getModel($this->table);
+    }
 
     /**
      * 通过id获取mid
@@ -47,7 +48,7 @@ class ColumnBaseLogic extends BaseLogic
      */
     public function getMidById(int|string $id): mixed
     {
-        return $this->model->where('id', $id)->value('mid');
+        return $this->columnModel()->where('id', $id)->value('mid');
     }
 
     /**
@@ -61,7 +62,7 @@ class ColumnBaseLogic extends BaseLogic
         if (empty($id)) {
             throw new Exception('栏目ID不能为空');
         }
-        $info = $this->model->findOrEmpty($id);
+        $info = $this->columnModel()->findOrEmpty($id);
         if ($info->isEmpty()) {
             throw new Exception('栏目不存在');
         }
