@@ -444,8 +444,8 @@ class ContentBaseLogic extends BaseLogic
             $data['list'] = time();
         }
         $this->ContentModel()->where($where)->update($data);
-        Db::name("{$this->table}_{$data['mid']}")->where($where)->update($data);
-        Db::name("{$this->table}_{$data['mid']}s")->where($where)->update($data);
+        Db::name("{$this->table}_{$data['mid']}")->where($where)->replace()->insert($data);
+        Db::name("{$this->table}_{$data['mid']}s")->where($where)->replace()->insert($data);
         return true;
     }
 }
