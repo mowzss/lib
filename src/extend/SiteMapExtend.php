@@ -1,8 +1,8 @@
 <?php
 
-namespace mowzs\lib\helper;
+namespace mowzs\lib\extend;
 
-class SiteMapHelper
+class SiteMapExtend
 {
     /**
      * 节点参数
