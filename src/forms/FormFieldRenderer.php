@@ -65,7 +65,7 @@ class FormFieldRenderer
 
         try {
             $renderer = self::create($type);
-            return $renderer->render($name, $label, $value, $option, $required, $ext);
+            return $renderer->render($name, $label, $value, $option, (bool)$required, $ext);
         } catch (\Exception $e) {
             // 记录错误日志并返回空字符串或默认渲染
             Log::error("Error rendering field: " . $e->getMessage());

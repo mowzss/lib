@@ -7,6 +7,7 @@ use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use mowzs\lib\helper\DataHelper;
 use mowzs\lib\helper\ViewFileHelper;
+use mowzs\lib\module\logic\FieldBaseLogic;
 use think\App;
 use think\Model;
 
@@ -160,5 +161,8 @@ abstract class ColumnAdmin extends BaseAdmin
                 ]
             ]
         ];
+        $this->forms['fields'] = array_merge($this->forms['fields'], FieldBaseLogic::instance()->getColumnFields());
     }
+
+
 }
