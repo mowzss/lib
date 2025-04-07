@@ -32,7 +32,7 @@ class HttpResponse
         $getArray = $this->app->request->get();
 
         // 匹配 in=wap、in=pc 或 in=xx
-        if (!empty($this->app->request->get('in')) && isset($getArray['in'])) {
+        if (!empty($this->app->request->get('in'))) {
             unset($getArray['in']);
             //组合新地址
             $url = $this->app->request->baseUrl();
@@ -42,8 +42,8 @@ class HttpResponse
             return redirect($url, 301);
         }
         //检测请求地址是否包含index.php 如果包含则跳转为无index.php
-        if (strpos($this->app->request->url(), 'index.php') !== false) {
-            $url = str_replace('index.php', '', $this->app->request->url());
+        if (str_contains($this->app->request->url(), 'index.php')) {
+            $url = str_replace('/index.php', '', $this->app->request->url(true));
             return redirect($url, 301);
         }
 
