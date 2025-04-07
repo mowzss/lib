@@ -168,6 +168,7 @@ abstract class Controller
      * @param int $wait
      * @param array $header
      * @param int $code
+     * @param string $tpl
      * @return void
      */
     private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, int $code = 0, $tpl = ''): void
