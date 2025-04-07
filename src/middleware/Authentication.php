@@ -58,7 +58,7 @@ class Authentication
             if ($newQueryString) {
                 $newUrl .= '?' . $newQueryString;
             }
-            return redirect($newUrl);
+            return redirect($newUrl, 301);
         }
         return $next($request);
     }
