@@ -44,6 +44,22 @@ class Authentication
                 return redirect($login_url);
             }
         }
+        // 获取查询字符串
+        $queryString = $this->app->request->query();
+
+        // 匹配 in=wap、in=pc 或 in=xx
+        if (!empty($this->app->request->get('in'))) {
+            // 移除 in=xx 参数
+            $newQueryString = preg_replace('/(^|&)in=(wap|pc|[^&]+)/', '', $queryString);
+            $newQueryString = trim($newQueryString, '&'); // 去掉多余的 &
+
+            // 构造新的 URL
+            $newUrl = $request->baseUrl();
+            if ($newQueryString) {
+                $newUrl .= '?' . $newQueryString;
+            }
+            return redirect($newUrl);
+        }
         return $next($request);
     }
 }
