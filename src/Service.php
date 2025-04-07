@@ -30,6 +30,8 @@ class Service extends BaseService
         $this->app->middleware->add(\think\middleware\SessionInit::class);
         // 注册权限中间件
         $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
+        //注册请求响应过滤中间件
+        $this->app->middleware->add(\mowzs\lib\middleware\HttpResponse::class, 'route');
         // 注册命令行
         $this->registerCommand();
     }
