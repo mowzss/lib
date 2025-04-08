@@ -2,7 +2,7 @@
 
 namespace mowzs\lib\module\logic;
 
-use app\logic\BaseLogic;
+use mowzs\lib\BaseLogic;
 use think\Exception;
 
 class FieldBaseLogic extends BaseLogic

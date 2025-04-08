@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace mowzs\lib\module\logic;
 
-use app\logic\BaseLogic;
+use mowzs\lib\BaseLogic;
 use think\Exception;
 use think\facade\Log;
 use think\Model;

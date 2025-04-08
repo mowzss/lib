@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace mowzs\lib\module\logic;
 
-use app\logic\BaseLogic;
+use mowzs\lib\BaseLogic;
 use mowzs\lib\helper\ColumnCacheHelper;
 use think\Collection;
 use think\db\exception\DataNotFoundException;
