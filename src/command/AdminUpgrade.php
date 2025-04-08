@@ -3,8 +3,8 @@
 namespace mowzs\lib\command;
 
 use app\common\util\SqlExecutor;
+use app\logic\system\UpgradeLogic;
 use app\model\system\SystemUpgradeLog;
-use mowzs\lib\system\UpgradeLogic;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
