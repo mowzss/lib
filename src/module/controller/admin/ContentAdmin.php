@@ -83,6 +83,8 @@ abstract class ContentAdmin extends BaseAdmin
      */
     protected TagBaseLogic $tagService;
 
+    protected array $where;
+
 
     public function __construct(App $app)
     {
@@ -120,6 +122,7 @@ abstract class ContentAdmin extends BaseAdmin
     public function index(): string
     {
         $params = $this->request->param();
+        $this->where = ['mid' => $this->request->param('mid', (new static::$modelModelClass())->where('id', '>', 0)->value('id'))];
         //  返回数据表格数据
         if ($this->isLayTable()) {
             // 构建查询
@@ -160,7 +163,6 @@ abstract class ContentAdmin extends BaseAdmin
             'right_button' => CrudUtil::getButtonHtml($this->tables['right_button'] ?? []),
             'top_button' => CrudUtil::getButtonHtml($this->tables['top_button'] ?? [], 'top'),
             'model_list' => $this->modelModel->where('id', '>', 0)->column('title', 'id'),
-            'where' => $this->bulidWhere(),
         ]);
 
         //渲染页面
