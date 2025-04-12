@@ -164,7 +164,6 @@ abstract class ContentAdmin extends BaseAdmin
             'top_button' => CrudUtil::getButtonHtml($this->tables['top_button'] ?? [], 'top'),
             'model_list' => $this->modelModel->where('id', '>', 0)->column('title', 'id'),
         ]);
-
         //渲染页面
         try {
             return $this->fetch();
@@ -288,7 +287,8 @@ abstract class ContentAdmin extends BaseAdmin
                     'url' => hurl('content/index', ['id' => '__id__']),
                     'name' => '预览',
                     'class' => 'layui-btn-primary layui-border-green',//默认包含 layui-btn layui-btn-xs
-                ], [
+                ],
+                [
                     'event' => '',
                     'type' => 'data-open',
                     'url' => urls('edit', ['id' => '__id__']),
