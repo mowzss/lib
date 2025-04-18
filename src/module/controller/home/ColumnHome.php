@@ -8,6 +8,7 @@ use mowzs\lib\helper\SystemHelper;
 use mowzs\lib\module\logic\ColumnBaseLogic;
 use think\App;
 use think\Exception;
+use think\template\exception\TemplateNotFoundException;
 
 class ColumnHome extends BaseHome
 {
@@ -52,10 +53,17 @@ class ColumnHome extends BaseHome
             'id' => $info['id'],
         ]);
         if (SystemHelper::instance()->isMobile()) {
-            $view_file = $info['view_file']['wap'] ?? 'index';
+            $view_file = $info['view_file']['wap'] ?: 'index_' . $info['mid'];
         } else {
-            $view_file = $info['view_file']['pc'] ?? 'index';
+            $view_file = $info['view_file']['pc'] ?: 'index_' . $info['mid'];
         }
-        return $this->fetch($view_file);
+
+        //渲染页面
+        try {
+            return $this->fetch($view_file);
+        } catch (TemplateNotFoundException $exception) {
+            //模板不存在时 尝试读取公用模板
+            return $this->fetch();
+        }
     }
 }

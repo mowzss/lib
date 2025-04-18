@@ -8,6 +8,7 @@ use app\model\user\UserFav;
 use mowzs\lib\helper\AuthHelper;
 use mowzs\lib\module\logic\ContentBaseLogic;
 use think\Exception;
+use think\template\exception\TemplateNotFoundException;
 
 class ContentHome extends BaseHome
 {
@@ -57,7 +58,13 @@ class ContentHome extends BaseHome
             'id' => $id,
             'cid' => $info['cid'],
         ]);
-        return $this->fetch();
+        //渲染页面
+        $view_file = 'index_' . $info['mid'];
+        try {
+            return $this->fetch($view_file);
+        } catch (TemplateNotFoundException $exception) {
+            return $this->fetch();
+        }
     }
 
     /**
