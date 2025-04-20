@@ -53,9 +53,9 @@ class ColumnHome extends BaseHome
             'id' => $info['id'],
         ]);
         if (SystemHelper::instance()->isMobile()) {
-            $view_file = $info['view_file']['wap'] ?: 'index_' . $info['mid'];
+            $view_file = $info['view_file']['wap'] ?? 'index_' . $info['mid'];
         } else {
-            $view_file = $info['view_file']['pc'] ?: 'index_' . $info['mid'];
+            $view_file = $info['view_file']['pc'] ?? 'index_' . $info['mid'];
         }
 
         //渲染页面
