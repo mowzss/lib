@@ -187,9 +187,14 @@ class ContentBaseLogic extends BaseLogic
                 $query->whereOr($orCondition);
             }
         }
-        // 排序
-        $query->order($options['order'], $options['by'])->whereNull('delete_time');
 
+        //处理排序
+        if ($options['order'] == "rand()") {
+            $query->orderRaw('rand()')->whereNull('delete_time');
+        } else {
+            $query->order($options['order'], $options['by'])->whereNull('delete_time');
+        }
+        
         // 如果是分页查询
         if ($options['paginate']) {
             $return = $query
@@ -335,10 +340,12 @@ class ContentBaseLogic extends BaseLogic
                 $query = $query->whereOr($orCondition);
             }
         }
-
-        // 排序
-        $query = $query->order($params['order'], $params['by'])->field('mid,id');
-
+        //处理排序
+        if ($params['order'] == 'rand()') {
+            $query = $query->orderRaw('rand()')->field('mid,id');
+        } else {
+            $query = $query->order($params['order'], $params['by'])->field('mid,id');
+        }
         // 如果是分页查询
         if ($params['paginate']) {
             $return = $query
