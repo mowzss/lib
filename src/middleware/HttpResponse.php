@@ -42,7 +42,7 @@ class HttpResponse
             return redirect($url, 301);
         }
         //检测请求地址是否包含index.php 如果包含则跳转为无index.php
-        if (str_contains($this->app->request->url(), 'index.php')) {
+        if (str_contains($this->app->request->url(), 'index.php') && $this->app->request->isGet()) {
             $url = str_replace('/index.php', '', $this->app->request->url(true));
             return redirect($url, 301);
         }
