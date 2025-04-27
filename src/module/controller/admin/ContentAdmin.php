@@ -354,7 +354,7 @@ abstract class ContentAdmin extends BaseAdmin
                     $data['id'] = CodeHelper::timestampBasedId();
                 }
                 EventHelper::instance()->listen('ContentAddBefore', $data);
-                if ($this->service->saveContent($data)) {
+                if ($this->service->addContent($data)) {
                     // 结果回调处理
                     $result = true;
                     EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);
@@ -516,7 +516,7 @@ abstract class ContentAdmin extends BaseAdmin
                     $data['id'] = CodeHelper::timestampBasedId();
                 }
                 EventHelper::instance()->listen('ContentAddBefore', $data);
-                if ($this->service->saveContent($data)) {
+                if ($this->service->addContent($data)) {
                     // 结果回调处理
                     $result = true;
                     EventHelper::instance()->triggerNoReturn('ContentAddAfter', $data);

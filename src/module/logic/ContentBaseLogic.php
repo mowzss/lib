@@ -194,7 +194,7 @@ class ContentBaseLogic extends BaseLogic
         } else {
             $query->order($options['order'], $options['by'])->whereNull('delete_time');
         }
-        
+
         // 如果是分页查询
         if ($options['paginate']) {
             $return = $query
@@ -413,7 +413,7 @@ class ContentBaseLogic extends BaseLogic
      * @return int|string
      * @throws Exception
      */
-    public function saveContent($data): int|string
+    public function addContent($data): int|string
     {
         if (empty($data['mid'])) {
             throw new Exception('模型id不能为空');
@@ -451,8 +451,10 @@ class ContentBaseLogic extends BaseLogic
             $data['list'] = time();
         }
         $this->ContentModel()->where($where)->update($data);
+
         Db::name("{$this->table}_{$data['mid']}")->where($where)->replace()->insert($data);
         Db::name("{$this->table}_{$data['mid']}s")->where($where)->replace()->insert($data);
         return true;
     }
+    
 }
