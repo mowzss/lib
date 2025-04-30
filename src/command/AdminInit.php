@@ -36,7 +36,9 @@ class AdminInit extends Command
         $commands = [
             'vendor:publish',
             'admin:moduleInit',
-            'admin:favicon'
+            'admin:favicon',
+            'optimize:route',
+            'optimize:schema'
         ];
         if ($this->app->config->get('happy.installed', false)) {
             $commands[] = 'admin:upgrade';
