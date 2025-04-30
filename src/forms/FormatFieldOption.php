@@ -27,7 +27,7 @@ class FormatFieldOption
         try {
             // 检测并执行方法
             return ExecutorHelper::runIfValid($inputString);
-        } catch (Exception) {
+        } catch (Exception $exception) {
             // 去除字符串两端的空白字符
             $inputString = trim($inputString);
             // 使用换行符分割字符串，得到每一行
