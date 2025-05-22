@@ -78,7 +78,7 @@ class TagBaseLogic extends BaseLogic
      */
     public function tagInfoModel()
     {
-        return $this->getModel($this->table)->setSuffix('_info');
+        return $this->getModel($this->infoTable);
     }
 
     /**

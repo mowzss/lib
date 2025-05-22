@@ -546,6 +546,7 @@ abstract class ContentAdmin extends BaseAdmin
             if (empty($data['id'])) {
                 $data['id'] = $model['id'];
             }
+
             $this->tagService->saveTagList($data);//保存tag记录
         }
         $this->success('保存成功');

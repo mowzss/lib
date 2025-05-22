@@ -30,7 +30,6 @@ class AipNlp extends BaseBaiduAip
                 $tags[] = $value['tag'];
             }
         }
-
         return implode($delimiter, $tags);
     }
 
