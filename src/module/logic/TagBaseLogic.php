@@ -172,7 +172,7 @@ class TagBaseLogic extends BaseLogic
         if (!empty($mid)) {
             $query = $query->where(['mid' => $mid]);
         }
-        return $query->field('aid')->paginate($rows)
+        return $query->field('aid')->order('id desc')->paginate($rows)
             ->each(function ($item) {
                 $content = ContentBaseLogic::instance([$this->getModule()])->getInfo($item['aid']);
                 foreach ($content as $key => $value) {
