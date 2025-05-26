@@ -87,7 +87,7 @@ abstract class BaseLogic
      * @param bool $new 是否强制创建新实例
      * @return static 返回当前类的实例
      */
-    public static function instance(array $var = [], bool $new = false): static
+    public static function instance(array $var = [], bool $new = true): static
     {
         // 创建实例
         return Container::getInstance()->make(static::class, $var, $new);

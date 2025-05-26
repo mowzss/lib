@@ -53,16 +53,16 @@ class Lists extends TaglibBase
         } else {
             //指定cid的情况下 可以通过cid获取mid
             if (!empty($config['cid'])) {
-                $params['mid'] = ColumnBaseLogic::instance([$module])->getMidById($config['cid']);
+                $params['mid'] = ColumnBaseLogic::instance([$module], true)->getMidById($config['cid']);
             }
         }
         if (!empty($config['cid'])) {
-            $config['cid'] = ColumnBaseLogic::instance([$module])->getColumnSonsById($config['cid']);
+            $config['cid'] = ColumnBaseLogic::instance([$module], true)->getColumnSonsById($config['cid']);
             $params['where'][] = ['cid', 'in', $config['cid']];
         }
         $name = $config['name'];
 
-        $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode(array_merge($params, $config)));
+        $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params) . json_encode($config));
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
             $return = ContentBaseLogic::instance([$module], true)->getList($params);

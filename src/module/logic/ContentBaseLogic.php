@@ -197,12 +197,11 @@ class ContentBaseLogic extends BaseLogic
 
         // 如果是分页查询
         if ($options['paginate']) {
-            $return = $query
-                ->paginate([
-                    'list_rows' => $options['rows'],
-                    'page' => request()->param('page') ?: 1, // 获取当前页码，默认第一页
-                    'query' => request()->get(),
-                ]);
+            $return = $query->paginate([
+                'list_rows' => $options['rows'],
+                'page' => request()->param('page') ?: 1, // 获取当前页码，默认第一页
+                'query' => request()->get(),
+            ]);
         } else {
             // 不是分页查询，则限制查询条数
             $return = $query->limit($options['rows'])->select();
@@ -456,5 +455,5 @@ class ContentBaseLogic extends BaseLogic
         Db::name("{$this->table}_{$data['mid']}s")->where($where)->replace()->insert($data);
         return true;
     }
-    
+
 }
