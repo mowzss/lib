@@ -59,13 +59,15 @@ class ColumnBaseLogic extends BaseLogic
      */
     public function getColumnSonsById(int|string $id): array
     {
-        // 构建缓存键名
-        $sons_ids = $this->columnModel()->where(function ($query) use ($id) {
-            $query->where('pid', $id)->whereOr('id', $id);
-        })->column('id');
-        if (empty($sons_ids)) {
-            return [$id];
-        }
-        return $sons_ids;
+        $cache_key = $this->getModule() . '_column_sons_by_id_' . $id;
+        return $this->app->cache->remember($cache_key, function () use ($id) {
+            $sons_ids = $this->columnModel()->where(function ($query) use ($id) {
+                $query->where('pid', $id)->whereOr('id', $id);
+            })->column('id');
+            if (empty($sons_ids)) {
+                return [$id];
+            }
+            return $sons_ids;
+        }, mt_rand(3000, 9000));
     }
 }
