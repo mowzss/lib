@@ -161,6 +161,13 @@ class ContentBaseLogic extends BaseLogic
         if (!empty($item['module_dir'])) {
             $item['url'] = hurl("{$item['module_dir']}/content/index", ['id' => $item['id']]);
         }
+
+        $item['is_new'] = isWithinDays($item['create_time']);
+        if (isWithinDays($item['create_time'], 15) && $item['view'] > 100) {
+            $item['is_hot'] = true;
+        } else {
+            $item['is_hot'] = false;
+        }
         return $item;
     }
 
@@ -401,6 +408,7 @@ class ContentBaseLogic extends BaseLogic
         $data->each(function ($item) use ($column_data) {
             // 添加分类标题
             $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
+            $item['column_url'] = urls($this->getModule() . '/column/index', ['id' => $item['id']]);
             $item['module_dir'] = $this->getModule();
             return $this->formatContentData($item);
         });
