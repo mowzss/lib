@@ -109,7 +109,7 @@ class TagBaseLogic extends BaseLogic
     {
         $id = $this->tagModel()->where('title', $title)->value('id');
         if (empty($id)) {
-            $id = $this->tagModel()->insertGetId(['title' => $title, 'status' => 0, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
+            $id = $this->tagModel()->insertGetId(['title' => $title, 'status' => 1, 'list' => time(), 'uid' => UserHelper::instance()->getUserId('0')]);
         }
         return $id;
     }
