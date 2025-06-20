@@ -425,19 +425,23 @@ class ContentBaseLogic extends BaseLogic
         if (empty($data['mid'])) {
             throw new Exception('模型id不能为空');
         }
-        $model = $this->ContentModel()->create($data);
-        if ($data['create_time']) {
-            $data['create_time'] = time();
+        try {
+            $model = $this->ContentModel()->create($data);
+            if ($data['create_time']) {
+                $data['create_time'] = time();
+            }
+            if ($data['update_time']) {
+                $data['update_time'] = time();
+            }
+            if ($data['list']) {
+                $data['list'] = time();
+            }
+            Db::name("{$this->table}_{$data['mid']}")->insert($data);
+            Db::name("{$this->table}_{$data['mid']}s")->insert($data);
+            return $data['id'];
+        } catch (Exception $e) {
+            return $e->getMessage();
         }
-        if ($data['update_time']) {
-            $data['update_time'] = time();
-        }
-        if ($data['list']) {
-            $data['list'] = time();
-        }
-        Db::name("{$this->table}_{$data['mid']}")->insert($data);
-        Db::name("{$this->table}_{$data['mid']}s")->insert($data);
-        return $model->id;
     }
 
     /**
