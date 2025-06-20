@@ -23,7 +23,7 @@ class Hp extends \think\template\TagLib
         ],
         //分类
         'column' => [
-            'attr' => 'name,module,where,item,rows，val,cache,status,whereor,order,by,offset,length,key,mod',
+            'attr' => 'name,module,where,item,rows，val,cache,status,whereor,order,by,offset,length,key,mod,sub',
             'level' => 3,
             'close' => 1,
         ]
@@ -97,6 +97,7 @@ class Hp extends \think\template\TagLib
         $order = $tag['order'] ?? 0;
         $by = $tag['by'] ?? 0;
         $val = $tag['val'] ?? false;
+        $sub = $tag['sub'] ?? true;
         $vals = $tag['val'] ?? $tag['name'];
         $mod = $tag['mod'] ?? '2';
         $offset = !empty($tag['offset']) && is_numeric($tag['offset']) ? intval($tag['offset']) : 0;
@@ -111,6 +112,7 @@ class Hp extends \think\template\TagLib
         "name"=>"' . $name . '",
         "order"=>"' . $order . '",
         "by"=>"' . $by . '",
+        "sub"=>"' . $sub . '",
         "where"=>"' . $where . '",
         "whereor"=>"' . $whereor . '",
         "cache"=>' . $cache . ',

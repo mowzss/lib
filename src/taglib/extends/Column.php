@@ -12,6 +12,7 @@ class Column extends TaglibBase
     public function run(string $module, mixed $config): mixed
     {
         $this->module = $module;
+        $sub = boolval($config['sub']);
         if (!empty($config['where'])) {
             $config['where'] = $this->parseWhereArray($config['where']);
         }
@@ -54,7 +55,11 @@ class Column extends TaglibBase
                 $item['url'] = urls($this->module . '/column/index', ['id' => $item['id']]);
                 return $item;
             });
-            $return = DataHelper::instance()->arrToTree($list->toArray(), 0, 'id', 'pid', 'sub');
+            if (empty($sub)) {
+                $return = $list->toArray();
+            } else {
+                $return = DataHelper::instance()->arrToTree($list->toArray(), 0, 'id', 'pid', 'sub');
+            }
             if ($config['cache'] != -1) {
                 $this->app->cache->set($cacheName, $return, $config['cache']);
             }
