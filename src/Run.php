@@ -82,11 +82,10 @@ class Run
     public static function initApp(string $env = 'home'): void
     {
         // 执行HTTP应用并响应
-        $http = self::init()->setEnvName($env);
-        $http = $http->http;
+        $http = self::init()->setEnvName($env)->http;
         $response = $http->run();
         $response->send();
         $http->end($response);
     }
-    
+
 }

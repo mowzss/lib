@@ -6,6 +6,7 @@ namespace mowzs\lib\middleware;
 use mowzs\lib\helper\AuthHelper;
 use think\App;
 use think\exception\HttpResponseException;
+use think\Request;
 
 class Authentication
 {
@@ -24,8 +25,9 @@ class Authentication
         $this->app = $app;
     }
 
-    public function handle($request, \Closure $next)
+    public function handle(Request $request, \Closure $next)
     {
+        dump($this->app->request);
         if ($this->app->config->get('route.controller_layer') == 'admin') {
             //权限校验 或 忽略控制器
             if (AuthHelper::instance()->cheek()) {
