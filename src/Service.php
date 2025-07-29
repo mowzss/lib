@@ -34,6 +34,10 @@ class Service extends BaseService
         $this->app->middleware->add(\mowzs\lib\middleware\HttpResponse::class, 'route');
         // 注册命令行
         $this->registerCommand();
+        //注册多模块路由
+        $this->app->event->listen('RouteLoaded', function () {
+            $this->app->route->auto();
+        });
     }
 
     /**
