@@ -11,12 +11,8 @@ use think\console\Output;
 
 class AdminUpgrade extends Command
 {
-    /**
-     * @return void
-     */
     protected function configure(): void
     {
-        // 设置命令名称、描述和帮助信息
         $this->setName('admin:upgrade')
             ->setDescription('执行相关数据表的升级操作，包括但不限于数据库结构更新、默认数据添加等。')
             ->setHelp(
@@ -30,68 +26,69 @@ class AdminUpgrade extends Command
     }
 
     /**
-     * 执行命令逻辑
-     *
-     * @param Input $input 输入对象
-     * @param Output $output 输出对象
+     * @param Input $input
+     * @param Output $output
      * @return int|void
-     * @throws \Exception
+     * @throws \think\Exception
      */
     protected function execute(Input $input, Output $output)
     {
         if (!$this->app->config->get('happy.installed', false)) {
-            $output->writeln("系统未安装，请先安装系统后再执行此命令。");
+            $output->writeln("<error>系统未安装，请先安装系统后再执行此命令。</error>");
             return 0;
         }
-        // 示例输出信息到控制台
-        $output->writeln("开始执行管理员模块升级...");
+        
+        $output->writeln("<info>开始执行管理员模块升级...</info>");
+
         $files = UpgradeLogic::instance()->getUpgradeFiles();
-        // 执行install_files中的SQL文件及类的run方法
+
         foreach ($files as $module => $moduleFiles) {
             foreach ($moduleFiles as $file) {
                 if (UpgradeLogic::instance()->isUpgrade($module, $file['filename'])) {
-                    $output->writeln("升级文件 {$file['filename']} 已升级，跳过");
+                    // 添加颜色：comment = 黄色
+                    $output->writeln("<comment>升级文件 {$file['filename']} 已升级，跳过</comment>");
                     continue;
                 }
-                //删除文件后缀.php
+
                 $className = str_replace('.php', '', $file['filename']);
                 $class = "\\app\common\upgrade\\{$module}\\{$className}";
+
                 if (is_string($file['filename']) && !class_exists($class)) {
-                    // 假设是SQL文件
                     $sqlFilePath = DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $file['filename'];
                     try {
-                        // 创建SqlExecutor实例并执行SQL文件
                         $sqlExecutor = new SqlExecutor();
                         $sqlExecutor->execute($sqlFilePath, 'update');
-                        $output->writeln("执行SQL文件成功: " . $sqlFilePath);
+                        // 成功：绿色
+                        $output->writeln("<info>执行SQL文件成功: " . $sqlFilePath . "</info>");
                     } catch (\Exception $e) {
-                        $output->writeln("执行SQL文件失败: " . $e->getMessage());
+                        // 错误：红色
+                        $output->writeln("<error>执行SQL文件失败: " . $e->getMessage() . "</error>");
                         throw new \Exception('执行SQL文件失败: ' . $e->getMessage());
                     }
                 } elseif (is_string($file['filename']) && class_exists($class)) {
-                    $output->writeln("类 {$file['filename']} 开始执行");
-                    // 假设是类名
+                    $output->writeln("类 {$file['filename']} 开始执行"); // 可选加颜色
                     try {
-                        // 实例化类并调用run方法
                         $instance = app($class);
                         if (method_exists($instance, 'run')) {
                             $instance->run();
-                            $output->writeln("执行类 {$file['filename']} 成功");
+                            $output->writeln("<info>执行类 {$file['filename']} 成功</info>");
                         } else {
-                            $output->writeln("类 {$file['filename']} 没有 run 方法");
+                            $output->writeln("<error>类 {$file['filename']} 没有 run 方法</error>");
                             throw new \Exception("类 {$file['filename']} 没有 run 方法");
                         }
                     } catch (\Exception $e) {
-                        $output->writeln("运行安装类失败: " . $e->getMessage());
+                        $output->writeln("<error>运行安装类失败: " . $e->getMessage() . "</error>");
                         throw new \Exception('运行安装类失败: ' . $e->getMessage());
                     }
                 }
-                SystemUpgradeLog::create(['module' => $module, 'filename' => $file['filename'],]);
-                $output->writeln("升级文件 {$file['filename']} 成功");
+
+                SystemUpgradeLog::create(['module' => $module, 'filename' => $file['filename']]);
+                // 成功提示加绿色
+                $output->writeln("<info>升级文件 {$file['filename']} 成功</info>");
             }
         }
 
-
-        $output->writeln("管理员模块升级完成！");
+        // 最终完成提示加绿色
+        $output->writeln("<info>管理员模块升级完成！</info>");
     }
 }
