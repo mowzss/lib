@@ -12,8 +12,8 @@ class MailLogHandler implements LogHandlerInterface
 
     public function __construct($to, $subject = '系统日志')
     {
-        $this->to = $to;
-        $this->subject = $subject;
+        $this->to = $to ?: config('log.to');
+        $this->subject = $subject ?: config('log.subject');
     }
 
     /**
