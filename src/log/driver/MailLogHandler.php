@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\log\handler;
+namespace mowzs\lib\log\driver;
 
 use think\contract\LogHandlerInterface;
 use think\facade\Queue;
