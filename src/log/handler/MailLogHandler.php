@@ -5,10 +5,10 @@ namespace mowzs\lib\log\handler;
 use think\contract\LogHandlerInterface;
 use think\facade\Queue;
 
-abstract class MailLogHandler implements LogHandlerInterface
+class MailLogHandler implements LogHandlerInterface
 {
-    protected $to;
-    protected $subject;
+    protected mixed $to;
+    protected mixed $subject;
 
     public function __construct($to, $subject = '系统日志')
     {
