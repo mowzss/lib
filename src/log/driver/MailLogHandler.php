@@ -3,6 +3,7 @@
 namespace mowzs\lib\log\driver;
 
 use think\contract\LogHandlerInterface;
+use think\facade\Config;
 use think\facade\Queue;
 
 class MailLogHandler implements LogHandlerInterface
@@ -12,8 +13,9 @@ class MailLogHandler implements LogHandlerInterface
 
     public function __construct($to, $subject = '系统日志')
     {
-        $this->to = $to ?: config('log.to');
-        $this->subject = $subject ?: config('log.subject');
+        $config = Config::get('log.channels.email');
+        $this->to = $to ?: $config['to'];
+        $this->subject = $subject ?: $config['subject'];
     }
 
     /**
