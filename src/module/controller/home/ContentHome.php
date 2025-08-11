@@ -48,8 +48,9 @@ class ContentHome extends BaseHome
             if ($info['status'] <= 0) {
                 $this->error('内容审核中');
             }
+            
         } catch (\Exception $e) {
-            $this->app->log->error('获取文章信息失败:' . $e->getMessage());
+            $this->app->log->error('获取文章信息失败:' . PHP_EOL . '文章ID:' . $info['id'] . PHP_EOL . '模块:' . $this->request->layer() . PHP_EOL . $e->getMessage());
             $this->error('出错了!');
         }
         ContentBaseLogic::instance()->updateInc($id, 'view', 1, $info['mid']);
