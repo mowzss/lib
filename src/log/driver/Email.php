@@ -4,9 +4,10 @@ namespace mowzs\lib\log\driver;
 
 use think\contract\LogHandlerInterface;
 use think\facade\Config;
+use think\facade\Log;
 use think\facade\Queue;
 
-class MailLogHandler implements LogHandlerInterface
+class Email implements LogHandlerInterface
 {
     protected mixed $to;
     protected mixed $subject;
@@ -29,7 +30,8 @@ class MailLogHandler implements LogHandlerInterface
         // 将日志消息转换为字符串
         $body = is_array($log) ? json_encode($log, JSON_UNESCAPED_UNICODE) : (string)$log;
         try {
-            Queue::push(\app\job\system\SendEmailJob::class, ['to' => $this->to, 'subject' => $this->subject, 'body' => $body, 'isHtml' => true]);
+            Log::error('发件人：' . $this->to . '，主题：' . $this->subject . '，内容：' . $body);
+            Queue::push(\app\job\system\SendEmailJob::class, ['to' => $this->to, 'subject' => $this->subject, 'body' => $body, 'isHtml' => false]);
             return true;
         } catch (\Exception $e) {
             return false;
