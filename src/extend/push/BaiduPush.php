@@ -83,7 +83,13 @@ class BaiduPush
             curl_close($ch);
 
             if ($error) {
-                return ['success' => false, 'msg' => 'CURL 错误: ' . $error, 'result' => null];
+                return [
+                    'success' => false,
+                    'msg' => 'CURL 错误: ' . $error,
+                    'result' => null,
+                    'post' => $apiUrl,
+                    'urls' => $urls,
+                ];
             }
 
             $result = json_decode($response, true);
@@ -93,7 +99,9 @@ class BaiduPush
                 return [
                     'success' => true,
                     'msg' => "推送成功，成功提交 {$result['success']} 个链接。",
-                    'result' => $result
+                    'result' => $result,
+                    'post' => $apiUrl,
+                    'urls' => $urls,
                 ];
             } else {
                 // 处理错误情况（如 token 错误、site 不匹配、配额超限等）
@@ -101,14 +109,19 @@ class BaiduPush
                 return [
                     'success' => false,
                     'msg' => "推送失败：{$errorMsg}",
-                    'result' => $result
+                    'result' => $result,
+                    'post' => $apiUrl,
+                    'urls' => $urls,
                 ];
             }
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'msg' => '推送异常：' . $e->getMessage(),
-                'result' => null
+                'result' => null,
+                'post' => $apiUrl,
+                'urls' => $urls,
+
             ];
         }
     }
