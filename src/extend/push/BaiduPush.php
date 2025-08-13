@@ -20,7 +20,7 @@ class BaiduPush
     public function __construct($site = null, $token = null)
     {
         try {
-            $this->site = $site ?: sys_config('baidu_push_token');
+            $this->site = $site ?: sys_config('baidu_push_domain');
             $this->token = $token ?: sys_config('baidu_push_token');
         } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
             throw new Exception('百度推送配置 site 或 token 获取失败');
