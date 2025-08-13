@@ -63,6 +63,7 @@ abstract class Controller
         $this->request = $this->app->request;
         $this->get = $this->request->get();
         $this->post = $this->request->post();
+        $this->app->event->trigger('ControllerInit');
         // 控制器初始化
         $this->initialize();
     }
