@@ -307,7 +307,8 @@ abstract class FieldAdmin extends BaseAdmin
                     'values' => [
                         ['value' => 'radio', 'field' => ['options']],
                         ['value' => 'checkbox', 'field' => ['options']],
-                        ['value' => 'select', 'field' => ['options']]
+                        ['value' => 'select', 'field' => ['options']],
+                        ['value' => 'xmselect', 'field' => ['options']]
                     ]
                 ],
                 [
