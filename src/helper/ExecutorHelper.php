@@ -52,6 +52,7 @@ class ExecutorHelper
     public static function runIfValid(string $string): mixed
     {
         if (self::isValidString($string)) {
+
             return self::execute($string);
         } else {
             throw new Exception("字符串格式不正确，应为 'Namespace\ClassName@methodName[@param1,param2]' 的形式");
