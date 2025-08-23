@@ -62,52 +62,45 @@ class Page extends Bootstrap
      * 页码按钮
      * @return string
      */
+    /**
+     * 页码按钮（修复版：支持省略号，避免过多页码显示）
+     * @return string
+     */
+    /**
+     * 只显示当前页前后各两页，共最多5个页码
+     * @return string
+     */
+    /**
+     * 只显示当前页前后各三页，共最多7个页码
+     * @return string
+     */
     protected function getLinks(): string
     {
         if ($this->simple) {
             return '';
         }
 
-        $block = [
-            'first' => null,
-            'slider' => null,
-            'last' => null,
-        ];
+        $current = $this->currentPage();
+        $last = $this->lastPage;
+        $side = 3; // 前后各显示3页
 
-        $side = 3;
-        $window = $side * 2;
+        // 计算页码范围
+        $start = max(1, $current - $side);
+        $end = min($last, $current + $side);
 
-        if ($this->lastPage < $window + 6) {
-            $block['first'] = $this->getUrlRange(1, $this->lastPage);
-        } elseif ($this->currentPage <= $window) {
-            $block['first'] = $this->getUrlRange(1, $window + 1);
-            //$block['last'] = $this->getUrlRange($this->lastPage - 1, $this->lastPage);
-        } elseif ($this->currentPage > ($this->lastPage - $window)) {
-            //$block['first'] = $this->getUrlRange(1, 1);
-            $block['last'] = $this->getUrlRange($this->lastPage - $window, $this->lastPage);
-        } else {
-            //$block['first'] = $this->getUrlRange(1, 1);
-            $block['slider'] = $this->getUrlRange($this->currentPage - $side, $this->currentPage + $side);
-            //$block['last'] = $this->getUrlRange($this->lastPage, $this->lastPage);
+        // 如果总页数不足7页，从第1页开始补齐
+        if ($end - $start + 1 < 7) {
+            // 尝试向左或向右扩展
+            if ($start == 1) {
+                $end = min($last, $start + 6); // 确保至少7个页码
+            } elseif ($end == $last) {
+                $start = max(1, $end - 6); // 确保至少7个页码
+            }
         }
 
-        $html = '';
+        $urls = $this->getUrlRange($start, $end);
 
-        if (is_array($block['first'])) {
-            $html .= $this->getUrlLinks($block['first']);
-        }
-
-        if (is_array($block['slider'])) {
-            //$html .= $this->getDots();
-            $html .= $this->getUrlLinks($block['slider']);
-        }
-
-        if (is_array($block['last'])) {
-            //$html .= $this->getDots();
-            $html .= $this->getUrlLinks($block['last']);
-        }
-
-        return $html;
+        return $this->getUrlLinks($urls);
     }
 
     /**
