@@ -18,6 +18,7 @@
     "yzh52521/flysystem-oss": "^3.0",
     "overtrue/flysystem-cos": "^5.0",
     "overtrue/flysystem-qiniu": "^3.0",
+    "overtrue/pinyin": "^5.0",
     "topthink/think-queue": "^3.0",
     "phpmailer/phpmailer": "^6.9",
     "symfony/process": ">=4.2",
