@@ -45,4 +45,20 @@ class FieldBaseLogic extends BaseLogic
         });
         return $data->toArray();
     }
+
+    /**
+     * 获取模型搜索字段
+     * @param $mid
+     * @return array
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getSearchFields($mid): array
+    {
+        $where = [];
+        $data = $this->model()->where('mid', $mid)->whereJsonContains('extend->search->is_open', 1)->select();
+        return $data->toArray();
+    }
 }
