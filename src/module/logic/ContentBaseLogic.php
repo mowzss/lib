@@ -464,7 +464,12 @@ class ContentBaseLogic extends BaseLogic
         $this->ContentModel()->where($where)->update($data);
 
         Db::name("{$this->table}_{$data['mid']}")->where($where)->update($data);
-        Db::name("{$this->table}_{$data['mid']}s")->where($where)->update($data);
+        $contents = Db::name("{$this->table}_{$data['mid']}s")->where($where)->value('id');
+        if (empty($contents)) {
+            Db::name("{$this->table}_{$data['mid']}s")->insert($data);
+        } else {
+            Db::name("{$this->table}_{$data['mid']}s")->where($where)->update($data);
+        }
         return true;
     }
 
