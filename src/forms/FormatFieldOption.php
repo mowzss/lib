@@ -45,7 +45,7 @@ class FormatFieldOption
                 $parts = explode('|', $line); // 限制分割次数为2，以确保只获取第一个键值对
                 list($key, $value) = $parts;
 //                // 添加到结果数组
-                if ($key == 'searchUrl') {
+                if ($key == 'searchUrl' || $key == 'dataInit') {
                     //判断value是否包含@
                     if (str_contains($value, '@')) {
                         $values = explode('@', $value);
