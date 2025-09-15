@@ -3,6 +3,7 @@
 namespace mowzs\lib\module\logic;
 
 use mowzs\lib\BaseLogic;
+use mowzs\lib\forms\FormatFieldOption;
 use think\Exception;
 
 class FieldBaseLogic extends BaseLogic
@@ -58,7 +59,35 @@ class FieldBaseLogic extends BaseLogic
     public function getSearchFields($mid): array
     {
         $where = [];
-        $data = $this->model()->where('mid', $mid)->whereJsonContains('extend->search->is_open', 1)->select();
+        $data = $this->model()->where('mid', $mid)->where('type', 'in', ['select', 'radio', 'checkbox'])->where('extend->search->is_open', 1)->select();
         return $data->toArray();
+    }
+
+    /**
+     * @param $mid
+     * @return array
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function buildFieldsUrls($mid): array
+    {
+        $fields = $this->getSearchFields($mid);
+        $data = [];
+        foreach ($fields as $key => $item) {
+            $data[$key]['name'] = $item['name'];
+            $data[$key]['title'] = $item['title'];
+            if (!is_array($item['options'])) {
+                $options = FormatFieldOption::strToArray($item['options']);
+            }
+            if (!empty($options) && is_array($options)) {
+                foreach ($options as $k => $v) {
+                    $data[$key]['urls'][$k]['title'] = $v;
+                    $data[$key]['urls'][$k]['url'] = url_with('', [$item['name'] => $k]);
+                }
+            }
+        }
+        return $data;
     }
 }
