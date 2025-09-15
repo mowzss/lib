@@ -17,7 +17,7 @@ class Hp extends \think\template\TagLib
         ],
         //数据列表
         'lists' => [
-            'attr' => 'name,module,mid,where,item,rows,page,val,cache,order,by,cid,status,whereor,week,month,count,get',
+            'attr' => 'name,module,mid,where,item,rows,page,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field',
             'level' => 3,
             'close' => 1,
         ],
@@ -153,6 +153,7 @@ class Hp extends \think\template\TagLib
         $rows = $tag['rows'] ?? 20;
         $module = $tag['module'];
         $page = isset($tag['page']) ? 1 : 0;
+        $filter = isset($tag['filter']) ? 1 : 0;
         $status = $tag['status'] ?? 1;
         $pageNum = isset($tag['pagenum']) ? 1 : 0;
         $cache = $tag['cache'] ?? 360;
@@ -163,6 +164,7 @@ class Hp extends \think\template\TagLib
         $order = $tag['order'] ?? 0;
         $by = $tag['by'] ?? 0;
         $whereor = $tag['whereor'] ?? '';
+        $sort_field = $tag['sort_field'] ?? '';
         $week = $tag['week'] ?? '';
         $month = $tag['month'] ?? '';
         $count = $tag['count'] ?? 'count';
@@ -173,12 +175,14 @@ class Hp extends \think\template\TagLib
         $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
         "module" => "' . $module . '",
         "page"=>' . $page . ',
+        "filter"=>' . $filter . ',
         "status"=>' . $status . ',
         "pagenum"=>' . $pageNum . ',
         "rows"=>' . $rows . ',
         "name"=>"' . $name . '",
         "where"=>"' . $where . '",
         "whereor"=>"' . $whereor . '",
+        "sort_field"=>"' . $sort_field . '",
         "month"=>"' . $month . '",
         "week"=>"' . $week . '",
         "cache"=>' . $cache . ',

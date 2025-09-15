@@ -28,26 +28,31 @@ class Lists extends TaglibBase
         $params['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');
         $params['rows'] = $config['rows'] ?? 20;
         $params['paginate'] = $config['page'] ?? false;
+        //条件
         if (!empty($config['where'])) {
             $params['where'] = $this->parseWhereArray($config['where']);
         }
+        //或条件
         if (!empty($config['whereor'])) {
             $params['whereor'] = $this->parseWhereArray($config['whereor']);
         }
-
+        //状态
         if (empty($config['status'])) {
             $params['where'][] = ['status', '=', 1];
         } else {
             $params['where'][] = ['status', '=', $config['status']];
         }
+        //排序方式
         if (!preg_match('/( asc| desc)$/i', $config['order'])) {
             $params['by'] = $config['by'] ?? 'desc';
         }
+        //排序字段
         if (stristr($config['order'], 'rand()')) {
             $params['order'] = 'rand()';
         } elseif (!empty($config['order'])) {
             $params['order'] = $config['order'];
         }
+        //筛选模型
         if (!empty($config['mid'])) {
             $params['mid'] = $config['mid'];
         } else {
@@ -56,9 +61,23 @@ class Lists extends TaglibBase
                 $params['mid'] = ColumnBaseLogic::instance([$module], true)->getMidById($config['cid']);
             }
         }
+        //筛选栏目
         if (!empty($config['cid'])) {
             $config['cid'] = ColumnBaseLogic::instance([$module], true)->getColumnSonsById($config['cid']);
             $params['where'][] = ['cid', 'in', $config['cid']];
+        }
+        //筛选字段
+        if (!empty($config['filter'])) {
+            $where = $this->getModelWhere($config['mid']);
+            $params['where'] = $this->mergeWhereConditions($params['where'], $where);
+        }
+        //自定义排序
+        if (!empty($config['sort_field'])) {
+            $data = $this->parseSort($config['sort_field']);
+            if (!empty($data)) {
+                $params['order'] = $data['order'];
+                $params['by'] = $data['by'];
+            }
         }
         $name = $config['name'];
 

@@ -64,6 +64,21 @@ class FieldBaseLogic extends BaseLogic
     }
 
     /**
+     * 获取模型搜索字段key
+     * @param $mid
+     * @return array
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getSearchFieldsKey($mid): array
+    {
+        $data = $this->getSearchFields($mid);
+        return array_column($data, 'name');
+    }
+
+    /**
      * @param $mid
      * @return array
      * @throws Exception
@@ -82,11 +97,26 @@ class FieldBaseLogic extends BaseLogic
                 $options = FormatFieldOption::strToArray($item['options']);
             }
             if (!empty($options) && is_array($options)) {
+                $request_param = $this->request->param($item['name']);
                 foreach ($options as $k => $v) {
                     $data[$key]['urls'][$k]['title'] = $v;
                     $data[$key]['urls'][$k]['url'] = url_with('', [$item['name'] => $k]);
+                    if ($request_param == $k) {
+                        $data[$key]['urls'][$k]['active'] = true;
+                    } else {
+                        $data[$key]['urls'][$k]['active'] = false;
+                    }
                 }
+                $params = $this->request->param();
+                unset($params[$item['name']]);
+                $urls_all = [
+                    'title' => '全部',
+                    'url' => urls('', $params),
+                    'active' => !$request_param,
+                ];
+                array_unshift($data[$key]['urls'], $urls_all);
             }
+
         }
         return $data;
     }
