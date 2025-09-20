@@ -4,6 +4,9 @@ namespace mowzs\lib\module\logic;
 
 use mowzs\lib\BaseLogic;
 use mowzs\lib\forms\FormatFieldOption;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 use think\Exception;
 
 class FieldBaseLogic extends BaseLogic
@@ -58,9 +61,31 @@ class FieldBaseLogic extends BaseLogic
      */
     public function getSearchFields($mid): array
     {
-        $where = [];
-        $data = $this->model()->where('mid', $mid)->where('type', 'in', ['select', 'radio', 'checkbox'])->where('extend->search->is_open', 1)->select();
-        return $data->toArray();
+        return $this->getFieldsInfoByType((int)$mid, ['select', 'radio', 'checkbox'], ['extend->search->is_open' => 1]);
+    }
+
+    /**
+     * @param int $mid
+     * @param array|string $fields
+     * @param array $ext_where
+     * @return array
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws Exception
+     * @throws ModelNotFoundException
+     */
+    public function getFieldsInfoByType(int $mid, array|string $fields = '', array $ext_where = []): array
+    {
+        if (is_array($fields)) {
+            $where[] = ['type', 'in', $fields];
+        } else {
+            $where = ['type' => $fields];
+        }
+        $data = $this->model()->where('mid', $mid)->where($where);
+        if (!empty($ext_where)) {
+            $data = $data->where($ext_where);
+        }
+        return $data->select()->toArray();
     }
 
     /**

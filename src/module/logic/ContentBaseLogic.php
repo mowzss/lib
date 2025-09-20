@@ -4,15 +4,13 @@ declare(strict_types=1);
 namespace mowzs\lib\module\logic;
 
 use mowzs\lib\BaseLogic;
-use mowzs\lib\helper\ColumnCacheHelper;
-use think\Collection;
+use mowzs\lib\forms\FormatFieldOption;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\facade\Db;
 use think\Model;
-use think\Paginator;
 
 /**
  * 模块内容公用服务
@@ -134,7 +132,7 @@ class ContentBaseLogic extends BaseLogic
      * @param array $item 单组数据
      * @return array
      */
-    public function formatContentData(array $item)
+    public function formatContentData(array $item): array
     {
         $item['_images'] = $item['images'] ?? '';
         $item['_image'] = $item['image'] ?? '';
@@ -168,7 +166,57 @@ class ContentBaseLogic extends BaseLogic
         } else {
             $item['is_hot'] = false;
         }
+        $this->formatModelFields($item);
         return $item;
+    }
+
+    /**
+     * @param $item
+     * @return void
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws Exception
+     * @throws ModelNotFoundException
+     */
+    protected function formatModelFields(&$item): void
+    {
+        if (!empty($item['mid'])) {
+            $fields = FieldBaseLogic::instance()->getFieldsInfoByType($item['mid'], ['select', 'radio', 'checkbox']);
+            foreach ($fields as $field) {
+                if (!is_array($field['options'])) {
+                    $field_options = FormatFieldOption::strToArray($field['options']);
+                } else {
+                    $field_options = $field['options'];
+                }
+                if ($field['type'] == 'select' || $field['type'] == 'radio') {
+                    $item['_' . $field['name']] = $item[$field['name']];
+                    $item[$field['name']] = $field_options[$item[$field['name']]] ?? '';
+                    $item['full_' . $field['name']] = [
+                        'title' => $field['title'],
+                        '_value' => $item['_' . $field['name']],
+                        'options' => $field_options,
+                        'value' => $item[$field['name']],
+                    ];
+                } elseif ($field['type'] == 'checkbox' && !empty($item[$field['name']])) {
+                    $item['_' . $field['name']] = $item[$field['name']];
+                    $checkbox_array = str2arr($item[$field['name']]);
+                    $checkbox_values = [];
+                    foreach ($checkbox_array as $checkbox) {
+                        $checkbox_values[] = $field_options[$checkbox] ?: '';
+                    }
+                    $item[$field['name']] = implode(' ', array_map(function ($rs) {
+                        return "<span>$rs</span>";
+                    }, $checkbox_values));
+                    $item['full_' . $field['name']] = [
+                        'title' => $field['title'],
+                        '_value' => $item['_' . $field['name']],
+                        'options' => $field_options,
+                        'value' => $item[$field['name']],
+                        'values' => $checkbox_values,
+                    ];
+                }
+            }
+        }
     }
 
     /**
@@ -408,7 +456,7 @@ class ContentBaseLogic extends BaseLogic
         $data->each(function ($item) use ($column_data) {
             // 添加分类标题
             $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
-            $item['column_url'] = urls($this->getModule() . '/column/index', ['id' => $item['id']]);
+            $item['column_url'] = urls($this->getModule() . ' / column / index', ['id' => $item['id']]);
             $item['module_dir'] = $this->getModule();
             return $this->formatContentData($item);
         });
