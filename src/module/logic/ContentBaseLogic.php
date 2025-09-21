@@ -5,12 +5,14 @@ namespace mowzs\lib\module\logic;
 
 use mowzs\lib\BaseLogic;
 use mowzs\lib\forms\FormatFieldOption;
+use mowzs\lib\helper\ColumnCacheHelper;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\facade\Db;
 use think\Model;
+use think\Paginator;
 
 /**
  * 模块内容公用服务
@@ -221,10 +223,15 @@ class ContentBaseLogic extends BaseLogic
 
     /**
      * @param array $options
-     * @return Collection|\think\model\Collection|Paginator
+     * @return \think\Collection|\think\Paginator
+     * @throws DataNotFoundException
      * @throws DbException
+     * @throws ModelNotFoundException
+     * @throws \Throwable
+     *
+     *
      */
-    public function getListByMid(array $options): Paginator|Collection|\think\model\Collection
+    public function getListByMid(array $options): \think\Collection|\think\Paginator
     {
 // 构建表名
         $content = $this->getModule() . '_content_' . $options['mid'];
@@ -440,12 +447,10 @@ class ContentBaseLogic extends BaseLogic
 
     /**
      * 格式化查询结果，添加分类和标签信息
-     *
-     * @param Collection|Paginator $data 查询结果对象
+     * @param $data
      * @return void
-     * @throws \Throwable
      */
-    protected function formatData(\think\Collection|\think\Paginator &$data): void
+    protected function formatData(&$data): void
     {
         try {
             $column_data = ColumnCacheHelper::instance()->getColumnsByIdTitle($this->getModule());
