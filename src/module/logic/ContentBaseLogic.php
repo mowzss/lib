@@ -461,7 +461,7 @@ class ContentBaseLogic extends BaseLogic
         $data->each(function ($item) use ($column_data) {
             // 添加分类标题
             $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
-            $item['column_url'] = urls($this->getModule() . ' / column / index', ['id' => $item['id']]);
+            $item['column_url'] = urls($this->getModule() . '/column/index', ['id' => $item['cid']]);
             $item['module_dir'] = $this->getModule();
             return $this->formatContentData($item);
         });
