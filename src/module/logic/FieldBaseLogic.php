@@ -132,7 +132,7 @@ class FieldBaseLogic extends BaseLogic
                         $data[$key]['urls'][$k]['active'] = false;
                     }
                 }
-                $params = $this->request->param();
+                $params = $this->request->rule()->getVars();
                 unset($params[$item['name']]);
                 $urls_all = [
                     'title' => '全部',
