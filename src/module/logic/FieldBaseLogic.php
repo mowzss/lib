@@ -133,7 +133,7 @@ class FieldBaseLogic extends BaseLogic
                     }
                 }
                 $params = $this->request->rule()->getVars();
-                unset($params[$item['name']]);
+                $params[$item['name']] = 0;
                 $urls_all = [
                     'title' => '全部',
                     'url' => urls('', $params),
