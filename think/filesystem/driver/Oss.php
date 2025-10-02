@@ -16,7 +16,7 @@ class Oss extends Driver
     /**
      * @var PathNormalizer
      */
-    protected $normalizer;
+    protected PathNormalizer $normalizer;
 
     /**
      * @return OssAdapter
