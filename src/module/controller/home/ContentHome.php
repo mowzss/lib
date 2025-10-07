@@ -32,10 +32,10 @@ class ContentHome extends BaseHome
     /**
      * 内容详情
      * @param int $id
-     * @return string
+     * @return string|void
      * @throws Exception
      */
-    public function index(int $id = 0): string
+    public function index(int $id = 0)
     {
         if (empty($id)) {
             $this->error('内容ID不能为空');
