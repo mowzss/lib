@@ -3,7 +3,6 @@
 namespace think\filesystem\driver;
 
 use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\PathNormalizer;
 use League\Flysystem\WhitespacePathNormalizer;
 use Overtrue\Flysystem\Qiniu\QiniuAdapter;
 use think\db\exception\DataNotFoundException;
@@ -14,9 +13,9 @@ use think\filesystem\Driver;
 class Qiniu extends Driver
 {
     /**
-     * @var PathNormalizer
+     * @var WhitespacePathNormalizer|null
      */
-    protected $normalizer;
+    protected ?WhitespacePathNormalizer $normalizer = null;
 
     protected function createAdapter(): FilesystemAdapter
     {
@@ -33,7 +32,10 @@ class Qiniu extends Driver
         return new QiniuAdapter($qiniuConfig['access_key'], $qiniuConfig['secret_key'], $qiniuConfig['bucket'], $qiniuConfig['domain']);
     }
 
-    protected function normalizer()
+    /**
+     * @return WhitespacePathNormalizer
+     */
+    protected function normalizer(): WhitespacePathNormalizer
     {
         if (!$this->normalizer) {
             $this->normalizer = new WhitespacePathNormalizer();

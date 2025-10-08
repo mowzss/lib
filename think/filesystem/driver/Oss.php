@@ -3,7 +3,6 @@
 namespace think\filesystem\driver;
 
 use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\PathNormalizer;
 use League\Flysystem\WhitespacePathNormalizer;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -14,9 +13,9 @@ use yzh52521\Flysystem\Oss\OssAdapter;
 class Oss extends Driver
 {
     /**
-     * @var PathNormalizer
+     * @var WhitespacePathNormalizer|null
      */
-    protected PathNormalizer $normalizer;
+    protected ?WhitespacePathNormalizer $normalizer = null;
 
     /**
      * @return OssAdapter
@@ -39,7 +38,10 @@ class Oss extends Driver
         return new OssAdapter($ossConfig);
     }
 
-    protected function normalizer()
+    /**
+     * @return WhitespacePathNormalizer|null
+     */
+    protected function normalizer(): WhitespacePathNormalizer|null
     {
         if (!$this->normalizer) {
             $this->normalizer = new WhitespacePathNormalizer();
