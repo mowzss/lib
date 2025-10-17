@@ -442,7 +442,6 @@ abstract class FieldAdmin extends BaseAdmin
         if (!in_array($fields['type'], ['TEXT', 'BLOB', 'GEOMETRY', 'JSON', 'LONGTEXT'])) {
             $fields['default'] = (bool)$data['extend']['field']['default'];
         }
-        p($fields);
         return $fields;
     }
 
