@@ -133,6 +133,10 @@ class ContentBaseLogic extends BaseLogic
      * 格式化内容数据
      * @param array $item 单组数据
      * @return array
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws Exception
+     * @throws ModelNotFoundException
      */
     public function formatContentData(array $item): array
     {

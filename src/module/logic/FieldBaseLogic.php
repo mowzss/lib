@@ -85,7 +85,7 @@ class FieldBaseLogic extends BaseLogic
         if (!empty($ext_where)) {
             $data = $data->where($ext_where);
         }
-        return $data->select()->toArray();
+        return $data->cache(true, 3600)->select()->toArray();
     }
 
     /**
