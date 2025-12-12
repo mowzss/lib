@@ -6,6 +6,9 @@ namespace mowzs\lib\command;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 
 /**
  * 系统初始化命令
@@ -29,6 +32,9 @@ class AdminInit extends Command
      * @param Input $input
      * @param Output $output
      * @return int
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
     protected function execute(Input $input, Output $output): int
     {
@@ -44,13 +50,14 @@ class AdminInit extends Command
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
         }
+        if (!empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
+            $commands[] = 'cloud:upload-static';
+        }
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
             $commandOutput = $this->app->console->call($commandName)->fetch();
             $output->writeln($commandOutput);
         }
-
-        $output->writeln('<comment>All initialization steps have been completed.</comment>');
         return 0;
     }
 }
