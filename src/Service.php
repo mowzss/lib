@@ -10,6 +10,9 @@ use mowzs\lib\command\AdminModuleInit;
 use mowzs\lib\command\AdminUpgrade;
 use mowzs\lib\task\command\TaskRun;
 use mowzs\lib\task\command\TaskSchedule;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 use think\Service as BaseService;
 
 /**
@@ -42,12 +45,29 @@ class Service extends BaseService
 
     /**
      * @return array
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
     protected function tplReplaceString(): array
     {
-        $data = [
-            '__STATIC__' => '/static',
-        ];
+        switch (sys_config('static_upload')) {
+            case 'oss':
+                $data = [
+                    '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
+                ];
+                break;
+            case 'qiniu':
+                $data = [
+                    '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
+                ];
+                break;
+            default:
+                $data = [
+                    '__STATIC__' => '/static',
+                ];
+                break;
+        }
         return array_merge($this->app->config->get('view.tpl_replace_string', []), $data);
     }
 
