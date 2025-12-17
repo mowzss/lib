@@ -172,7 +172,7 @@ abstract class Controller
      * @param string $tpl
      * @return void
      */
-    private function ret(?string $url, mixed $msg, mixed $data, int $wait, array $header, int $code = 0, $tpl = ''): void
+    private function response(?string $url, mixed $msg, mixed $data, int $wait, array $header, int $code = 1, string $tpl = ''): void
     {
         if (is_null($url) && isset($_SERVER["HTTP_REFERER"])) {
             $url = $_SERVER["HTTP_REFERER"];
@@ -193,7 +193,7 @@ abstract class Controller
         if ('html' == strtolower($type)) {
             $type = 'view';
             if (empty($tpl)) {
-                if ($code == 0) {
+                if ($code == 1) {
                     $tpl = $this->app->config->get('app.dispatch_success_tmpl');
                 } else {
                     $tpl = $this->app->config->get('app.dispatch_error_tmpl');
@@ -222,7 +222,7 @@ abstract class Controller
             $data = $msg;
             $msg = 'ok';
         }
-        $this->ret($url, $msg, $data, $wait, $header);
+        $this->response($url, $msg, $data, $wait, $header);
     }
 
     /**
@@ -237,7 +237,7 @@ abstract class Controller
      */
     protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): void
     {
-        $this->ret($url, $msg, $data, $wait, $header, 1);
+        $this->response($url, $msg, $data, $wait, $header, 0);
     }
 
     /**
@@ -250,7 +250,7 @@ abstract class Controller
     protected function closeSite(string $msg = '', ?string $url = null, int $wait = 3): void
     {
         $tpl = $this->app->config->get('app.dispatch_close_site_tmpl');
-        $this->ret($url, $msg, [], $wait, [], 1, $tpl);
+        $this->response($url, $msg, [], $wait, [], 0, $tpl);
     }
 
     /**
