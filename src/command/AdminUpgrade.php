@@ -28,24 +28,23 @@ class AdminUpgrade extends Command
     /**
      * @param Input $input
      * @param Output $output
-     * @return int|void
+     * @return int
      * @throws \think\Exception
      */
-    protected function execute(Input $input, Output $output)
+    protected function execute(Input $input, Output $output): int
     {
         if (!$this->app->config->get('happy.installed', false)) {
             $output->writeln("<error>系统未安装，请先安装系统后再执行此命令。</error>");
             return 0;
         }
-        
+
         $output->writeln("<info>开始执行管理员模块升级...</info>");
 
-        $files = UpgradeLogic::instance()->getUpgradeFiles();
+        $files = UpgradeLogic::instance()->getUpgradeFiles(); // 已在内部排序
 
         foreach ($files as $module => $moduleFiles) {
             foreach ($moduleFiles as $file) {
                 if (UpgradeLogic::instance()->isUpgrade($module, $file['filename'])) {
-                    // 添加颜色：comment = 黄色
                     $output->writeln("<comment>升级文件 {$file['filename']} 已升级，跳过</comment>");
                     continue;
                 }
@@ -53,20 +52,20 @@ class AdminUpgrade extends Command
                 $className = str_replace('.php', '', $file['filename']);
                 $class = "\\app\common\upgrade\\{$module}\\{$className}";
 
-                if (is_string($file['filename']) && !class_exists($class)) {
+                if (!class_exists($class)) {
+                    // 处理 SQL 文件
                     $sqlFilePath = DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $file['filename'];
                     try {
                         $sqlExecutor = new SqlExecutor();
                         $sqlExecutor->execute($sqlFilePath, 'update');
-                        // 成功：绿色
-                        $output->writeln("<info>执行SQL文件成功: " . $sqlFilePath . "</info>");
+                        $output->writeln("<info>执行SQL文件成功: {$sqlFilePath}</info>");
                     } catch (\Exception $e) {
-                        // 错误：红色
-                        $output->writeln("<error>执行SQL文件失败: " . $e->getMessage() . "</error>");
+                        $output->writeln("<error>执行SQL文件失败: {$e->getMessage()}</error>");
                         throw new \Exception('执行SQL文件失败: ' . $e->getMessage());
                     }
-                } elseif (is_string($file['filename']) && class_exists($class)) {
-                    $output->writeln("类 {$file['filename']} 开始执行"); // 可选加颜色
+                } else {
+                    // 处理 PHP 升级类
+                    $output->writeln("类 {$file['filename']} 开始执行");
                     try {
                         $instance = app($class);
                         if (method_exists($instance, 'run')) {
@@ -77,18 +76,21 @@ class AdminUpgrade extends Command
                             throw new \Exception("类 {$file['filename']} 没有 run 方法");
                         }
                     } catch (\Exception $e) {
-                        $output->writeln("<error>运行安装类失败: " . $e->getMessage() . "</error>");
-                        throw new \Exception('运行安装类失败: ' . $e->getMessage());
+                        $output->writeln("<error>运行升级类失败: {$e->getMessage()}</error>");
+                        throw new \Exception('运行升级类失败: ' . $e->getMessage());
                     }
                 }
 
-                SystemUpgradeLog::create(['module' => $module, 'filename' => $file['filename']]);
-                // 成功提示加绿色
-                $output->writeln("<info>升级文件 {$file['filename']} 成功</info>");
+                SystemUpgradeLog::create([
+                    'module' => $module,
+                    'filename' => $file['filename'],
+                    'create_time' => time(),
+                ]);
+                $output->writeln("<info>升级文件 {$file['filename']} 记录完成</info>");
             }
         }
 
-        // 最终完成提示加绿色
-        $output->writeln("<info>管理员模块升级完成！</info>");
+        $output->writeln("<info>✅ 管理员模块升级完成！</info>");
+        return 0;
     }
 }
