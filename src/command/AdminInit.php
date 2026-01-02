@@ -49,8 +49,12 @@ class AdminInit extends Command
         if ($this->app->config->get('happy.installed', false)) {
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
-            if (function_exists('sys_config') && !empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
-                $commands[] = 'cloud:upload-static';
+            try {
+                if (empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
+                    $commands[] = 'cloud:upload-static';
+                }
+            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
+                $commands[] = [];
             }
         }
 
