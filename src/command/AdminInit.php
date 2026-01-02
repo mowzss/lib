@@ -42,13 +42,15 @@ class AdminInit extends Command
         $commands = [
             'vendor:publish',
             'admin:moduleInit',
-            'admin:favicon',
-            'optimize:route',
-            'optimize:schema',
+
         ];
         if ($this->app->config->get('happy.installed', false)) {
+            $commands[] = 'admin:favicon';
+            $commands[] = 'optimize:route';
+            $commands[] = 'optimize:schema';
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
+
             try {
                 if (empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
                     $commands[] = 'cloud:upload-static';
