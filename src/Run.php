@@ -72,6 +72,9 @@ class Run
             Helper::instance()->app->env->load(self::getRunEnv());
             return Helper::instance()->app->env->get('APP_DEBUG');
         }
+        if (!Helper::instance()->app->config->get('happy.installed', false)) {
+            return true;
+        }
         return false;
     }
 
