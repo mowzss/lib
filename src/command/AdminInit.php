@@ -49,10 +49,11 @@ class AdminInit extends Command
         if ($this->app->config->get('happy.installed', false)) {
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
+            if (!empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
+                $commands[] = 'cloud:upload-static';
+            }
         }
-        if (!empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
-            $commands[] = 'cloud:upload-static';
-        }
+
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
             $commandOutput = $this->app->console->call($commandName)->fetch();
