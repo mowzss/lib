@@ -51,6 +51,9 @@ class Service extends BaseService
      */
     protected function tplReplaceString(): array
     {
+        if (!$this->app->config->get('happy.installed', false)) {
+            return [];
+        }
         switch (sys_config('static_upload')) {
             case 'oss':
                 $data = [
