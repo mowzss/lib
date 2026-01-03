@@ -52,7 +52,7 @@ class Service extends BaseService
     protected function tplReplaceString(): array
     {
         if (!$this->app->config->get('happy.installed', false)) {
-            array_merge($this->app->config->get('view.tpl_replace_string', []), [
+            return array_merge($this->app->config->get('view.tpl_replace_string', []), [
                 '__STATIC__' => '/static',
             ]);
         }
