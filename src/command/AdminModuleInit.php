@@ -22,7 +22,7 @@ class AdminModuleInit extends Command
      * 配置命令
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('admin:moduleInit')
             ->setDescription('从已安装的happy-module类型的包中初始化自定义模块配置。')
@@ -278,7 +278,7 @@ class AdminModuleInit extends Command
      * @param int $mode 目录权限模式，默认为 0755
      * @return bool 创建是否成功
      */
-    public function ensureDirectoryExists($path, $mode = 0755)
+    public function ensureDirectoryExists(string $path, int $mode = 0755): bool
     {
         if (!file_exists($path)) {
             // mkdir() 的第三个参数设置为 true 以启用递归创建

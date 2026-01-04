@@ -42,7 +42,6 @@ class AdminInit extends Command
         $commands = [
             'vendor:publish',
             'admin:moduleInit',
-
         ];
         if ($this->app->config->get('happy.installed', false)) {
             $commands[] = 'admin:favicon';
@@ -51,13 +50,10 @@ class AdminInit extends Command
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
 
-            try {
-                if (empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
-                    $commands[] = 'cloud:upload-static';
-                }
-            } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-                $commands[] = [];
+            if (empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
+                $commands[] = 'cloud:upload-static';
             }
+
         }
 
         foreach ($commands as $commandName) {
