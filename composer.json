@@ -29,7 +29,6 @@
   "extra": {
     "think": {
       "config": {
-        "auth": "stc/auth.php",
         "form": "stc/form.php",
         "filesystem": "stc/filesystem.php"
       },
