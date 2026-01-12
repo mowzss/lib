@@ -35,6 +35,8 @@ class Service extends BaseService
         $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
         //注册请求响应过滤中间件
         $this->app->middleware->add(\mowzs\lib\middleware\HttpResponse::class, 'route');
+        // 注册JWT默认权限
+        $this->app->middleware->add(\mowzs\lib\middleware\JWTAuthDefaultScene::class);
         // 注册命令行
         $this->registerCommand();
         //注册多模块路由
