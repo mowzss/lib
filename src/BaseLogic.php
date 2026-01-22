@@ -97,10 +97,10 @@ abstract class BaseLogic
      * 获取模型实例
      *
      * @param string $model 模型类名或简写
-     * @return Model
+     * @return object|string|Model
      * @throws Exception
      */
-    protected function getModel(string $model): \think\Model
+    protected function getModel(string $model)
     {
         // 将模型名称转换为标准命名空间路径
         $modelName = $this->resolveModelName($model);

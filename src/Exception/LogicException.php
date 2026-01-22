@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib\Exception;
 
-class RandomGenerationException extends \Exception
+class LogicException extends \Exception
 {
+
 }
