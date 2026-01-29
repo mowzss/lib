@@ -24,15 +24,19 @@ class JWTAuthDefaultScene
     public function handle(Request $request, $next)
     {
         if ($this->app->config->get('route.controller_layer') == 'api') {
-            if ($request->controller() == 'index.Login') {
+
+            if ($request->controller() === 'index.Login') {
                 return $next($request);
             }
+
             try {
                 $token = JWTUtil::getToken($request);
                 if ($token !== false && $this->jwt->verifyTokenAndScene('default', $token)) {
                     $jwtConfig = $this->jwt->getJwtSceneConfig();
                     $jwtConfig['user_model'] && $request->user = $this->jwt->getUser();
                     return $next($request);
+                } else {
+                    return json(['code' => 401, 'msg' => '未授权']);
                 }
             } catch (\Exception $e) {
                 return json(['code' => 401, 'msg' => '未授权']);
