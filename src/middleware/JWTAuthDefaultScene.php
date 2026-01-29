@@ -31,13 +31,15 @@ class JWTAuthDefaultScene
 
             try {
                 $token = JWTUtil::getToken($request);
-                if ($token !== false && $this->jwt->verifyTokenAndScene('default', $token)) {
-                    $jwtConfig = $this->jwt->getJwtSceneConfig();
-                    $jwtConfig['user_model'] && $request->user = $this->jwt->getUser();
-                    return $next($request);
-                } else {
+                if ($token === false) {
                     return json(['code' => 401, 'msg' => '未授权']);
                 }
+                if (!$this->jwt->verifyTokenAndScene('default', $token)) {
+                    return json(['code' => 401, 'msg' => '未授权']);
+                }
+                $jwtConfig = $this->jwt->getJwtSceneConfig();
+                $jwtConfig['user_model'] && $request->user = $this->jwt->getUser();
+                return $next($request);
             } catch (\Exception $e) {
                 return json(['code' => 401, 'msg' => '未授权']);
             }
