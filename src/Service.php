@@ -58,22 +58,28 @@ class Service extends BaseService
                 '__STATIC__' => '/static',
             ]);
         }
-        switch (sys_config('static_upload')) {
-            case 'oss':
-                $data = [
-                    '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
-                ];
-                break;
-            case 'qiniu':
-                $data = [
-                    '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
-                ];
-                break;
-            default:
-                $data = [
-                    '__STATIC__' => '/static',
-                ];
-                break;
+        if (function_exists('sys_config')) {
+            switch (sys_config('static_upload')) {
+                case 'oss':
+                    $data = [
+                        '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
+                    ];
+                    break;
+                case 'qiniu':
+                    $data = [
+                        '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
+                    ];
+                    break;
+                default:
+                    $data = [
+                        '__STATIC__' => '/static',
+                    ];
+                    break;
+            }
+        } else {
+            $data = [
+                '__STATIC__' => '/static',
+            ];
         }
         return array_merge($this->app->config->get('view.tpl_replace_string', []), $data);
     }
