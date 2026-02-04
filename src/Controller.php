@@ -247,7 +247,7 @@ abstract class Controller
      * @param int $wait
      * @return void
      */
-    protected function closeSite(string $msg = '', ?string $url = null, int $wait = 3): void
+    protected function closeSite(string $msg = '', ?string $url = null, int $wait = 60): void
     {
         $tpl = $this->app->config->get('app.dispatch_close_site_tmpl');
         $this->response($url, $msg, [], $wait, [], 0, $tpl);
