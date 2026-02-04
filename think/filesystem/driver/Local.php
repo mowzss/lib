@@ -29,6 +29,7 @@ class Local extends Driver
      */
     protected $config = [
         'root' => '',
+        'url' => ''
     ];
 
     /**
@@ -87,8 +88,9 @@ class Local extends Driver
 
         if (isset($this->config['url'])) {
             return $this->concatPathToUrl($this->config['url'], $path);
+        } else {
+            return $this->concatPathToUrl(request()->domain(), $path);
         }
-        return parent::url($path);
     }
 
     public function path(string $path): string
