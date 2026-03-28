@@ -515,6 +515,7 @@ class Forms
     }
 
     /**
+     * 输出模式
      * @param string $html
      * @return mixed
      */

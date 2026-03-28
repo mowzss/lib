@@ -6,6 +6,7 @@ namespace mowzs\lib\module\controller\admin;
 use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use app\common\util\TableCreatorUtil;
+use mowzs\lib\forms\FormFieldConfig;
 use think\App;
 use think\Exception;
 use think\Model;
@@ -155,7 +156,7 @@ abstract class FieldAdmin extends BaseAdmin
                     'type' => 'select',
                     'name' => 'type',
                     'label' => '表单类型',
-                    'options' => $this->app->config->get('form'),
+                    'options' => FormFieldConfig::get(),
                     'required' => true
                 ], [
                     'type' => 'textarea',
@@ -354,7 +355,7 @@ abstract class FieldAdmin extends BaseAdmin
      */
     protected function _index_list_filter(&$data): void
     {
-        $forms = $this->app->config->get('form');
+        $forms = FormFieldConfig::get();
         foreach ($data['data'] as &$item) {
             $item['model_name'] = $this->moduleModel->where('id', $item['mid'])->value('title');
             $item['type_name'] = $forms[$item['type']] ?? '未定义类型';
