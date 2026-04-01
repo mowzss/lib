@@ -227,16 +227,15 @@ class Forms
      * 解析 options 字段并生成触发条件
      *
      * @param array $item 字段数据
-     * @return bool|null
+     * @return false|void
      * @throws Exception
      * @throws FormsException
      */
-    protected function parseOptionsTriggers(array $item): ?bool
+    protected function parseOptionsTriggers(array $item)
     {
         if (is_array($item['options'])) {
             return false;
         }
-
         // 解析 options 字段
         $options = array_filter(explode("\n", trim($item['options'])));
         foreach ($options as $option) {
