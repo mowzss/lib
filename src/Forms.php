@@ -3,9 +3,9 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
+use mowzs\lib\Exception\FormsException;
 use mowzs\lib\forms\FormFieldRenderer;
 use think\Exception;
-use think\exception\HttpResponseException;
 use think\facade\Env;
 use think\facade\Request;
 use think\facade\View;
@@ -115,7 +115,7 @@ class Forms
      * @param mixed $value 触发值，可以是字符串、数组等
      * @param array|string $field 触发字段，多个使用数组或逗号分隔
      * @return $this
-     * @throws Exception
+     * @throws FormsException
      */
     public function setTrigger(string $name, mixed $value, array|string $field): static
     {
@@ -126,7 +126,7 @@ class Forms
 
         // 确保 $field 是一个数组
         if (!is_array($field)) {
-            throw new Exception('触发字段必须是字符串或数组');
+            throw new FormsException('触发字段必须是字符串或数组');
         }
 
         // 查找已存在的 trigger，如果有则合并 value 和 field
@@ -160,24 +160,24 @@ class Forms
      *
      * @param array $triggers 多个触发条件的数组
      * @return $this
-     * @throws Exception
+     * @throws Exception|FormsException
      */
     public function setTriggers(array $triggers): static
     {
         foreach ($triggers as $trigger) {
             if (!isset($trigger['name'], $trigger['values'])) {
-                throw new Exception('每个触发条件必须包含 name 和 values');
+                throw new FormsException('每个触发条件必须包含 name 和 values');
             }
 
             // 确保 values 是一个数组
             if (!is_array($trigger['values'])) {
-                throw new Exception('触发条件的 values 必须是一个数组');
+                throw new FormsException('触发条件的 values 必须是一个数组');
             }
 
             // 遍历 values 数组，调用 setTrigger 方法来设置每个触发条件
             foreach ($trigger['values'] as $valueConfig) {
                 if (!isset($valueConfig['value'], $valueConfig['field'])) {
-                    throw new Exception('每个 valueConfig 必须包含 value 和 field');
+                    throw new FormsException('每个 valueConfig 必须包含 value 和 field');
                 }
 
                 $this->setTrigger(
@@ -221,6 +221,7 @@ class Forms
      * @param array $item 字段数据
      * @return false|void
      * @throws Exception
+     * @throws FormsException
      */
     protected function parseOptionsTriggers(array $item)
     {
@@ -465,10 +466,10 @@ class Forms
      * @param array $data 覆盖或合并的数据
      * @param string $template 渲染模版
      * @param string|null $outputMode 输出模式，默认为 null（使用类中的 outputMode）
-     * @return string
+     * @return mixed|string|\think\response\View
      * @throws Exception
      */
-    public function render(array $data = [], string $template = '', ?string $outputMode = null): string
+    public function render(array $data = [], string $template = '', ?string $outputMode = null)
     {
 
         $this->outputMode = $outputMode ?? $this->outputMode;
@@ -517,18 +518,17 @@ class Forms
     /**
      * 输出模式
      * @param string $html
-     * @return mixed
+     * @return mixed|string|\think\response\View
      */
     protected function outputMode(mixed $html = ''): mixed
     {
         if ($this->outputMode === 'page') {
-            throw new HttpResponseException(display($html));
-        } else {
-            $config = array_merge($this->old_view_config, ['view_path' => '']);
-            View::config($config);
-            Helper::instance()->app->config->set($config, 'view');
-            return $html;
+            return display($html);
         }
+        $config = array_merge($this->old_view_config, ['view_path' => '']);
+        View::config($config);
+        Helper::instance()->app->config->set($config, 'view');
+        return $html;
     }
 
     /**
