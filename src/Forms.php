@@ -6,7 +6,6 @@ namespace mowzs\lib;
 use mowzs\lib\Exception\FormsException;
 use mowzs\lib\forms\FormFieldRenderer;
 use think\Exception;
-use think\facade\Env;
 use think\facade\Request;
 use think\facade\View;
 
@@ -90,6 +89,7 @@ class Forms
     /**
      * @param array $options
      * @throws Exception
+     * @throws FormsException
      */
     public function __construct(array $options = [])
     {
@@ -137,9 +137,15 @@ class Forms
                     'value' => $value,
                     'field' => $field,
                 ];
+                unset($existingTrigger);
                 return $this;
             }
         }
+
+        // 关键：循环未 `return`，说明未找到同名项，也需取消设置引用变量（以防 $this->trigger 为空数组）
+        // 在 foreach 结束后，如果循环体从未执行，$existingTrigger 可能不存在，
+        // 但执行 unset 也不会报错，所以这是安全的。
+        unset($existingTrigger);
 
         // 如果没有找到已存在的 trigger，则创建一个新的
         $this->trigger[] = [
@@ -160,7 +166,7 @@ class Forms
      *
      * @param array $triggers 多个触发条件的数组
      * @return $this
-     * @throws Exception|FormsException
+     * @throws FormsException|Exception
      */
     public function setTriggers(array $triggers): static
     {
@@ -196,7 +202,9 @@ class Forms
      *
      * @param array $field
      * @return void
+     * |FormsException
      * @throws Exception
+     * @throws FormsException
      */
     protected function getTriggers(array $field = []): void
     {
@@ -219,11 +227,11 @@ class Forms
      * 解析 options 字段并生成触发条件
      *
      * @param array $item 字段数据
-     * @return false|void
+     * @return bool|null
      * @throws Exception
      * @throws FormsException
      */
-    protected function parseOptionsTriggers(array $item)
+    protected function parseOptionsTriggers(array $item): ?bool
     {
         if (is_array($item['options'])) {
             return false;
@@ -238,7 +246,6 @@ class Forms
             }
 
             $value = $parts[0];
-            $label = $parts[1];
             $dependentFields = isset($parts[2]) ? explode(',', $parts[2]) : [];
 
             // 如果有依赖字段，则设置触发条件
@@ -364,11 +371,11 @@ class Forms
     protected function setButton(string $type = '', string $title = '', string $class = 'layui-btn', bool $lay_filter = false): string
     {
         $lay_submit = $type === 'submit' ? 'lay-submit=""' : '';
-        $lay_filter = $lay_filter ? 'lay-filter="' . $this->lay_filter . '"' : '';
+        $lay_filter_html = $lay_filter ? 'lay-filter="' . $this->lay_filter . '"' : '';
         return $this->fetch('button', ['btn' => [
             'title' => $title,
             'class' => $class,
-            'lay_filter' => $lay_filter,
+            'lay_filter' => $lay_filter_html,
             'type' => $type,
             'lay_submit' => $lay_submit,
         ]]);
@@ -385,7 +392,7 @@ class Forms
      * @param bool $required 是否必填
      * @return $this
      */
-    public function setInput($type, ?string $name = null, ?string $label = null, ?string $value = null, ?array $options = null, ?string $help = null, bool $required = false): static
+    public function setInput(mixed $type, ?string $name = null, ?string $label = null, ?string $value = null, ?array $options = null, ?string $help = null, bool $required = false): static
     {
         if (is_array($type)) {
             // 如果传入的是数组，则直接添加到输入数据中
@@ -429,7 +436,7 @@ class Forms
         $value = $field['value'] ?? null;
 
         // 如果字段名包含方括号，则尝试解析为嵌套数组
-        if (strpos($name, '[') !== false && strpos($name, ']') !== false) {
+        if (str_contains($name, '[') && str_contains($name, ']')) {
             // 去掉方括号并分割成键数组
             $parts = explode('[', str_replace(']', '', $name));
 
@@ -467,9 +474,9 @@ class Forms
      * @param string $template 渲染模版
      * @param string|null $outputMode 输出模式，默认为 null（使用类中的 outputMode）
      * @return mixed|string|\think\response\View
-     * @throws Exception
+     * @throws FormsException|\think\Exception
      */
-    public function render(array $data = [], string $template = '', ?string $outputMode = null)
+    public function render(array $data = [], string $template = '', ?string $outputMode = null): mixed
     {
 
         $this->outputMode = $outputMode ?? $this->outputMode;
@@ -578,7 +585,7 @@ class Forms
     protected function getFormsViewPath(string $theme_name = null): string
     {
         $path = 'forms_style';
-        if (Helper::instance()->app->request->isMobile() && Env::get('CONTROLLER_LAYER') != 'admin') {
+        if (Helper::instance()->app->env->get('CONTROLLER_LAYER') !== 'admin' && Helper::instance()->app->request->isMobile()) {
             $theme = 'wap_default';
             Helper::instance()->app->config->set(['cache_prefix' => 'wap_',], 'view');
         } else {
