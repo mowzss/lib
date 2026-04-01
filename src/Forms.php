@@ -6,6 +6,7 @@ namespace mowzs\lib;
 use mowzs\lib\Exception\FormsException;
 use mowzs\lib\forms\FormFieldRenderer;
 use think\Exception;
+use think\exception\HttpResponseException;
 use think\facade\Request;
 use think\facade\View;
 
@@ -529,7 +530,7 @@ class Forms
     protected function outputMode(mixed $html = ''): mixed
     {
         if ($this->outputMode === 'page') {
-            return display($html);
+            throw new HttpResponseException(display($html));
         }
         $config = array_merge($this->old_view_config, ['view_path' => '']);
         View::config($config);

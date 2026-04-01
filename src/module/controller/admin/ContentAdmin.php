@@ -8,6 +8,7 @@ use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use app\common\util\ContentSaveFilterUtil;
 use app\common\util\CrudUtil;
+use mowzs\lib\Exception\FormsException;
 use mowzs\lib\Exception\RandomGenerationException;
 use mowzs\lib\Forms;
 use mowzs\lib\helper\CodeHelper;
@@ -15,6 +16,7 @@ use mowzs\lib\helper\EventHelper;
 use mowzs\lib\module\logic\ColumnBaseLogic;
 use mowzs\lib\module\logic\ContentBaseLogic;
 use mowzs\lib\module\logic\TagBaseLogic;
+use Random\RandomException;
 use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -325,7 +327,13 @@ abstract class ContentAdmin extends BaseAdmin
      * @param int $cid
      * @param int $mid
      * @return bool|string|void
+     * @throws DataNotFoundException
+     * @throws DbException
      * @throws Exception
+     * @throws ModelNotFoundException
+     * @throws RandomGenerationException
+     * @throws RandomException
+     * @throws FormsException
      */
     public function add(int $cid = 0, int $mid = 0)
     {
