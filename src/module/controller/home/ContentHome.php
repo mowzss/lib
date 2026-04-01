@@ -71,7 +71,6 @@ class ContentHome extends BaseHome
     /**
      * 点赞
      * @return void
-     * @throws Exception
      */
     public function agree(): void
     {
@@ -89,8 +88,12 @@ class ContentHome extends BaseHome
         } else {
             $this->error('您已经点赞过了');
         }
-        if (ContentBaseLogic::instance()->updateInc($id, 'agree')) {
-            $this->success('点赞成功');
+        try {
+            if (ContentBaseLogic::instance()->updateInc($id, 'agree')) {
+                $this->success('点赞成功');
+            }
+        } catch (\Exception $e) {
+            $this->error('点赞失败:' . PHP_EOL . $e->getMessage());
         }
         $this->error('点赞失败');
     }

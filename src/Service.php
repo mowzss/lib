@@ -41,7 +41,7 @@ class Service extends BaseService
         $this->registerCommand();
         //注册多模块路由
         $this->app->event->listen('RouteLoaded', function () {
-            $this->app->route->auto();
+            $this->app->route->auto()->completeMatch(false);
         });
     }
 

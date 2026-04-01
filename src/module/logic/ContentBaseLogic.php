@@ -88,14 +88,14 @@ class ContentBaseLogic extends BaseLogic
      * @param int $step
      * @param int|string $mid
      * @return bool
-     * @throws Exception
      */
     public function updateInc(int|string $id, string $field = '', int $step = 1, int|string $mid = 0): bool
     {
-        if (empty($mid)) {
-            $mid = $this->ContentModel()->where(['id' => $id])->value('mid');
-        }
+
         try {
+            if (empty($mid)) {
+                $mid = $this->ContentModel()->where(['id' => $id])->value('mid');
+            }
             $where = ['id' => $id];
             $this->getDbQuery($this->table)->where($where)->inc($field, $step)->update();
             $this->getDbQuery($this->table . '_' . $mid)->where($where)->inc($field, $step)->update();

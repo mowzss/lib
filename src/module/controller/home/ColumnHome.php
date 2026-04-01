@@ -21,7 +21,7 @@ class ColumnHome extends BaseHome
      * 服务类
      * @var
      */
-    protected ColumnBaseLogic $service;
+    protected mixed $service;
 
     public function __construct(App $app)
     {
