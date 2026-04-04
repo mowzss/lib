@@ -3,8 +3,8 @@ declare (strict_types=1);
 
 namespace mowzs\lib\helper;
 
+use mowzs\lib\Exception\LibsException;
 use mowzs\lib\Exception\RandomGenerationException;
-use Random\RandomException;
 
 class CodeHelper
 {
@@ -53,15 +53,13 @@ class CodeHelper
         return $prefix . $compressedTimestamp . $randomPart;
     }
 
-
     /**
      * 生成完全随机的唯一字符串（包括字母和数字）。
      *
      * @param int $length 总长度（包括前缀），最小为10。
      * @param string $prefix 前缀（可以为空）。
      * @return string 返回生成的唯一字符串。
-     * @throws RandomException
-     * @throws RandomGenerationException
+     * @throws LibsException
      */
     public static function randomString(int $length = 12, string $prefix = ''): string
     {
@@ -71,14 +69,19 @@ class CodeHelper
         if ($actualLength < 0) {
             throw new \InvalidArgumentException('Prefix is too long for the specified length.');
         }
+
         try {
             $randomString = '';
+            $charLength = strlen($characters);
+            $bytes = random_bytes($actualLength);
+
             for ($i = 0; $i < $actualLength; $i++) {
-                $randomString .= $characters[random_int(0, strlen($characters) - 1)];
+                $randomString .= $characters[ord($bytes[$i]) % $charLength];
             }
-        } catch (\Error $e) {
-            throw new RandomGenerationException('Failed to generate random string: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            throw new LibsException('Failed to generate random string: ' . $e->getMessage(), 0, $e);
         }
+
         return $prefix . $randomString;
     }
 
