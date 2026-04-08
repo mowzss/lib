@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib\helper;
 
+use mowzs\lib\Exception\LibsException;
 use mowzs\lib\Helper;
 
 class MimeHelper extends Helper
@@ -11,6 +12,7 @@ class MimeHelper extends Helper
 
     /**
      * 初始化 MIME 类型映射
+     * @throws LibsException
      */
     public function init(): void
     {
@@ -20,7 +22,7 @@ class MimeHelper extends Helper
             if (file_exists($path)) {
                 $this->mimeTypes = require $path;
             } else {
-                throw new \Exception('mimes.php 文件不存在');
+                throw new LibsException('mimes.php 文件不存在');
             }
         }
     }

@@ -3,7 +3,7 @@
 namespace mowzs\lib\helper;
 
 
-use think\Exception;
+use mowzs\lib\Exception\LibsException;
 
 class ImageToIcoHelper
 {
@@ -20,14 +20,14 @@ class ImageToIcoHelper
      * @param string $file 图像文件路径或URL
      * @param array $size 输出尺寸 [width, height]
      * @return self
-     * @throws Exception
+     * @throws LibsException
      */
     public function addImage(string $file, array $size = []): self
     {
         if (filter_var($file, FILTER_VALIDATE_URL)) {
             $imageData = file_get_contents($file);
             if ($imageData === false) {
-                throw new Exception("无法下载图片");
+                throw new LibsException("无法下载图片");
             }
             $im = imagecreatefromstring($imageData);
         } else {
@@ -35,7 +35,7 @@ class ImageToIcoHelper
         }
 
         if ($im === false) {
-            throw new Exception("读取图片文件失败");
+            throw new LibsException("读取图片文件失败");
         }
 
         if (empty($size)) {
@@ -50,7 +50,7 @@ class ImageToIcoHelper
 
         [$sourceWidth, $sourceHeight] = [imagesx($im), imagesy($im)];
         if (!imagecopyresampled($image, $im, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight)) {
-            throw new Exception("解析和处理图片失败");
+            throw new LibsException("解析和处理图片失败");
         }
 
         $this->addImageData($image, $width, $height);

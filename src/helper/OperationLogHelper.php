@@ -36,13 +36,13 @@ class OperationLogHelper extends Helper
         // 获取User-Agent信息
         $userAgent = $request->header('user-agent', '');
         // 创建并保存日志记录
-        $log = new SystemOperationLog();
-        $log->uid = $adminId;
-        $log->node = $node;
-        $log->desc = $desc;
-        $log->ip = $ip;
-        $log->user_agent = $userAgent;
-        return $log->save();
+        return (new SystemOperationLog())->save([
+            'uid' => $adminId,
+            'node' => $node,
+            'desc' => $desc,
+            'ip' => $ip,
+            'user_agent' => $userAgent,
+        ]);
     }
 
     /**

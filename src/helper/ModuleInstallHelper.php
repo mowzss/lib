@@ -51,11 +51,11 @@ class ModuleInstallHelper extends Helper
             while (($file = readdir($dirHandle)) !== false) {
                 $path = $directory . DIRECTORY_SEPARATOR . $file;
 
-                if ($file == '.' || $file == '..') continue;
+                if ($file === '.' || $file === '..') continue;
 
                 if (is_dir($path)) {
                     $files = array_merge($files, $this->scanInfoPhpFiles($path));
-                } elseif (basename($path) == 'info.php') {
+                } elseif (basename($path) === 'info.php') {
                     $files[] = $path;
                 }
             }
