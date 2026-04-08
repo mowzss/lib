@@ -6,6 +6,7 @@ namespace mowzs\lib\module\controller\admin;
 use app\common\controllers\BaseAdmin;
 use app\common\traits\CrudTrait;
 use mowzs\lib\helper\UserHelper;
+use Overtrue\Pinyin\Pinyin;
 use think\App;
 
 /**
@@ -45,6 +46,10 @@ abstract class TagAdmin extends BaseAdmin
                     'title' => '封面图',
                     'templet' => 'image'
                 ], [
+                    'field' => 'spy',
+                    'title' => '首字母',
+                    'edit' => 'text'
+                ], [
                     'field' => 'title',
                     'title' => '名称',
                     'edit' => 'text'
@@ -79,6 +84,14 @@ abstract class TagAdmin extends BaseAdmin
                 'label' => 'TAG名称',
                 'required' => true
             ], [
+                'type' => 'text',
+                'name' => 'spy',
+                'label' => '首字母',
+                'ext' => [
+                    'disabled' => true
+                ],
+                'help' => 'TAG名称首字母,无需手动输入自动生成'
+            ], [
                 'type' => 'image',
                 'name' => 'image',
                 'label' => '封面图片'
@@ -97,7 +110,7 @@ abstract class TagAdmin extends BaseAdmin
             ]
         ];
         $this->search = [
-            'id#=#id', 'title#=#title', 'status#=#status', 'create_time#between#create_time', 'update_time#between#update_time'
+            'id#=#id', 'title#=#title', 'spy#=#spy', 'status#=#status', 'create_time#between#create_time', 'update_time#between#update_time'
         ];
     }
 
@@ -131,5 +144,23 @@ abstract class TagAdmin extends BaseAdmin
     protected function tagModel(): mixed
     {
         return new static::$modelClass;
+    }
+
+    /**
+     * 新增&保存前置处理
+     * @param $data
+     * @return void
+     */
+    protected function _save_filter(&$data): void
+    {
+        if ($this->request->isPost()) {
+            if (($this->request->action() === 'add') && !empty($this->tagModel()->where(['title' => $data['title']])->value('id'))) {
+                $this->error('TAG名称已存在');
+            }
+            if (empty($data['spy'])) {
+                $data['spy'] = Pinyin::abbr(mb_substr($data['title'], 0, 1, 'UTF-8'));
+            }
+
+        }
     }
 }
