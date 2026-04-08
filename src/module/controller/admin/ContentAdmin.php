@@ -292,7 +292,7 @@ abstract class ContentAdmin extends BaseAdmin
                 ],
                 [
                     'event' => '',
-                    'type' => 'data-meun-open',
+                    'type' => 'data-menu-open',
                     'url' => urls('edit', ['id' => '__id__']),
                     'name' => '编辑',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
