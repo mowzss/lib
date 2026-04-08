@@ -22,7 +22,7 @@ class FormatFieldOption
      * @param mixed $inputString 输入的字符串
      * @return array 返回包含键值对的关联数组
      */
-    public static function strToArray(mixed $inputString): array
+    public static function strToArray(mixed $inputString, $original = false): array
     {
         try {
             // 检测并执行方法
@@ -43,17 +43,20 @@ class FormatFieldOption
                 }
                 // 使用竖线（|）分割行，获取第一个键值对
                 $parts = explode('|', $line); // 限制分割次数为2，以确保只获取第一个键值对
-                list($key, $value) = $parts;
+                [$key, $value] = $parts;
 //                // 添加到结果数组
-                if ($key == 'searchUrl' || $key == 'dataInit') {
+                if ($key === 'searchUrl' || $key === 'dataInit') {
                     //判断value是否包含@
                     if (str_contains($value, '@')) {
                         $values = explode('@', $value);
-                        list($value, $method) = $values;
+                        [$value, $method] = $values;
                     }
                     $value = urls($value, $method ?? []);
                 }
                 $result[$key] = $value;
+            }
+            if ($original) {
+                $result['_original'] = $inputString;
             }
             return $result;
         }
