@@ -32,10 +32,10 @@ class ContentHome extends BaseHome
     /**
      * 内容详情
      * @param int $id
-     * @return string|void
+     * @return string
      * @throws Exception
      */
-    public function index(int $id = 0)
+    public function index(int $id = 0): string
     {
         if (empty($id)) {
             $this->error('内容ID不能为空');
@@ -50,7 +50,7 @@ class ContentHome extends BaseHome
             }
 
         } catch (\Exception $e) {
-            $this->app->log->error('获取文章信息失败:' . PHP_EOL . '模块:' . $this->request->layer() . PHP_EOL . $e->getMessage());
+            $this->app->log->error('获取文章信息失败,文章ID:' . $id . PHP_EOL . '模块:' . $this->request->layer() . PHP_EOL . $e->getMessage());
             $this->error('出错了!');
         }
         ContentBaseLogic::instance()->updateInc($id, 'view', 1, $info['mid']);
