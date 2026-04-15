@@ -4,27 +4,27 @@ declare (strict_types=1);
 
 namespace mowzs\lib\module\controller\admin;
 
-use app\common\controllers\BaseAdmin;
-use app\common\traits\CrudTrait;
-use app\common\util\ContentSaveFilterUtil;
-use app\common\util\CrudUtil;
-use mowzs\lib\Exception\FormsException;
-use mowzs\lib\Exception\RandomGenerationException;
-use mowzs\lib\Forms;
-use mowzs\lib\helper\CodeHelper;
-use mowzs\lib\helper\EventHelper;
-use mowzs\lib\module\logic\ColumnBaseLogic;
-use mowzs\lib\module\logic\ContentBaseLogic;
-use mowzs\lib\module\logic\TagBaseLogic;
-use Random\RandomException;
 use think\App;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
+use think\Model;
 use think\db\Query;
+use mowzs\lib\Forms;
 use think\Exception;
 use think\facade\View;
-use think\Model;
+use Random\RandomException;
+use app\common\util\CrudUtil;
+use app\common\traits\CrudTrait;
+use mowzs\lib\helper\CodeHelper;
+use mowzs\lib\helper\EventHelper;
+use think\db\exception\DbException;
+use app\common\controllers\BaseAdmin;
+use mowzs\lib\Exception\FormsException;
+use mowzs\lib\module\logic\TagBaseLogic;
+use app\common\util\ContentSaveFilterUtil;
+use mowzs\lib\module\logic\ColumnBaseLogic;
+use mowzs\lib\module\logic\ContentBaseLogic;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
+use mowzs\lib\Exception\RandomGenerationException;
 use think\template\exception\TemplateNotFoundException;
 
 /**
@@ -143,7 +143,7 @@ abstract class ContentAdmin extends BaseAdmin
             $limit = $params['limit'] ?? ($this->limit ?? 20);
             $paginateResult = $query->paginate([
                 'page' => $page,
-                'list_rows' => $limit
+                'list_rows' => $limit,
             ]);
 
             // 转换结果为数组
@@ -169,7 +169,7 @@ abstract class ContentAdmin extends BaseAdmin
         //渲染页面
         try {
             return $this->fetch();
-        } catch (TemplateNotFoundException $exception) {
+        } catch (TemplateNotFoundException) {
             //模板不存在时 尝试读取公用模板
             return $this->fetch('common@/module/content_list');
         }
@@ -206,7 +206,7 @@ abstract class ContentAdmin extends BaseAdmin
         // 使用类的 search 属性作为搜索配置
         foreach ($this->search as $config) {
             // 拆分配置字符串
-            list($fields, $operator, $paramKey) = explode('#', $config);
+            [$fields, $operator, $paramKey] = explode('#', $config);
 
             // 如果是多个字段使用 | 分隔符进行分割
             $fieldList = explode('|', $fields);
@@ -264,14 +264,14 @@ abstract class ContentAdmin extends BaseAdmin
                 ],
                 [
                     'field' => 'title',
-                    'title' => '标题'
+                    'title' => '标题',
                 ], [
                     'field' => 'model_name',
                     'title' => '所属模型',
                 ],
                 [
                     'field' => 'column_name',
-                    'title' => '所属栏目'
+                    'title' => '所属栏目',
                 ],
                 [
                     'field' => 'view',
@@ -280,7 +280,7 @@ abstract class ContentAdmin extends BaseAdmin
                 ],
             ],
             'top_button' => [
-                ['event' => 'del']
+                ['event' => 'del'],
             ],
             'right_button' => [
                 [
@@ -297,9 +297,9 @@ abstract class ContentAdmin extends BaseAdmin
                     'name' => '编辑',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
                 ],
-                ['event' => 'del']
+                ['event' => 'del'],
 
-            ]
+            ],
         ];
 
         $this->search = [
@@ -313,7 +313,7 @@ abstract class ContentAdmin extends BaseAdmin
             [
                 'field' => 'status',
                 'title' => '状态',
-                'templet' => 'switch'
+                'templet' => 'switch',
             ], [
                 'field' => 'create_time',
                 'title' => '添加时间',
@@ -331,7 +331,6 @@ abstract class ContentAdmin extends BaseAdmin
      * @throws DbException
      * @throws Exception
      * @throws ModelNotFoundException
-     * @throws RandomGenerationException
      * @throws RandomException
      * @throws FormsException
      */
@@ -339,6 +338,9 @@ abstract class ContentAdmin extends BaseAdmin
     {
         if (empty($cid) && empty($mid) && $this->request->isGet()) {
             $model_all = $this->modelModel->where('id', '>', 0)->select();
+            if (count($model_all->toArray()) === 1) {
+                $this->redirect(urls('add', ['mid' => $model_all[0]['id']]));
+            }
             $this->assign('column', $model_all);
             return $this->fetch('common@module/post');
         }
@@ -584,10 +586,10 @@ abstract class ContentAdmin extends BaseAdmin
             'type' => 'xmselect',
             'label' => 'TAG标签',
             'options' => [
-                'remoteSearch' => true,//搜索数据接口
+                'remoteSearch' => true,                //搜索数据接口
                 'searchUrl' => urls('tag/getAjaxList'),//搜索数据接口
                 'autoAdd' => true,
-            ]
+            ],
         ]];
         if ($this->request->action() == 'index') {
             $this->forms['fields'] = $this->mergeFields($this->forms['fields'], [[
@@ -656,7 +658,7 @@ abstract class ContentAdmin extends BaseAdmin
                     'label' => '栏目',
                     'options' => $this->columnModel->where('mid', $mid)->column('title', 'id'),
                     'required' => true,
-                ]
+                ],
             ];
             // 再次调用 mergeFields 来合并手动指定的字段
             $this->forms['fields'] = $this->mergeFields($this->forms['fields'], $manual_fields);
