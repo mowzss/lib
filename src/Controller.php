@@ -4,11 +4,11 @@ declare (strict_types=1);
 namespace mowzs\lib;
 
 use think\App;
-use think\exception\HttpResponseException;
-use think\exception\ValidateException;
-use think\facade\View;
 use think\Response;
 use think\Validate;
+use think\facade\View;
+use think\exception\ValidateException;
+use think\exception\HttpResponseException;
 
 abstract class Controller
 {
@@ -72,9 +72,7 @@ abstract class Controller
      * 初始化
      * @return void
      */
-    protected function initialize()
-    {
-    }
+    protected function initialize() {}
 
 
     /**
@@ -293,7 +291,7 @@ abstract class Controller
      * @param array $with 隐式传参
      * @return void
      */
-    protected function redirect($url, int $code = 302, $with = []): void
+    protected function redirect(string $url, int $code = 302, array $with = []): void
     {
         $response = Response::create($url, 'redirect');
 
@@ -301,6 +299,7 @@ abstract class Controller
 
         throw new HttpResponseException($response);
     }
+    
 
 
 }

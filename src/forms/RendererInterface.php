@@ -11,9 +11,10 @@ interface RendererInterface
      * @param string $label
      * @param mixed $value 默认值
      * @param mixed $option 表单参数
-     * @param bool $required
-     * @param mixed $ext
+     * @param bool $required 是否必填
+     * @param bool $disabled
+     * @param mixed $extra
      * @return string
      */
-    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string;
+    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, bool $disabled, mixed $extra): string;
 }

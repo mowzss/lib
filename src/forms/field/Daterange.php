@@ -13,13 +13,14 @@ class Daterange extends FormFieldRenderer implements RendererInterface
      * 渲染表单
      * @param string $name
      * @param string $label
-     * @param string|int $value
+     * @param mixed $value
      * @param mixed $option
      * @param bool $required
-     * @param mixed $ext
+     * @param mixed $disabled
+     * @param mixed $extra
      * @return string
      */
-    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string
+    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
         if (!is_array($option)) {
             $option = FormatFieldOption::strToArray($option);
@@ -30,7 +31,8 @@ class Daterange extends FormFieldRenderer implements RendererInterface
             'label' => $label,
             'value' => $value,
             'required' => $required,
-            'ext' => $ext,
+            'extra' => $extra,
+            'disabled' => $disabled,
             'option' => $option,
         ]);
 

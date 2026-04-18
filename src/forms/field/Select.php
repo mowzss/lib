@@ -16,10 +16,11 @@ class Select extends FormFieldRenderer implements RendererInterface
      * @param mixed $value
      * @param mixed $option
      * @param bool $required
-     * @param mixed $ext
+     * @param mixed $disabled
+     * @param mixed $extra
      * @return string
      */
-    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string
+    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
 
         if (!is_array($option)) {
@@ -33,6 +34,8 @@ class Select extends FormFieldRenderer implements RendererInterface
             'value' => $value,
             'required' => $required,
             'option' => $option,
+            'disabled' => $disabled,
+            'extra' => $extra,
         ]);
     }
 }

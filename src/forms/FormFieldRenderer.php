@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace mowzs\lib\forms;
 
-use mowzs\lib\forms\field\Text;
 use think\facade\Log;
 use think\facade\View;
+use mowzs\lib\forms\field\Text;
 
 class FormFieldRenderer
 {
@@ -62,11 +62,12 @@ class FormFieldRenderer
         $option = $field['options'] ?? [];
         $required = $field['required'] ?? false;
         $ext = $field['ext'] ?? [];
+        $disabled = $field['disabled'] ?? false;
         if (is_string($ext)) {
             $ext = FormatFieldOption::strToArray($ext, true);
         }
         try {
-            return self::create($type)->render($name, $label, $value, $option, (bool)$required, $ext);
+            return self::create($type)->render($name, $label, $value, $option, (bool)$required, (bool)$disabled, $ext);
         } catch (\Exception $e) {
             // 记录错误日志并返回空字符串或默认渲染
             Log::error("Error rendering field: " . $e->getMessage());

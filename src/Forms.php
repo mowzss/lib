@@ -3,12 +3,12 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
-use mowzs\lib\Exception\FormsException;
-use mowzs\lib\forms\FormFieldRenderer;
 use think\Exception;
-use think\exception\HttpResponseException;
-use think\facade\Request;
 use think\facade\View;
+use think\facade\Request;
+use mowzs\lib\forms\FormFieldRenderer;
+use mowzs\lib\Exception\FormsException;
+use think\exception\HttpResponseException;
 
 /**
  * 表单构建类
@@ -99,8 +99,8 @@ class Forms
         $this->method = $options['method'] ?? 'post';
         $this->value = $options['value'] ?? [];
         $this->inputData = $options['inputData'] ?? [];
-        $this->pk = $options['pk'] ?? 'id'; // 初始化主键名，默认为 'id'
-        $this->description = $options['description'] ?? ''; // 表单说明介绍
+        $this->pk = $options['pk'] ?? 'id';                   // 初始化主键名，默认为 'id'
+        $this->description = $options['description'] ?? '';   // 表单说明介绍
         $this->outputMode = $options['outputMode'] ?? 'page'; // 初始化输出模式，默认为 'page'
         $this->renderer = new FormFieldRenderer();
         $this->lay_filter = $options['lay_filter'] ?? 'filter' . md5(time() . Request::url(true));
@@ -155,8 +155,8 @@ class Forms
                 [
                     'value' => $value,
                     'field' => $field,
-                ]
-            ]
+                ],
+            ],
         ];
 
         return $this;
@@ -251,8 +251,8 @@ class Forms
             // 如果有依赖字段，则设置触发条件
             if (!empty($dependentFields)) {
                 $this->setTrigger(
-                    $item['name'],  // 触发字段
-                    $value,         // 触发值
+                    $item['name'],    // 触发字段
+                    $value,           // 触发值
                     $dependentFields, // 依赖字段
                 );
             }
@@ -383,16 +383,19 @@ class Forms
 
     /**
      * 设置表单字段
-     * @param mixed $type 表单类型
-     * @param string|null $name 字段名称
-     * @param string|null $label 标签名称
-     * @param string|null $value 默认值
-     * @param array|null $options 扩展参数
-     * @param string|null $help 帮助说明
-     * @param bool $required 是否必填
+     * @param mixed $type
+     * @param string|null $name
+     * @param string|null $label
+     * @param string|null $value
+     * @param array|null $options
+     * @param string|null $help
+     * @param bool $required
+     * @param mixed|null $default_value
+     * @param bool $disabled
+     * @param mixed|null $extra
      * @return $this
      */
-    public function setInput(mixed $type, ?string $name = null, ?string $label = null, ?string $value = null, ?array $options = null, ?string $help = null, bool $required = false): static
+    public function setInput(mixed $type, ?string $name = null, ?string $label = null, ?string $value = null, ?array $options = null, ?string $help = null, bool $required = false, mixed $default_value = null, $disabled = false, mixed $extra = null): static
     {
         if (is_array($type)) {
             // 如果传入的是数组，则直接添加到输入数据中
@@ -406,7 +409,10 @@ class Forms
                 'value' => $value,
                 'options' => $options ?? [],
                 'help' => $help ?? '',
-                'required' => $required
+                'required' => $required,
+                'default_value' => $default_value,
+                'disabled' => $disabled,
+                'extra' => $extra,
             ];
         }
         return $this;
@@ -495,7 +501,7 @@ class Forms
             'submit' => $this->renderSubmit(),
             'description' => $this->description,
             'lay_filter' => $this->lay_filter,
-            'form_html' => $this->form_html
+            'form_html' => $this->form_html,
         ]);
         return $this->outputMode($html);
     }
@@ -564,7 +570,7 @@ class Forms
             $fields[] = [
                 'type' => 'hidden',
                 'name' => $this->pk,
-                'value' => $this->value[$this->pk]
+                'value' => $this->value[$this->pk],
             ];
         }
         foreach ($fields as &$field) {

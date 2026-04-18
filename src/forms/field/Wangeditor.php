@@ -15,10 +15,11 @@ class Wangeditor extends FormFieldRenderer implements RendererInterface
      * @param mixed $value
      * @param mixed $option
      * @param bool $required
-     * @param mixed $ext
+     * @param mixed $disabled
+     * @param mixed $extra
      * @return string
      */
-    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $ext): string
+    public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
         $required = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('wangeditor', [
@@ -26,7 +27,8 @@ class Wangeditor extends FormFieldRenderer implements RendererInterface
             'label' => $label,
             'value' => $value,
             'required' => $required,
-            'ext' => $ext,
+            'extra' => $extra,
+            'disabled' => $disabled,
         ]);
     }
 }
