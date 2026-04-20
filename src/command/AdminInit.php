@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace mowzs\lib\command;
 
-use think\console\Command;
 use think\console\Input;
 use think\console\Output;
-use think\db\exception\DataNotFoundException;
+use think\console\Command;
 use think\db\exception\DbException;
+use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 
 /**
@@ -52,6 +52,8 @@ class AdminInit extends Command
 
             if (function_exists('sys_config') && !empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
                 $commands[] = 'cloud:upload-static';
+            } else {
+                $commands[] = ['command_name' => 'cloud:upload-static', 'parameters' => ['-only-update-version']];
             }
 
 
@@ -59,7 +61,11 @@ class AdminInit extends Command
 
         foreach ($commands as $commandName) {
             $output->writeln("Running <info>$commandName</info>...");
-            $commandOutput = $this->app->console->call($commandName)->fetch();
+            if (is_array($commandName)) {
+                $commandOutput = $this->app->console->call($commandName['command_name'], $commandName['parameters'])->fetch();
+            } else {
+                $commandOutput = $this->app->console->call($commandName)->fetch();
+            }
             $output->writeln($commandOutput);
         }
         return 0;
