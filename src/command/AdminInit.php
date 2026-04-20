@@ -50,13 +50,9 @@ class AdminInit extends Command
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
 
-            if (function_exists('sys_config') && !empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
-                $commands[] = 'cloud:upload-static';
-            } else {
-                $commands[] = ['command_name' => 'cloud:upload-static', 'parameters' => ['-only-update-version']];
+            if (function_exists('sys_config') && !empty(sys_config('static_upload')) && sys_config('static_upload') !== 'local') {
+                $commands[] = 'cloud:upload-static -only-update-version';
             }
-
-
         }
 
         foreach ($commands as $command) {
