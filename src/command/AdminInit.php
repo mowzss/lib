@@ -59,12 +59,12 @@ class AdminInit extends Command
 
         }
 
-        foreach ($commands as $commandName) {
-            $output->writeln("Running <info>$commandName</info>...");
-            if (is_array($commandName)) {
-                $commandOutput = $this->app->console->call($commandName['command_name'], $commandName['parameters'])->fetch();
+        foreach ($commands as $command) {
+            $output->writeln("Running <info>$command</info>...");
+            if (is_array($command)) {
+                $commandOutput = $this->app->console->call($command['command_name'], $command['parameters'])->fetch();
             } else {
-                $commandOutput = $this->app->console->call($commandName)->fetch();
+                $commandOutput = $this->app->console->call($command)->fetch();
             }
             $output->writeln($commandOutput);
         }
