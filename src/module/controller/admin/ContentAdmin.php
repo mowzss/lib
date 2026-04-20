@@ -612,6 +612,7 @@ abstract class ContentAdmin extends BaseAdmin
                     'label' => $v['title'],
                     'options' => $v['options'],
                     'required' => (bool)$v['required'],
+                    'default_value' => $v['extend']['field']['default'] ?? '',
                     'help' => $v['help'],
                 ];
                 // 提取局部变量

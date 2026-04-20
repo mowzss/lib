@@ -58,7 +58,7 @@ class FormFieldRenderer
         $type = $field['type'] ?? 'text';
         $name = $field['name'] ?? '';
         $label = $field['label'] ?? '';
-        $value = $field['value'] ?? '';
+        $value = $field['value'] ?? $field['default_value'] ?? '';
         $option = $field['options'] ?? [];
         $required = $field['required'] ?? false;
         $ext = $field['ext'] ?? [];

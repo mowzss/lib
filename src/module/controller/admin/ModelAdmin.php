@@ -3,17 +3,17 @@ declare (strict_types=1);
 
 namespace mowzs\lib\module\controller\admin;
 
-use app\common\controllers\BaseAdmin;
-use app\common\traits\CrudTrait;
-use app\common\util\table\TableStructures;
-use app\common\util\TableCreatorUtil;
-use mowzs\lib\Forms;
 use think\App;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
-use think\Exception;
 use think\Model;
+use mowzs\lib\Forms;
+use think\Exception;
+use app\common\traits\CrudTrait;
+use think\db\exception\DbException;
+use app\common\controllers\BaseAdmin;
+use app\common\util\TableCreatorUtil;
+use app\common\util\table\TableStructures;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 
 /**
  * 模型管理
@@ -69,21 +69,21 @@ abstract class ModelAdmin extends BaseAdmin
                 ], [
                     'field' => 'title',
                     'title' => '模型名称',
-                    'edit' => "text"
+                    'edit' => "text",
                 ], [
                     'field' => 'info',
                     'title' => '介绍',
                 ], [
                     'field' => 'list',
                     'title' => '排序',
-                    'edit' => "text"
-                ]
+                    'edit' => "text",
+                ],
             ],
             //表格行按钮
             'right_button' => [
                 [
                     'event' => '',
-                    'type' => 'data-open',
+                    'type' => 'data-menu-open',
                     'url' => urls('field/index', ['mid' => '__id__']),
                     'name' => '字段设计',
                     'class' => '',//默认包含 layui-btn layui-btn-xs
@@ -104,14 +104,14 @@ abstract class ModelAdmin extends BaseAdmin
                     'type' => 'text',
                     'name' => 'title',
                     'label' => '模型名称',
-                    'required' => true
+                    'required' => true,
                 ], [
                     'type' => 'textarea',
                     'name' => 'info',
                     'label' => '介绍',
                     'help' => '功能详细说明',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -201,11 +201,11 @@ abstract class ModelAdmin extends BaseAdmin
      */
     protected function createTable($data): bool
     {
-        try {// 开启事务
+        try {                            // 开启事务
             $this->app->db->startTrans();// 获取模块名称并构建表名
             $module = strtolower($this->getModuleName());
             $contentTable = "{$module}_content_{$data['id']}";
-            $contentsTable = "{$module}_content_{$data['id']}s";// 创建 content 表
+            $contentsTable = "{$module}_content_{$data['id']}s";   // 创建 content 表
             $retContent = TableCreatorUtil::instance()->createTable($contentTable, 3);
             if (!$retContent['success']) {
                 throw new \Exception("Failed to create table '{$contentTable}': " . $retContent['message']);
@@ -227,10 +227,10 @@ abstract class ModelAdmin extends BaseAdmin
                 ['mid' => $data['id'], 'name' => 'keywords', 'type' => 'text', 'title' => '关键词', 'options' => '', 'help' => null, 'required' => '0', 'list' => '100', 'edit' => '1', 'extend' => '{"field":{"type":"VARCHAR","length":"2000","unsigned":"0","null":"0","default":"\'\'"},"search":{"is_open":"0","linq":""},"tables":{"is_show":"0","templet":"","switch":{"name":""},"edit":"0"},"add":{"is_show":"0"}}', 'status' => '1', 'create_time' => time(), 'update_time' => time(), 'is_search' => null],
                 ['mid' => $data['id'], 'name' => 'description', 'type' => 'textarea', 'title' => '简介', 'options' => '', 'help' => null, 'required' => '0', 'list' => '100', 'edit' => '1', 'extend' => '{"field":{"type":"TEXT","length":"","unsigned":"0","null":"0","default":""},"search":{"is_open":"0","linq":""},"tables":{"is_show":"0","templet":"","switch":{"name":""},"edit":"0"},"add":{"is_show":"1"}}', 'status' => '1', 'create_time' => time(), 'update_time' => time(), 'is_search' => null],
                 ['mid' => $data['id'], 'name' => 'content', 'type' => 'editor', 'title' => '内容', 'options' => '', 'help' => null, 'required' => '1', 'list' => '1', 'edit' => '1', 'extend' => '{"field":{"type":"LONGTEXT","length":"","unsigned":"0","null":"0","default":""},"search":{"is_open":"0","linq":""},"tables":{"is_show":"0","templet":"","switch":{"name":""},"edit":"0"},"add":{"is_show":"1"}}', 'status' => '1', 'create_time' => time(), 'update_time' => time(), 'is_search' => null],
-                ['mid' => $data['id'], 'name' => 'images', 'type' => 'images', 'title' => '组图', 'options' => '', 'help' => null, 'required' => '0', 'list' => '80', 'edit' => '1', 'extend' => '{"field":{"type":"TEXT","length":"","unsigned":"0","null":"0","default":""},"search":{"is_open":"0","linq":""},"tables":{"is_show":"0","templet":"","switch":{"name":""},"edit":"0"},"add":{"is_show":"1"}}', 'status' => '1', 'create_time' => time(), 'update_time' => time(), 'is_search' => null]
-            ];// 插入字段数据
+                ['mid' => $data['id'], 'name' => 'images', 'type' => 'images', 'title' => '组图', 'options' => '', 'help' => null, 'required' => '0', 'list' => '80', 'edit' => '1', 'extend' => '{"field":{"type":"TEXT","length":"","unsigned":"0","null":"0","default":""},"search":{"is_open":"0","linq":""},"tables":{"is_show":"0","templet":"","switch":{"name":""},"edit":"0"},"add":{"is_show":"1"}}', 'status' => '1', 'create_time' => time(), 'update_time' => time(), 'is_search' => null],
+            ];                                     // 插入字段数据
             $this->fieldModel->saveAll($fieldData);// 提交事务
-            $this->app->db->commit();// 返回成功信息
+            $this->app->db->commit();              // 返回成功信息
             return true;
         } catch (\Exception $e) {
             // 回滚事务

@@ -3,13 +3,13 @@ declare (strict_types=1);
 
 namespace mowzs\lib\module\controller\admin;
 
-use app\common\controllers\BaseAdmin;
-use app\common\traits\CrudTrait;
-use app\common\util\TableCreatorUtil;
-use mowzs\lib\forms\FormFieldConfig;
 use think\App;
-use think\Exception;
 use think\Model;
+use think\Exception;
+use app\common\traits\CrudTrait;
+use mowzs\lib\forms\FormFieldConfig;
+use app\common\controllers\BaseAdmin;
+use app\common\util\TableCreatorUtil;
 
 /**
  * 字段管理
@@ -113,8 +113,8 @@ abstract class FieldAdmin extends BaseAdmin
                 ], [
                     'field' => 'status',
                     'title' => '状态',
-                    'templet' => 'switch'
-                ]
+                    'templet' => 'switch',
+                ],
             ],
             //表格行按钮
             'right_button' => [
@@ -130,7 +130,7 @@ abstract class FieldAdmin extends BaseAdmin
             'type#=#type',
             'status#=#status',
             'create_time#between#create_time',
-            'update_time#between#update_time'
+            'update_time#between#update_time',
         ];
         $this->forms = [
             'fields' => [
@@ -139,7 +139,7 @@ abstract class FieldAdmin extends BaseAdmin
                     'name' => 'mid',
                     'label' => '选择模型',
                     'options' => $this->moduleModel->column('title', 'id'),
-                    'required' => true
+                    'required' => true,
                 ], [
                     'type' => 'text',
                     'name' => 'name',
@@ -151,13 +151,13 @@ abstract class FieldAdmin extends BaseAdmin
                     'name' => 'title',
                     'label' => '字段说明',
                     'help' => '字段中文说明',
-                    'required' => true
+                    'required' => true,
                 ], [
                     'type' => 'select',
                     'name' => 'type',
                     'label' => '表单类型',
                     'options' => FormFieldConfig::get(),
-                    'required' => true
+                    'required' => true,
                 ], [
                     'type' => 'textarea',
                     'name' => 'options',
@@ -168,7 +168,7 @@ abstract class FieldAdmin extends BaseAdmin
                     'label' => '是否必填',
                     'options' => [
                         0 => '不限',
-                        1 => '必填'
+                        1 => '必填',
                     ],
                     'value' => 0,
                 ],
@@ -195,12 +195,12 @@ abstract class FieldAdmin extends BaseAdmin
                         'TINYBLOB' => '[TINYBLOB] 小二进制大对象存储',
                         'MEDIUMBLOB' => '[MEDIUMBLOB] 中二进制大对象存储',
                         'LONGBLOB' => '[LONGBLOB] 大二进制大对象存储',
-                    ]
+                    ],
                 ],
                 [
                     'type' => 'text',
                     'name' => 'extend[field][length]',
-                    'label' => '字段长度'
+                    'label' => '字段长度',
                 ],
                 [
                     'type' => 'radio',
@@ -208,7 +208,7 @@ abstract class FieldAdmin extends BaseAdmin
                     'label' => '允许负数',
                     'options' => [
                         0 => '允许',
-                        1 => '不允许'
+                        1 => '不允许',
                     ], 'value' => 0,
                 ],
                 [
@@ -217,13 +217,13 @@ abstract class FieldAdmin extends BaseAdmin
                     'label' => '允许NULL',
                     'options' => [
                         0 => '允许',
-                        1 => '不允许'
+                        1 => '不允许',
                     ], 'value' => 0,
                 ],
                 [
                     'type' => 'text',
                     'name' => 'extend[field][default]',
-                    'label' => '默认值'
+                    'label' => '字段默认值',
                 ], [
                     'type' => 'radio',
                     'name' => 'extend[index][is_open]',
@@ -231,15 +231,15 @@ abstract class FieldAdmin extends BaseAdmin
                     'help' => '',
                     'options' => [
                         0 => '不添加',
-                        1 => '添加'
-                    ]
+                        1 => '添加',
+                    ],
                 ], [
                     'type' => 'radio',
                     'name' => 'extend[search][is_open]',
                     'label' => '搜索',
                     'options' => [
                         0 => '不启用',
-                        1 => '启用'
+                        1 => '启用',
                     ], 'value' => 0,
                 ],
                 [
@@ -251,7 +251,7 @@ abstract class FieldAdmin extends BaseAdmin
                         'like' => 'LIKE 模糊查询',
                         'between' => 'between 时间区间',
                     ],
-                    'help' => '仅支持常用表达式，更多用法建议使用原生用法'
+                    'help' => '仅支持常用表达式，更多用法建议使用原生用法',
 
                 ],
                 [
@@ -260,19 +260,19 @@ abstract class FieldAdmin extends BaseAdmin
                     'label' => '列表显示',
                     'options' => [
                         0 => '不显示',
-                        1 => '显示'
+                        1 => '显示',
                     ], 'value' => 0,
                 ], [
                     'type' => 'text',
                     'name' => 'extend[tables][templet]',
                     'label' => '使用模版',
-                    'help' => '内置模版 switch 开关模板 可自定义 <br> 自定义模版 #xxxxtpl 需自行在前端设置模板,模板用法参考 layui 数据表格 https://layui.dev/docs/2/table/#options.cols'
+                    'help' => '内置模版 switch 开关模板 可自定义 <br> 自定义模版 #xxxxtpl 需自行在前端设置模板,模板用法参考 layui 数据表格 https://layui.dev/docs/2/table/#options.cols',
 
                 ], [
                     'type' => 'text',
                     'name' => 'extend[tables][switch][name]',
                     'label' => 'switch显示文字',
-                    'help' => '内容格式: 显示|隐藏 或 已审|待审 等等'
+                    'help' => '内容格式: 显示|隐藏 或 已审|待审 等等',
 
                 ], [
                     'type' => 'radio',
@@ -290,14 +290,14 @@ abstract class FieldAdmin extends BaseAdmin
                     'label' => '投稿显示', 'value' => 0,
                     'options' => [
                         0 => '不显示',
-                        1 => '显示'
-                    ]
+                        1 => '显示',
+                    ],
                 ],
                 [
                     'type' => 'text',
                     'name' => 'list',
                     'label' => '排序值',
-                    'value' => '100'
+                    'value' => '100',
                 ],
 
             ],
@@ -309,8 +309,8 @@ abstract class FieldAdmin extends BaseAdmin
                         ['value' => 'radio', 'field' => ['options']],
                         ['value' => 'checkbox', 'field' => ['options']],
                         ['value' => 'select', 'field' => ['options']],
-                        ['value' => 'xmselect', 'field' => ['options']]
-                    ]
+                        ['value' => 'xmselect', 'field' => ['options']],
+                    ],
                 ],
                 [
                     'name' => 'extend[field][type]',
@@ -320,30 +320,30 @@ abstract class FieldAdmin extends BaseAdmin
                         ['value' => 'MEDIUMINT', 'field' => ['extend[field][unsigned]', 'extend[field][length]',]],
                         ['value' => 'INT', 'field' => ['extend[field][unsigned]', 'extend[field][length]',]],
                         ['value' => 'BIGINT', 'field' => ['extend[field][unsigned]', 'extend[field][length]',]],
-                        ['value' => 'VARCHAR', 'field' => ['extend[field][length]',]]
-                    ]
+                        ['value' => 'VARCHAR', 'field' => ['extend[field][length]',]],
+                    ],
                 ], [
                     'name' => 'extend[search][is_open]',
                     'values' => [
                         ['value' => '1', 'field' => ['extend[search][linq]',]],
-                    ]
+                    ],
                 ], [
                     'name' => 'extend[tables][is_show]',
                     'values' => [
                         ['value' => '1', 'field' => ['extend[tables][templet]', 'extend[tables][edit]',]],
-                    ]
+                    ],
                 ], [
                     'name' => 'extend[tables][templet]',
                     'values' => [
                         ['value' => 'switch', 'field' => ['extend[tables][switch][name]']],
-                    ]
+                    ],
                 ], [
                     'name' => 'extend[tables][edit]',
                     'values' => [
                         ['value' => '0', 'field' => ['extend[tables][templet]']],
-                    ]
+                    ],
                 ],
-            ]
+            ],
         ];
     }
 
