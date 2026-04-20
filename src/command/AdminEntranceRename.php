@@ -2,8 +2,8 @@
 
 namespace mowzs\lib\command;
 
-use think\console\Command;
 use think\Exception;
+use think\console\Command;
 
 class AdminEntranceRename extends Command
 {
@@ -44,6 +44,8 @@ class AdminEntranceRename extends Command
         // 如果新文件名对应的文件已经存在，则删除它
         if (file_exists($newFilePath)) {
             if (!unlink($newFilePath)) {
+                $output->writeln("请检查文件权限：{$newFilePath}");
+                $output->writeln('文件删除失败');
                 throw new Exception("无法删除已存在的文件：{$newFilePath}");
             }
             $output->writeln("已删除旧的目标文件：{$newFilePath}");
