@@ -50,17 +50,22 @@ class AdminInit extends Command
             $commands[] = 'admin:upgrade';
             $commands[] = 'admin:entrance';
 
-            if (function_exists('sys_config') && !empty(sys_config('static_upload')) && sys_config('static_upload') !== 'local') {
+            if (function_exists('sys_config') && !empty(sys_config('static_upload')) && sys_config('static_upload') != 'local') {
                 $commands[] = 'cloud:upload-static';
             } else {
-                $commands[] = 'cloud:upload-static only-update-version';
+                $commands[] = ['command_name' => 'cloud:upload-static', 'parameters' => ['-only-update-version' => 1]];
             }
+
+
         }
 
         foreach ($commands as $command) {
             $output->writeln("Running <info>$command</info>...");
-            $commandName = explode(' ', $command);
-            $commandOutput = $this->app->console->call($commandName[0], array_slice($commandName, 1))->fetch();
+            if (is_array($command)) {
+                $commandOutput = $this->app->console->call($command['command_name'], $command['parameters'])->fetch();
+            } else {
+                $commandOutput = $this->app->console->call($command)->fetch();
+            }
             $output->writeln($commandOutput);
         }
         return 0;
