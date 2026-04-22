@@ -294,12 +294,8 @@ abstract class Controller
     protected function redirect(string $url, int $code = 302, array $with = []): void
     {
         $response = Response::create($url, 'redirect');
-
         $response->code($code)->with($with);
-
         throw new HttpResponseException($response);
     }
-    
-
 
 }
