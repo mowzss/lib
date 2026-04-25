@@ -3,11 +3,11 @@ declare (strict_types=1);
 
 namespace mowzs\lib\module\controller\admin;
 
-use app\common\controllers\BaseAdmin;
+use think\App;
+use Overtrue\Pinyin\Pinyin;
 use app\common\traits\CrudTrait;
 use mowzs\lib\helper\UserHelper;
-use Overtrue\Pinyin\Pinyin;
-use think\App;
+use app\common\controllers\BaseAdmin;
 
 /**
  * TAG管理
@@ -44,15 +44,15 @@ abstract class TagAdmin extends BaseAdmin
                 ], [
                     'field' => 'image',
                     'title' => '封面图',
-                    'templet' => 'image'
+                    'templet' => 'image',
                 ], [
                     'field' => 'spy',
                     'title' => '首字母',
-                    'edit' => 'text'
+                    'edit' => 'text',
                 ], [
                     'field' => 'title',
                     'title' => '名称',
-                    'edit' => 'text'
+                    'edit' => 'text',
                 ], [
                     'field' => 'count',
                     'title' => '关联内容数',
@@ -69,36 +69,36 @@ abstract class TagAdmin extends BaseAdmin
                 ], [
                     'field' => 'status',
                     'title' => '状态',
-                    'templet' => 'switch'
+                    'templet' => 'switch',
                 ], [
                     'field' => 'create_time',
                     'title' => '创建时间',
                 ],
 
-            ]
+            ],
         ];
         $this->forms['fields'] = [
             [
                 'type' => 'text',
                 'name' => 'title',
                 'label' => 'TAG名称',
-                'required' => true
+                'required' => true,
             ], [
                 'type' => 'text',
                 'name' => 'spy',
                 'label' => '首字母',
                 'ext' => [
-                    'disabled' => true
+                    'disabled' => true,
                 ],
-                'help' => 'TAG名称首字母,无需手动输入自动生成'
+                'help' => 'TAG名称首字母,无需手动输入自动生成',
             ], [
                 'type' => 'image',
                 'name' => 'image',
-                'label' => '封面图片'
+                'label' => '封面图片',
             ], [
                 'type' => 'text',
                 'name' => 'seo_title',
-                'label' => 'SEO标题'
+                'label' => 'SEO标题',
             ], [
                 'type' => 'text',
                 'name' => 'seo_keywords',
@@ -107,10 +107,10 @@ abstract class TagAdmin extends BaseAdmin
                 'type' => 'textarea',
                 'name' => 'seo_description',
                 'label' => 'SEO描述',
-            ]
+            ],
         ];
         $this->search = [
-            'id#=#id', 'title#=#title', 'spy#=#spy', 'status#=#status', 'create_time#between#create_time', 'update_time#between#update_time'
+            'id#=#id', 'title#like#title', 'spy#=#spy', 'status#=#status', 'create_time#between#create_time', 'update_time#between#update_time',
         ];
     }
 
