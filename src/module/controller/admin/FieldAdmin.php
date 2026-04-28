@@ -223,7 +223,11 @@ abstract class FieldAdmin extends BaseAdmin
                 [
                     'type' => 'text',
                     'name' => 'extend[field][default]',
-                    'label' => '字段默认值',
+                    'label' => '数据库字段默认值',
+                ], [
+                    'type' => 'text',
+                    'name' => 'extend[from][default_value]',
+                    'label' => '表单默认值',
                 ], [
                     'type' => 'radio',
                     'name' => 'extend[index][is_open]',
