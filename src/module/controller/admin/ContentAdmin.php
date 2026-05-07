@@ -221,7 +221,7 @@ abstract class ContentAdmin extends BaseAdmin
                 }
 
                 // 对于 like 操作符，防止 SQL 注入攻击，处理用户输入
-                if ($operator == 'like') {
+                if ($operator === 'like') {
                     $value = '%' . addcslashes($value, '_%') . '%';
                 }
 
