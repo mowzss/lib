@@ -506,10 +506,8 @@ abstract class FieldAdmin extends BaseAdmin
      */
     protected function _edit_save_result(&$result, &$model, &$data): void
     {
-        if ($result === true) {
-            if ($this->editFields($data, $model)) {
-                $this->success('修改成功');
-            }
+        if (($result === true) && $this->editFields($data, $model)) {
+            $this->success('修改成功');
         }
         $this->error('修改失败');
 
@@ -517,10 +515,12 @@ abstract class FieldAdmin extends BaseAdmin
 
     /**
      * @param $data
+     * @param $model
      * @return bool
      */
     protected function editFields($data, $model): bool
     {
+        dump($model);
         $this->app->db->startTrans();
         try {
             $ret = TableCreatorUtil::instance()->modifyField($this->formatTableName($data), $model['name'], $this->formatAddFields($data));
