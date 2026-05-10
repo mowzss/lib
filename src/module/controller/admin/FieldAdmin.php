@@ -383,10 +383,10 @@ abstract class FieldAdmin extends BaseAdmin
                     $sql_fields = (new static::$contentModelClass())->setSuffix('_' . $data['mid'])->getTableFields();
                 }
             }
-            if ($this->request->action() == 'add' && in_array($data['name'], $this->reserve_field)) {
+            if ($this->request->action() === 'add' && in_array($data['name'], $this->reserve_field)) {
                 $this->error('系统保留字段，不可添加');
             }
-            if ($this->request->action() == 'add' && isset($sql_fields) && in_array($data['name'], $sql_fields)) {
+            if ($this->request->action() === 'add' && isset($sql_fields) && in_array($data['name'], $sql_fields)) {
                 $this->error('数据库已存在' . $data['name'] . '字段');
             }
             $result = $this->model->where([
@@ -403,7 +403,12 @@ abstract class FieldAdmin extends BaseAdmin
         }
     }
 
-    protected function formatTableName($data = [])
+    /**
+     * 表格字段
+     * @param array $data
+     * @return string|void
+     */
+    protected function formatTableName(array $data = [])
     {
         if (empty($data)) {
             $data = $this->request->post();
@@ -412,14 +417,14 @@ abstract class FieldAdmin extends BaseAdmin
             $this->error('模型id不能不能为空');
         }
         $module = strtolower($this->getModuleName());
-        if ($data['name'] == 'content') {
+        if ($data['name'] === 'content') {
             return "{$module}_content_{$data['mid']}s";
         }
         if ($data['mid'] > 0) {
             return "{$module}_content_{$data['mid']}";
         }
 
-        if ($data['mid'] == '-1') {
+        if ((int)$data['mid'] === -1) {
             return "{$module}_column";
         }
         $this->error('模型id不正确');
@@ -502,7 +507,7 @@ abstract class FieldAdmin extends BaseAdmin
     protected function _edit_save_result(&$result, &$model, &$data): void
     {
         if ($result === true) {
-            if ($this->editFields($data)) {
+            if ($this->editFields($data, $model)) {
                 $this->success('修改成功');
             }
         }
@@ -514,11 +519,11 @@ abstract class FieldAdmin extends BaseAdmin
      * @param $data
      * @return bool
      */
-    protected function editFields($data): bool
+    protected function editFields($data, $model): bool
     {
         $this->app->db->startTrans();
         try {
-            $ret = TableCreatorUtil::instance()->modifyField($this->formatTableName($data), $data['name'], $this->formatAddFields($data));
+            $ret = TableCreatorUtil::instance()->modifyField($this->formatTableName($data), $model['name'], $this->formatAddFields($data));
             if (!$ret['success']) {
                 throw new Exception('字段修改失败:' . $ret['message']);
             }
