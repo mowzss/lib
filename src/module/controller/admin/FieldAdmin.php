@@ -522,7 +522,7 @@ abstract class FieldAdmin extends BaseAdmin
     {
         $this->app->db->startTrans();
         try {
-            $ret = TableCreatorUtil::instance()->modifyField($this->formatTableName($data), $model['name'], $this->formatAddFields($data));
+            $ret = TableCreatorUtil::instance()->modifyField($this->formatTableName($data), $model['name'], $data['name'], $this->formatAddFields($data));
             if (!$ret['success']) {
                 throw new Exception('字段修改失败:' . $ret['message']);
             }
