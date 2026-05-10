@@ -520,7 +520,6 @@ abstract class FieldAdmin extends BaseAdmin
      */
     protected function editFields($data, $model): bool
     {
-        dump($model);
         $this->app->db->startTrans();
         try {
             $ret = TableCreatorUtil::instance()->modifyField($this->formatTableName($data), $model['name'], $this->formatAddFields($data));
