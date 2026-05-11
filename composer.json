@@ -30,7 +30,6 @@
   "extra": {
     "think": {
       "config": {
-        "form": "stc/form.php",
         "filesystem": "stc/filesystem.php"
       },
       "services": [

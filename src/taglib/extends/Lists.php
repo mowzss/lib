@@ -4,11 +4,11 @@ declare (strict_types=1);
 
 namespace mowzs\lib\taglib\extends;
 
-use mowzs\lib\helper\ColumnCacheHelper;
-use mowzs\lib\module\logic\ColumnBaseLogic;
-use mowzs\lib\module\logic\ContentBaseLogic;
-use mowzs\lib\taglib\TaglibBase;
 use think\facade\Db;
+use mowzs\lib\taglib\TaglibBase;
+use mowzs\cms\logic\ColumnBaseLogic;
+use mowzs\cms\logic\ContentBaseLogic;
+use mowzs\lib\helper\ColumnCacheHelper;
 
 class Lists extends TaglibBase
 {

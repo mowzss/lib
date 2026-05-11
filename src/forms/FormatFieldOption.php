@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace mowzs\lib\forms;
 
-use mowzs\lib\helper\ExecutorHelper;
 use think\Exception;
+use mowzs\lib\helper\ExecutorHelper;
 
 class FormatFieldOption
 {
@@ -12,10 +12,7 @@ class FormatFieldOption
      * @param mixed $options 参数
      * @return void
      */
-    public static function getOptions(mixed $options = [])
-    {
-
-    }
+    public static function getOptions(mixed $options = []) {}
 
     /**
      * 将特定格式的字符串转换为数组，提取每行的第一个键值对。
@@ -44,7 +41,7 @@ class FormatFieldOption
                 // 使用竖线（|）分割行，获取第一个键值对
                 $parts = explode('|', $line); // 限制分割次数为2，以确保只获取第一个键值对
                 [$key, $value] = $parts;
-//                // 添加到结果数组
+                //                // 添加到结果数组
                 if ($key === 'searchUrl' || $key === 'dataInit') {
                     //判断value是否包含@
                     if (str_contains($value, '@')) {

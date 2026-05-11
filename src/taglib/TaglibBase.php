@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace mowzs\lib\taglib;
 
-use mowzs\lib\module\logic\FieldBaseLogic;
 use think\App;
 use think\Container;
 use think\facade\Log;
+use mowzs\cms\logic\FieldBaseLogic;
 
 abstract class TaglibBase
 {
@@ -28,9 +28,7 @@ abstract class TaglibBase
         $this->request = $this->app->request;
     }
 
-    protected function getModel(mixed $module, string $db_name)
-    {
-    }
+    protected function getModel(mixed $module, string $db_name) {}
 
     abstract public function run(string $module, mixed $config);
 
@@ -140,7 +138,7 @@ abstract class TaglibBase
             '>= time' => '>= TIME',
             '<= time' => '<= TIME',
             'exp' => 'EXP',
-            'find in set' => 'FIND IN SET'
+            'find in set' => 'FIND IN SET',
         ];
 
         // 将简写转换为完整形式
@@ -171,7 +169,7 @@ abstract class TaglibBase
                 continue; // 忽略不完整的条件
             }
 
-            list($field, $operator, $value) = $condition;
+            [$field, $operator, $value] = $condition;
 
             // 标准化操作符并处理特殊操作符
             switch (strtoupper($operator)) {
