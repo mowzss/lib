@@ -30,7 +30,8 @@
   "extra": {
     "think": {
       "config": {
-        "filesystem": "stc/filesystem.php"
+        "filesystem": "stc/filesystem.php",
+        "form": "stc/form.php"
       },
       "services": [
         "mowzs\\lib\\Service"
