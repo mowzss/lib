@@ -4,7 +4,6 @@ declare (strict_types=1);
 namespace mowzs\lib\helper;
 
 use mowzs\lib\Exception\LibsException;
-use mowzs\lib\Exception\RandomGenerationException;
 
 class CodeHelper
 {
@@ -18,10 +17,10 @@ class CodeHelper
         if (strlen($timestampStr) < 2) {
             return $timestampStr;
         }
-        $firstDigit = intval($timestampStr[0]);
-        $secondDigit = intval($timestampStr[1]);
+        $firstDigit = (int)$timestampStr[0];
+        $secondDigit = (int)$timestampStr[1];
         $sumOfFirstTwoDigits = $firstDigit + $secondDigit;
-        return strval($sumOfFirstTwoDigits) . substr($timestampStr, 2);
+        return $sumOfFirstTwoDigits . substr($timestampStr, 2);
     }
 
     /**
@@ -30,8 +29,7 @@ class CodeHelper
      * @param int $length 总长度（包括前缀），最小为10。
      * @param string $prefix 前缀（可以为空）。
      * @return string 返回生成的唯一ID。
-     * @throws RandomGenerationException
-     * @throws RandomException
+     * @throws LibsException|\Random\RandomException
      */
     public static function timestampBasedId(int $length = 10, string $prefix = ''): string
     {
@@ -48,7 +46,7 @@ class CodeHelper
                 $randomPart .= random_int(0, 9);
             }
         } catch (\Error $e) {
-            throw new RandomGenerationException('Failed to generate random number: ' . $e->getMessage());
+            throw new LibsException('Failed to generate random number: ' . $e->getMessage());
         }
         return $prefix . $compressedTimestamp . $randomPart;
     }
