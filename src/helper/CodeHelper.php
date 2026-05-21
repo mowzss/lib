@@ -8,6 +8,7 @@ use mowzs\lib\Exception\LibsException;
 class CodeHelper
 {
     /**
+     * 压缩时间戳。
      * @param int $timestamp 时间戳。
      * @return string
      */
