@@ -8,6 +8,7 @@ return [
     'disabled' => '只读框',
     'radio' => '单选框',
     'checkbox' => '复选框',
+    'switchs' => '开关按钮',
     'select' => '单选下拉框',
     'xmselect' => '异步[单选/多选]',
     'image' => '单图上传',
