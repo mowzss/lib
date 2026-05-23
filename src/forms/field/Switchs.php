@@ -26,7 +26,9 @@ class Switchs extends FormFieldRenderer implements RendererInterface
             $option = FormatFieldOption::strToArray($option);
         }
         if (is_array($option) && count($option) == 2) {
-            $title = implode('|', array_reverse($option));
+            if (isset($option[0]) && isset($option[1])) {
+                $title = $option[1] . '|' . $option[0];
+            }
         }
         $required = $required ? 'required' : '';
         return $this->fetch('switchs', [
