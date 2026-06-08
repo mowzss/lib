@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace mowzs\lib;
 
 use think\App;
-use think\Container;
-use think\db\BaseQuery;
 use think\Exception;
-use think\facade\Cache;
 use think\facade\Db;
+use think\Container;
 use think\facade\Log;
-use think\Model;
+use think\facade\Cache;
+use think\db\BaseQuery;
 
 /**
  * 基础服务类
@@ -22,12 +21,12 @@ abstract class BaseLogic
      */
     protected App $app;
     protected \think\Request $request;
-
+    
     /**
      * @var string|null 静态属性用于存储 module 的值
      */
     protected static ?string $module = null;
-
+    
     /**
      * 构造函数
      *
@@ -44,7 +43,7 @@ abstract class BaseLogic
         // 控制器初始化
         $this->initialize();
     }
-
+    
     /**
      * 初始化
      * @return void
@@ -52,7 +51,7 @@ abstract class BaseLogic
     protected function initialize()
     {
     }
-
+    
     /**
      * 设置 module 的值
      *
@@ -64,7 +63,7 @@ abstract class BaseLogic
         self::$module = $module;
         return $this;
     }
-
+    
     /**
      * 获取 module 的值
      *
@@ -78,8 +77,8 @@ abstract class BaseLogic
         }
         return self::$module;
     }
-
-
+    
+    
     /**
      * 获取当前类的实例（用于静态调用）
      *
@@ -92,22 +91,22 @@ abstract class BaseLogic
         // 创建实例
         return Container::getInstance()->make(static::class, $var, $new);
     }
-
+    
     /**
      * 获取模型实例
      *
      * @param string $model 模型类名或简写
-     * @return object|string|Model
+     * @return object|string|\think\Model
      * @throws Exception
      */
-    protected function getModel(string $model)
+    protected function getModel(string $model): string|\think\Model
     {
         // 将模型名称转换为标准命名空间路径
         $modelName = $this->resolveModelName($model);
         // 从容器中获取模型实例
         return $this->app->make($modelName, [], true);
     }
-
+    
     /**
      * 解析模型名称为完整命名空间路径
      *
@@ -119,26 +118,26 @@ abstract class BaseLogic
     {
         // 缓存解析后的模型名称
         static $modelCache = [];
-
+        
         if (isset($modelCache[$model])) {
             return $modelCache[$model];
         }
-
+        
         // 处理不同命名格式
         $snakeModel = $this->camelToSnake($model);  // 将驼峰命名或 PascalCase 转换为下划线命名
         $parts = explode('_', $snakeModel);
-
+        
         // 确保至少有一个部分（模块名称）
         if (empty($parts)) {
             throw new Exception("Invalid model name format: [{$model}]. Expected format: module_name or module_name_class_name.");
         }
-
+        
         // 保留原始的 $parts 数组副本，用于后续拼接类名
         $originalParts = $parts;
-
+        
         // 获取模块名称（如 'article'）
         $module = array_shift($parts);
-
+        
         // 如果有剩余部分，则将其作为类名
         if (!empty($parts)) {
             // 将剩余部分转换为 PascalCase 格式的类名
@@ -148,7 +147,7 @@ abstract class BaseLogic
             // 如果没有其他部分，则类名与模块名称相同
             $className = ucfirst($module);
         }
-
+        
         // 如果原始的 $parts 数组中只有一个元素，说明类名应该包含模块名称
         if (count($originalParts) === 1) {
             $className = ucfirst($originalParts[0]);
@@ -157,21 +156,21 @@ abstract class BaseLogic
             $classNameParts = array_map('ucfirst', $originalParts);
             $className = implode('', $classNameParts);
         }
-
+        
         // 构建完整的命名空间路径
         $namespace = "app\\model\\{$module}\\{$className}";
-
+        
         // 检查类是否存在
         if (!class_exists($namespace)) {
             throw new Exception("Model [{$namespace}] does not exist.");
         }
-
+        
         // 缓存解析结果
         $modelCache[$model] = $namespace;
-
+        
         return $namespace;
     }
-
+    
     /**
      * 将驼峰命名或 PascalCase 转换为下划线命名
      *
@@ -183,8 +182,8 @@ abstract class BaseLogic
         // 使用正则表达式将驼峰命名或 PascalCase 转换为下划线命名
         return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $string));
     }
-
-
+    
+    
     /**
      * 获取查询构建器
      *
@@ -195,7 +194,7 @@ abstract class BaseLogic
     {
         return $this->app->db->connect()->name($name);
     }
-
+    
     /**
      * 事务处理
      *
@@ -206,7 +205,7 @@ abstract class BaseLogic
     protected function transaction(callable $callback): mixed
     {
         Db::startTrans();
-
+        
         try {
             $result = $callback();
             Db::commit();
@@ -216,9 +215,9 @@ abstract class BaseLogic
             Log::error("Transaction failed: " . $e->getMessage());
             throw $e;
         }
-
+        
     }
-
+    
     /**
      * 缓存操作
      *
@@ -237,7 +236,7 @@ abstract class BaseLogic
             return Cache::get($key);
         }
     }
-
+    
     /**
      * 记录日志
      *
@@ -249,7 +248,7 @@ abstract class BaseLogic
     {
         Log::record($message, $level);
     }
-
+    
     /**
      * 获取配置项
      *
@@ -261,6 +260,6 @@ abstract class BaseLogic
     {
         return $this->app->config->get($name, $default);
     }
-
-
+    
+    
 }
