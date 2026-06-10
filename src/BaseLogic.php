@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace mowzs\lib;
 
 use think\App;
-use think\Exception;
+use think\Model;
 use think\facade\Db;
 use think\Container;
 use think\facade\Log;
 use think\facade\Cache;
 use think\db\BaseQuery;
+use mowzs\lib\Exception\LogicException;
 
 /**
  * 基础服务类
@@ -96,8 +97,8 @@ abstract class BaseLogic
      * 获取模型实例
      *
      * @param string $model 模型类名或简写
-     * @return object|string|\think\Model
-     * @throws Exception
+     * @return string|Model
+     * @throws LogicException
      */
     protected function getModel(string $model): string|\think\Model
     {
@@ -112,7 +113,7 @@ abstract class BaseLogic
      *
      * @param string $model 模型类名或简写（支持下划线风格、驼峰命名和 PascalCase）
      * @return string 完整的命名空间路径
-     * @throws Exception
+     * @throws LogicException
      */
     private function resolveModelName(string $model): string
     {
@@ -129,7 +130,7 @@ abstract class BaseLogic
         
         // 确保至少有一个部分（模块名称）
         if (empty($parts)) {
-            throw new Exception("Invalid model name format: [{$model}]. Expected format: module_name or module_name_class_name.");
+            throw new LogicException("Invalid model name format: [{$model}]. Expected format: module_name or module_name_class_name.");
         }
         
         // 保留原始的 $parts 数组副本，用于后续拼接类名
@@ -162,7 +163,7 @@ abstract class BaseLogic
         
         // 检查类是否存在
         if (!class_exists($namespace)) {
-            throw new Exception("Model [{$namespace}] does not exist.");
+            throw new LogicException("Model [{$namespace}] does not exist.");
         }
         
         // 缓存解析结果
