@@ -11,7 +11,7 @@ class HttpResponse
      * @var \think\App
      */
     protected App $app;
-
+    
     /**
      * Construct
      * @param \think\App $app
@@ -20,17 +20,17 @@ class HttpResponse
     {
         $this->app = $app;
     }
-
+    
     /**
      * @param $request
      * @param \Closure $next
      * @return mixed|\think\response\Redirect
      */
-    public function handle($request, \Closure $next)
+    public function handle($request, \Closure $next): mixed
     {
         // 获取查询字符串
         $getArray = $this->app->request->get();
-
+        
         // 匹配 in=wap、in=pc 或 in=xx
         if (!empty($this->app->request->get('in'))) {
             unset($getArray['in']);
@@ -46,7 +46,7 @@ class HttpResponse
             $url = str_replace('/index.php', '', $this->app->request->url(true));
             return redirect($url, 301);
         }
-
+        
         return $next($request);
     }
 }
