@@ -3,25 +3,39 @@
 if (!function_exists('format_url')) {
     /**
      * 格式化网址
-     * @param string $url
-     * @param bool|string $is_array false 返回完整网址 反之返回分割数组
-     * @return null|array|false|int|mixed|string|void
+     * @param string $url 待格式化的URL
+     * @param bool|string $is_array 控制返回类型: false 返回完整网址, true 返回分割数组, string (如 'host') 返回对应组件
+     * @return false|mixed|string|array<string, mixed>|null
      */
-
-    function format_url(string $url, bool|string $is_array = false)
+    function format_url(string $url, bool|string $is_array = false): mixed
     {
         if (empty($url)) {
             return false;
         }
+        
         $url = trim($url);
         if (!str_contains($url, 'http://') && !str_contains($url, 'https://')) {
             $url = 'http://' . $url;
         }
         $url = str_replace('////', '//', $url);
-        if ($is_array) {
-            $url = parse_url($url);
-            return $url[$is_array];
+        
+        // 检查 $is_array 的类型
+        if ($is_array === true) { // 明确为 true 时返回数组
+            $parsed_url = parse_url($url);
+            if ($parsed_url === false) {
+                return false; // 解析失败
+            }
+            return $parsed_url;
         }
+        
+        if (is_string($is_array)) { // 如果是字符串，则返回指定组件
+            $parsed_url = parse_url($url);
+            if ($parsed_url === false || !isset($parsed_url[$is_array])) {
+                return null; // 组件不存在或解析失败
+            }
+            return $parsed_url[$is_array];
+        }
+        // $is_array 为 false 或其他假值，返回格式化后的 URL 字符串
         return $url;
     }
 }
@@ -42,7 +56,7 @@ if (!function_exists('isWithinDays')) {
         } else {
             $inputTime = strtotime($input);
         }
-
+        
         // 处理基准时间（默认为现在）
         if ($baseTime === 'now' || empty($baseTime)) {
             $baseTime = time();
@@ -51,10 +65,10 @@ if (!function_exists('isWithinDays')) {
         } else {
             $baseTime = strtotime($baseTime);
         }
-
+        
         // 计算 N 天前的时间戳
         $nDaysAgo = strtotime("-{$days} days", $baseTime);
-
+        
         // 判断 inputTime 是否在 [n天前, 当前时间] 这个区间内
         return $inputTime >= $nDaysAgo && $inputTime <= $baseTime;
     }
