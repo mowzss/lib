@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace mowzs\lib\forms\field;
@@ -6,7 +7,7 @@ namespace mowzs\lib\forms\field;
 use mowzs\lib\forms\FormFieldRenderer;
 use mowzs\lib\forms\RendererInterface;
 
-class Editor extends FormFieldRenderer implements RendererInterface
+class Tag extends FormFieldRenderer implements RendererInterface
 {
     /**
      * 渲染表单
@@ -21,14 +22,17 @@ class Editor extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
+        
         $required_html = $required ? 'required lay-verify="required"' : '';
-        return $this->fetch('editor', [
+        
+        return $this->fetch('textarea', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
             'required' => $required_html,
             'extra' => $extra,
             'disabled' => $disabled,
+        
         ]);
     }
 }

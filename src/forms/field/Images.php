@@ -24,12 +24,12 @@ class Images extends FormFieldRenderer implements RendererInterface
         if (is_array($value)) {
             $value = implode(',', $value);
         }
-        $required = $required ? 'required lay-verify="required"' : '';
+        $required_html = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('images', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
-            'required' => $required,
+            'required' => $required_html,
             'extra' => $extra,
             'disabled' => $disabled,
         ]);

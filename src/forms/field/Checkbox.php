@@ -28,12 +28,12 @@ class Checkbox extends FormFieldRenderer implements RendererInterface
         if (is_string($value)) {
             $value = explode(',', $value);
         }
-        $required = $required ? 'required lay-verify="required"' : '';
+        $required_html = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('checkbox', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
-            'required' => $required,
+            'required' => $required_html,
             'option' => $option,
             'disabled' => $disabled,
             'extra' => $extra,

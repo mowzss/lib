@@ -22,16 +22,16 @@ class Xmselect extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
-
+        
         if (!is_array($option)) {
             $option = FormatFieldOption::strToArray($option);
         }
-        $required = $required ? 'required lay-verify="required"' : '';
+        $required_html = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('xmselect', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
-            'required' => $required,
+            'required' => $required_html,
             'option' => $option,
             'extra' => $extra,
             'disabled' => $disabled,

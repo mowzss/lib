@@ -21,6 +21,7 @@ class FormFieldConfig
         'date' => '日期',
         'datetime' => '日期+时间',
         'daterange' => '日期区间',
+        'tag' => 'TAG标签',
         'icon' => 'Icon图标',
         'color' => '颜色选择器',
         'cron' => 'Cron表达式',
@@ -30,7 +31,7 @@ class FormFieldConfig
         'ueditor' => '百度Ueditor',
         'hidden' => '隐藏字段',
     ];
-
+    
     /**
      * 获取表单配置
      * @return array

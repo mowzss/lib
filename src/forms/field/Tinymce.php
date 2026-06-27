@@ -21,15 +21,15 @@ class Tinymce extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
-        $required = $required ? 'required lay-verify="required"' : '';
+        $required_html = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('tinymce', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
-            'required' => $required,
+            'required' => $required_html,
             'extra' => $extra,
             'disabled' => $disabled,
-
+        
         ]);
     }
 }

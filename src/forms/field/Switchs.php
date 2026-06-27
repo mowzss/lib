@@ -35,7 +35,7 @@ class Switchs extends FormFieldRenderer implements RendererInterface
             'name' => $name,
             'label' => $label,
             'value' => $value,
-            'required' => $required,
+            'required' => $required_html,
             'option' => $option,
             'disabled' => $disabled,
             'extra' => $extra,

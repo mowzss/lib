@@ -25,16 +25,16 @@ class Radio extends FormFieldRenderer implements RendererInterface
         if (!is_array($option)) {
             $option = FormatFieldOption::strToArray($option);
         }
-        $required = $required ? 'required lay-verify="required"' : '';
+        $required_html = $required ? 'required lay-verify="required"' : '';
         return $this->fetch('radio', [
             'name' => $name,
             'label' => $label,
             'value' => $value,
-            'required' => $required,
+            'required' => $required_html,
             'extra' => $extra,
             'option' => $option,
             'disabled' => $disabled,
         ]);
-
+        
     }
 }
