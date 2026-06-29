@@ -25,7 +25,7 @@ class Tag extends FormFieldRenderer implements RendererInterface
         
         $required_html = $required ? 'required lay-verify="required"' : '';
         
-        return $this->fetch('textarea', [
+        return $this->fetch('tag', [
             'name' => $name,
             'label' => $label,
             'value' => $value,

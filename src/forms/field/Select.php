@@ -22,12 +22,12 @@ class Select extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
-
+        
         if (!is_array($option)) {
             $option = FormatFieldOption::strToArray($option);
         }
-
-        $required = $required ? 'required' : '';
+        
+        $required_html = $required ? 'required' : '';
         return $this->fetch('select', [
             'name' => $name,
             'label' => $label,
