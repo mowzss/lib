@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace mowzs\lib\helper;
 
+use mowzs\lib\Helper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response as PsrResponse;
-use mowzs\lib\Helper;
 
 class HttpHelper extends Helper
 {
@@ -20,9 +20,9 @@ class HttpHelper extends Helper
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15',
         'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1',
-        'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Mobile Safari/537.36'
+        'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Mobile Safari/537.36',
     ];
-
+    
     /**
      * 发起 HTTP 请求
      *
@@ -37,21 +37,21 @@ class HttpHelper extends Helper
         try {
             // 创建 Guzzle HTTP 客户端
             $client = new Client();
-
+            
             // 设置默认的请求头
             $headers = $this->getDefaultHeaders($options);
-
+            
             // 合并用户传入的请求头
             if (isset($options['headers']) && is_array($options['headers'])) {
                 $headers = array_merge($headers, $options['headers']);
             }
-
+            
             // 构建请求配置
             $requestConfig = [
                 'headers' => $headers,
                 'timeout' => isset($options['timeout']) ? $options['timeout'] : 30,  // 默认超时时间为 30 秒
             ];
-
+            
             // 处理请求体
             if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
                 if (isset($options['form_params']) && is_array($options['form_params'])) {
@@ -60,20 +60,22 @@ class HttpHelper extends Helper
                     $requestConfig['json'] = $options['json'];
                 }
             }
-
+            if (($method === 'GET') && isset($options['query']) && is_array($options['query'])) {
+                $requestConfig['query'] = $options['query'];
+            }
             // 发起请求
             $response = $client->request($method, $url, $requestConfig);
-
+            
             // 解析响应
             $responseBody = $response->getBody()->getContents();
             $contentType = $response->getHeaderLine('Content-Type');
-
+            
             // 如果是 JSON 响应，尝试解析为数组
             if (stripos($contentType, 'application/json') !== false) {
                 $decoded = json_decode($responseBody, true);
                 return ['status' => $response->getStatusCode(), 'data' => $decoded];
             }
-
+            
             // 返回原始响应内容
             return ['status' => $response->getStatusCode(), 'data' => $responseBody];
         } catch (RequestException $e) {
@@ -86,7 +88,7 @@ class HttpHelper extends Helper
             throw new \Exception("请求失败: " . $e->getMessage());
         }
     }
-
+    
     /**
      * 获取默认的请求头
      *
@@ -96,7 +98,7 @@ class HttpHelper extends Helper
     private function getDefaultHeaders(array $options): array
     {
         $headers = [];
-
+        
         // 设置 User-Agent
         if (isset($options['ua']) && $options['ua'] === 'random') {
             // 使用随机 User-Agent
@@ -108,15 +110,15 @@ class HttpHelper extends Helper
             // 使用当前客户端的 User-Agent
             $headers['User-Agent'] = $this->getCurrentClientUserAgent();
         }
-
+        
         // 设置 Content-Type，默认为 application/json
         if (!isset($headers['Content-Type'])) {
             $headers['Content-Type'] = 'application/json';
         }
-
+        
         return $headers;
     }
-
+    
     /**
      * 获取随机的 User-Agent
      *
@@ -126,7 +128,7 @@ class HttpHelper extends Helper
     {
         return $this->userAgents[array_rand($this->userAgents)];
     }
-
+    
     /**
      * 获取当前客户端的 User-Agent
      *
@@ -134,48 +136,48 @@ class HttpHelper extends Helper
      */
     private function getCurrentClientUserAgent(): string
     {
-        return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Unknown';
+        return $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
     }
-
+    
     /**
      * 发起 GET 请求
      *
      * @param string $url 请求 URL
      * @param array $options 请求选项
      * @return array 返回响应内容或解析后的 JSON 对象
-     * @throws \Exception
+     * @throws \Exception|GuzzleException
      */
     public function get(string $url, array $options = []): array
     {
         return $this->request('GET', $url, $options);
     }
-
+    
     /**
      * 发起 POST 请求
      *
      * @param string $url 请求 URL
      * @param array $options 请求选项
      * @return array 返回响应内容或解析后的 JSON 对象
-     * @throws \Exception
+     * @throws \Exception|GuzzleException
      */
     public function post(string $url, array $options = []): array
     {
         return $this->request('POST', $url, $options);
     }
-
+    
     /**
      * 发起 PUT 请求
      *
      * @param string $url 请求 URL
      * @param array $options 请求选项
      * @return array 返回响应内容或解析后的 JSON 对象
-     * @throws \Exception
+     * @throws \Exception|GuzzleException
      */
     public function put(string $url, array $options = []): array
     {
         return $this->request('PUT', $url, $options);
     }
-
+    
     /**
      * 发起 DELETE 请求
      *
@@ -188,7 +190,7 @@ class HttpHelper extends Helper
     {
         return $this->request('DELETE', $url, $options);
     }
-
+    
     /**
      * 发起 PATCH 请求
      *
