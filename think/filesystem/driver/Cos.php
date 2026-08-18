@@ -2,40 +2,40 @@
 
 namespace think\filesystem\driver;
 
-use League\Flysystem\FilesystemAdapter;
-use Overtrue\Flysystem\Cos\CosAdapter;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 use think\filesystem\Driver;
+use think\db\exception\DbException;
+use Overtrue\Flysystem\Cos\CosAdapter;
+use League\Flysystem\FilesystemAdapter;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 
 class Cos extends Driver
 {
-
+    
     protected function createAdapter(): FilesystemAdapter
     {
         // TODO: Implement createAdapter() method.
-        $Config = ['type' => 'qcloud',
+        $config = ['type' => 'qcloud',
             'bucket' => null,
             'app_id' => null,
             'region' => 'ap-guangzhou',
             'signed_url' => false,
         ];
-
-        return new CosAdapter($this->config);
+        
+        return new CosAdapter($config);
     }
-
+    
     /**
      * @param string $path
      * @return string
      * @throws DataNotFoundException
      * @throws DbException
-     * @throws ModelNotFoundException
+     * @throws ModelNotFoundException|\Throwable
      */
     public function url(string $path): string
     {
         $path = str_replace('\\', '/', $path);
-
+        
         if (!empty(sys_config('cos_domain'))) {
             return $this->concatPathToUrl(sys_config('cos_domain'), $path);
         }
