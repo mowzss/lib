@@ -3,18 +3,18 @@ declare(strict_types=1);
 
 namespace mowzs\lib\command;
 
-use think\console\Command;
 use think\console\Input;
 use think\console\Output;
+use think\console\Command;
 use function copy;
-use function file_exists;
-use function is_dir;
-use function is_file;
-use function json_decode;
 use function mkdir;
 use function rmdir;
-use function scandir;
+use function is_dir;
 use function unlink;
+use function is_file;
+use function scandir;
+use function file_exists;
+use function json_decode;
 
 class AdminModuleInit extends Command
 {
@@ -28,14 +28,15 @@ class AdminModuleInit extends Command
             ->setDescription('从已安装的happy-module类型的包中初始化自定义模块配置。')
             ->setHelp('此命令根据带有类型 "happy-module" 的已安装包中的 composer.json 文件来初始化自定义模块配置。');
     }
-
+    
     /**
      * 执行
      * @param Input $input
      * @param Output $output
      * @return int
+     * @throws \JsonException
      */
-    protected function execute(Input $input, Output $output)
+    protected function execute(Input $input, Output $output): int
     {
         $output->writeln('开始模块初始化...');
         // 检查并读取 installed.json 文件
@@ -44,7 +45,7 @@ class AdminModuleInit extends Command
             $output->writeln('<error>未找到 vendor/composer/installed.json 文件！</error>');
             return 1; // 返回非零值表示命令执行失败
         }
-        $packages = json_decode(@file_get_contents($installedJsonPath), true);
+        $packages = json_decode(@file_get_contents($installedJsonPath), true, 512, JSON_THROW_ON_ERROR);
         if (isset($packages['packages'])) {
             $packages = $packages['packages']; // 兼容 Composer 2.0
         } else {
@@ -84,7 +85,13 @@ class AdminModuleInit extends Command
         $this->executeCommands($input, $output);
         return 0; // 返回零值表示命令成功执行
     }
-
+    
+    /**
+     * 执行命令
+     * @param Input $input 输入对象
+     * @param Output $output 输出对象
+     * @return int
+     */
     protected function executeCommands(Input $input, Output $output): int
     {
         // 定义要执行的命令列表
@@ -92,8 +99,8 @@ class AdminModuleInit extends Command
             'optimize:route',
             'optimize:schema',
         ];
-        if (!is_dir($this->app->getRuntimePath())) {
-            mkdir($this->app->getRuntimePath(), 0755, true);
+        if (!is_dir($this->app->getRuntimePath()) && !mkdir($concurrentDirectory = $this->app->getRuntimePath(), 0755, true) && !is_dir($concurrentDirectory)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
         foreach ($commands as $commandName) {
             $output->writeln("运行 <info>$commandName</info>...");
@@ -103,7 +110,7 @@ class AdminModuleInit extends Command
         $output->writeln('<comment>所有初始化步骤已完成。</comment>');
         return 0;
     }
-
+    
     /**
      * 处理路径（复制或替换）
      *
@@ -112,7 +119,7 @@ class AdminModuleInit extends Command
      * @param Output $output 输出对象
      * @param string $packageName 包名
      */
-    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName)
+    protected function processPaths(array $paths, bool $forceReplace, Output $output, string $packageName): void
     {
         foreach ($paths as $targetKey => $sourcePath) {
             $sourceFullPath = $this->app->getRootPath() . 'vendor/' . $packageName . '/' . $sourcePath;
@@ -130,15 +137,16 @@ class AdminModuleInit extends Command
             }
         }
     }
-
+    
     /**
-     * @param string $sourceFullPath
-     * @param string $targetFullPath
-     * @param bool $forceReplace
-     * @param Output $output
+     * 处理文件（复制或替换）
+     * @param string $sourceFullPath 源文件路径
+     * @param string $targetFullPath 目标文件路径
+     * @param bool $forceReplace 是否强制替换
+     * @param Output $output 输出对象
      * @return void
      */
-    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
+    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output): void
     {
         // 确保目标文件所在的目录存在
         $targetDir = dirname($targetFullPath);
@@ -159,8 +167,16 @@ class AdminModuleInit extends Command
             //            $output->writeln("文件复制至 '$targetFullPath'。");
         }
     }
-
-    protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output)
+    
+    /**
+     * 处理目录（复制或替换）
+     * @param string $sourceFullPath 源目录路径
+     * @param string $targetFullPath 目标目录路径
+     * @param bool $forceReplace 是否强制替换
+     * @param Output $output 输出对象
+     * @return void
+     */
+    protected function processDirectory(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output): void
     {
         // 确保目标目录存在
         if (!$this->ensureDirectoryExists($targetFullPath)) {
@@ -194,14 +210,14 @@ class AdminModuleInit extends Command
             }
         }
     }
-
+    
     /**
      * 删除包的内容
      *
      * @param string $packageName 包名
      * @param Output $output 输出对象
      */
-    protected function deletePackageContent(string $packageName, Output $output)
+    protected function deletePackageContent(string $packageName, Output $output): void
     {
         $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
         if (!file_exists($packagePath)) {
@@ -220,7 +236,7 @@ class AdminModuleInit extends Command
             $output->writeln("<error>删除包内容失败：$packageName</error>");
         }
     }
-
+    
     /**
      * 递归删除目录及其内容
      *
@@ -238,15 +254,14 @@ class AdminModuleInit extends Command
             // 如果是文件，直接删除
             if (unlink($path)) {
                 return true;
-            } else {
-                $output->writeln("<error>删除文件失败：$path</error>");
-                return false;
             }
+            $output->writeln("<error>删除文件失败：$path</error>");
+            return false;
         }
         // 获取目录中的所有文件和子目录
         $objects = scandir($path);
         foreach ($objects as $object) {
-            if ($object == '.' || $object == '..') {
+            if ($object === '.' || $object === '..') {
                 continue;
             }
             $fullPath = $path . DIRECTORY_SEPARATOR . $object;
@@ -265,12 +280,12 @@ class AdminModuleInit extends Command
         // 删除空目录
         if (rmdir($path)) {
             return true;
-        } else {
-            $output->writeln("<error>删除目录失败：$path</error>");
-            return false;
         }
+        
+        $output->writeln("<error>删除目录失败：$path</error>");
+        return false;
     }
-
+    
     /**
      * 确保目录路径存在，如果不存在则创建。
      *
