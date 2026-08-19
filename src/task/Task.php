@@ -3,6 +3,7 @@
 namespace mowzs\lib\task;
 
 use Closure;
+use think\App;
 use think\Cache;
 use Cron\CronExpression;
 use app\model\system\SystemTasks;

@@ -3,6 +3,7 @@
 namespace mowzs\lib\task;
 
 use Exception;
+use think\App;
 use Cron\CronExpression;
 use app\model\system\SystemTasks;
 use mowzs\lib\task\event\TaskFailed;

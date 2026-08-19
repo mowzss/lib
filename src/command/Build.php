@@ -63,7 +63,9 @@ class Build extends Command
     {
         if (!is_dir($this->basePath . $app)) {
             // 创建应用目录
-            mkdir($this->basePath . $app);
+            if (!mkdir($concurrentDirectory = $this->basePath . $app) && !is_dir($concurrentDirectory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
         }
         
         $appPath = $this->basePath . ($app ? $app . DIRECTORY_SEPARATOR : '');
@@ -75,16 +77,16 @@ class Build extends Command
         $this->buildHello($app, $namespace);
         
         foreach ($list as $path => $file) {
-            if ('__dir__' == $path) {
+            if ('__dir__' === $path) {
                 // 生成子目录
                 foreach ($file as $dir) {
                     $this->checkDirBuild($appPath . $dir);
                 }
-            } elseif ('__file__' == $path) {
+            } elseif ('__file__' === $path) {
                 // 生成（空白）文件
                 foreach ($file as $name) {
                     if (!is_file($appPath . $name)) {
-                        file_put_contents($appPath . $name, 'php' == pathinfo($name, PATHINFO_EXTENSION) ? '<?php' . PHP_EOL : '');
+                        file_put_contents($appPath . $name, 'php' === pathinfo($name, PATHINFO_EXTENSION) ? '<?php' . PHP_EOL : '');
                     }
                 }
             } else {
@@ -174,7 +176,9 @@ class Build extends Command
     protected function checkDirBuild(string $dirname): void
     {
         if (!is_dir($dirname)) {
-            mkdir($dirname, 0755, true);
+            if (!mkdir($dirname, 0755, true) && !is_dir($dirname)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dirname));
+            }
         }
     }
 }

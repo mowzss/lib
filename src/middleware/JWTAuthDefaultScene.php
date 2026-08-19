@@ -2,6 +2,7 @@
 
 namespace mowzs\lib\middleware;
 
+use think\App;
 use think\Request;
 use yzh52521\Jwt\JWT;
 use yzh52521\Jwt\Util\JWTUtil;
@@ -22,7 +23,7 @@ class JWTAuthDefaultScene
 
     public function handle(Request $request, $next)
     {
-        if ($this->app->config->get('route.controller_layer') == 'api') {
+        if ($this->app->config->get('route.controller_layer') === 'api') {
 
             if ($request->controller() === 'index.Login') {
                 return $next($request);

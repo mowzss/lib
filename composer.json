@@ -44,7 +44,7 @@
       "think\\": "think"
     },
     "files": [
-      "src/sys.php"
+      "sys.php"
     ]
   }
 }

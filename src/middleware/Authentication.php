@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib\middleware;
 
+use think\App;
 use think\Request;
 use mowzs\lib\helper\AuthHelper;
 use think\exception\HttpResponseException;
@@ -26,7 +27,7 @@ class Authentication
 
     public function handle(Request $request, \Closure $next)
     {
-        if ($this->app->config->get('route.controller_layer') == 'admin') {
+        if ($this->app->config->get('route.controller_layer') === 'admin') {
             //权限校验 或 忽略控制器
             if (AuthHelper::instance()->cheek()) {
                 return $next($request);
@@ -40,9 +41,9 @@ class Authentication
             $login_url = aurl($login_url);
             if ($request->isAjax()) {
                 throw new HttpResponseException(json(['code' => 0, 'info' => lang('请重新登录！'), 'url' => $login_url]));
-            } else {
-                return redirect($login_url);
             }
+            
+            return redirect($login_url);
         }
         return $next($request);
     }

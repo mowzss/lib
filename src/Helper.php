@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
+use think\App;
 use think\Container;
 
 class Helper

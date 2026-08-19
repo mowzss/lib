@@ -53,12 +53,12 @@ class Clear extends Command
         $files = is_dir($path) ? scandir($path) : [];
         
         foreach ($files as $file) {
-            if ('.' != $file && '..' != $file && is_dir($path . $file)) {
+            if ('.' !== $file && '..' !== $file && is_dir($path . $file)) {
                 array_map('unlink', glob($path . $file . DIRECTORY_SEPARATOR . '*.*'));
                 if ($rmdir) {
                     rmdir($path . $file);
                 }
-            } elseif ('.gitignore' != $file && is_file($path . $file)) {
+            } elseif ('.gitignore' !== $file && is_file($path . $file)) {
                 unlink($path . $file);
             }
         }

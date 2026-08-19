@@ -3,6 +3,8 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
+use think\App;
+
 class Run
 {
     protected static string $run_env = '.env';
@@ -20,8 +22,7 @@ class Run
      */
     protected static function init(): App
     {
-        $app = new App();
-        return $app->debug(self::isDebug());
+        return (new App())->debug(self::isDebug());
     }
 
     /**
