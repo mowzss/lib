@@ -2,13 +2,12 @@
 
 namespace mowzs\lib\task;
 
-use app\model\system\SystemTasks;
-use Cron\CronExpression;
 use Exception;
+use Cron\CronExpression;
+use app\model\system\SystemTasks;
 use mowzs\lib\task\event\TaskFailed;
-use mowzs\lib\task\event\TaskProcessed;
 use mowzs\lib\task\event\TaskSkipped;
-use think\App;
+use mowzs\lib\task\event\TaskProcessed;
 
 class Scheduler
 {

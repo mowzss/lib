@@ -3,10 +3,9 @@ declare (strict_types=1);
 
 namespace mowzs\lib\middleware;
 
-use mowzs\lib\helper\AuthHelper;
-use think\App;
-use think\exception\HttpResponseException;
 use think\Request;
+use mowzs\lib\helper\AuthHelper;
+use think\exception\HttpResponseException;
 
 class Authentication
 {

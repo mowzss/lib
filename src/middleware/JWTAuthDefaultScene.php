@@ -2,7 +2,6 @@
 
 namespace mowzs\lib\middleware;
 
-use think\App;
 use think\Request;
 use yzh52521\Jwt\JWT;
 use yzh52521\Jwt\Util\JWTUtil;

@@ -3,8 +3,6 @@ declare (strict_types=1);
 
 namespace mowzs\lib;
 
-use think\App;
-
 class Run
 {
     protected static string $run_env = '.env';

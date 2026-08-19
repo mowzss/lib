@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace mowzs\lib\taglib;
 
-use think\App;
 use think\Container;
 use think\facade\Log;
 use mowzs\cms\logic\FieldBaseLogic;

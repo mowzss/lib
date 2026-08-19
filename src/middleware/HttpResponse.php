@@ -2,8 +2,6 @@
 
 namespace mowzs\lib\middleware;
 
-use think\App;
-
 class HttpResponse
 {
     /**

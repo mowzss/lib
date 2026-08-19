@@ -3,28 +3,25 @@ declare(strict_types=1);
 
 namespace mowzs\lib;
 
-use mowzs\lib\command\AdminEntranceRename;
-use mowzs\lib\command\AdminFaviconFromConfig;
+use mowzs\lib\command\Build;
+use mowzs\lib\command\Clear;
 use mowzs\lib\command\AdminInit;
-use mowzs\lib\command\AdminModuleInit;
+use think\Service as BaseService;
 use mowzs\lib\command\AdminUpgrade;
 use mowzs\lib\task\command\TaskRun;
-use mowzs\lib\task\command\TaskSchedule;
-use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
+use mowzs\lib\command\AdminModuleInit;
+use mowzs\lib\task\command\TaskSchedule;
+use mowzs\lib\command\AdminEntranceRename;
+use mowzs\lib\command\AdminFaviconFromConfig;
+use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
-use think\Service as BaseService;
 
 /**
  * 应用服务类
  */
 class Service extends BaseService
 {
-    public function register()
-    {
-//        $this->loadSysFiles();
-    }
-
     public function boot(): void
     {
         // 服务启动
@@ -37,12 +34,20 @@ class Service extends BaseService
         $this->app->middleware->add(\mowzs\lib\middleware\HttpResponse::class, 'route');
         // 注册JWT默认权限
         $this->app->middleware->add(\mowzs\lib\middleware\JWTAuthDefaultScene::class, 'route');
-        // 注册命令行
-        $this->registerCommand();
         //注册多模块路由
         $this->app->event->listen('RouteLoaded', function () {
             $this->app->route->auto()->completeMatch(false);
         });
+        $this->app->event->listen('HttpRun', function () {
+            $this->app->middleware->add(MultiApp::class);
+        });
+        
+        $this->app->bind([
+            'mowzs\lib\Url' => Url::class,
+        ]);
+        // 注册命令行
+        $this->registerCommand();
+        
     }
 
     /**
@@ -98,58 +103,8 @@ class Service extends BaseService
             AdminFaviconFromConfig::class,
             TaskRun::class,
             TaskSchedule::class,
+            Build::class,
+            Clear::class,
         ]);
-    }
-
-    /**
-     * 加载 sys.php 文件
-     * @return void
-     */
-    protected function loadSysFiles(): void
-    {
-        $baseDir = $this->app->getAppPath() . DIRECTORY_SEPARATOR;
-        $paths = [
-            $baseDir . 'sys.php',
-            $baseDir,
-        ];
-
-        foreach ($paths as $path) {
-            if (is_dir($path)) {
-                // 如果是目录，则遍历子目录寻找 sys.php 文件
-                $this->scanDirectoryForSysFiles($path);
-            } elseif (is_file($path)) {
-                // 如果是文件，则直接加载
-                $this->includeSysFile($path);
-            }
-        }
-    }
-
-    /**
-     * 遍历目录寻找 sys.php 文件
-     * @param string $directory
-     */
-    protected function scanDirectoryForSysFiles(string $directory): void
-    {
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directory),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getFilename() === 'sys.php') {
-                $this->includeSysFile($file->getPathname());
-            }
-        }
-    }
-
-    /**
-     * 包含 sys.php 文件
-     * @param string $filePath
-     */
-    protected function includeSysFile(string $filePath): void
-    {
-        if (file_exists($filePath)) {
-            require_once $filePath;
-        }
     }
 }

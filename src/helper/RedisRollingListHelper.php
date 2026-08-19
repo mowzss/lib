@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace mowzs\lib\helper;
 
-use think\App;
 use think\facade\Log;
 use mowzs\lib\Helper;
 use think\facade\Cache;

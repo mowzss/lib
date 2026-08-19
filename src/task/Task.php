@@ -2,11 +2,10 @@
 
 namespace mowzs\lib\task;
 
-use app\model\system\SystemTasks;
 use Closure;
-use Cron\CronExpression;
-use think\App;
 use think\Cache;
+use Cron\CronExpression;
+use app\model\system\SystemTasks;
 
 abstract class Task
 {
