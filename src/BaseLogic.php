@@ -232,10 +232,10 @@ abstract class BaseLogic
         if ($value !== null) {
             // 设置缓存
             return Cache::set($key, $value, $ttl);
-        } else {
-            // 获取缓存
-            return Cache::get($key);
         }
+        
+        // 获取缓存
+        return Cache::get($key);
     }
     
     /**
