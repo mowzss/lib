@@ -78,14 +78,15 @@ class Run
     }
 
     /**
-     * @param string $env 环境变量
+     * @param string $app_name 应用名称&环境变量名
      * @return void
      */
-    public static function initApp(string $env = 'home'): void
+    public static function initApp(string $app_name = 'home'): void
     {
         // 执行HTTP应用并响应
-        $http = self::init()->setEnvName($env)->http;
-        $response = $http->run();
+        $http = self::init()->setEnvName($app_name)->http;
+        
+        $response = $http->name($app_name)->run();
         $response->send();
         $http->end($response);
     }
