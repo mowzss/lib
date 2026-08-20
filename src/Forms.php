@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
 use think\Exception;
 use think\facade\View;

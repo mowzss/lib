@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
 use think\Service as BaseService;
 use happy\admin\libs\command\Build;

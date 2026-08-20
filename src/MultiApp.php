@@ -10,9 +10,10 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
 use Closure;
+use think\App;
 use think\Request;
 use think\Response;
 use think\exception\HttpException;

@@ -1,16 +1,16 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
-use think\db\exception\DataNotFoundException;
-use think\db\exception\ModelNotFoundException;
+use Throwable;
+use think\Response;
 use think\exception\Handle;
 use think\exception\HttpException;
-use think\exception\HttpResponseException;
 use think\exception\ValidateException;
-use think\Response;
-use Throwable;
+use think\exception\HttpResponseException;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 
 /**
  * 应用异常处理类

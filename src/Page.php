@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
 use think\paginator\driver\Bootstrap;
 

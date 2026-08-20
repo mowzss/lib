@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
 use think\route\Url as UrlBuild;
 
