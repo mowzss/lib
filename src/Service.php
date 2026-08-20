@@ -35,10 +35,10 @@ class Service extends BaseService
         $this->app->middleware->add(\happy\admin\libs\middleware\HttpResponse::class, 'route');
         // 注册JWT默认权限
         $this->app->middleware->add(\happy\admin\libs\middleware\JWTAuthDefaultScene::class, 'route');
-        //注册多模块路由
-        $this->app->event->listen('RouteLoaded', function () {
-            $this->app->route->auto()->completeMatch(false);
-        });
+        //        //注册多模块路由
+        //        $this->app->event->listen('RouteLoaded', function () {
+        //            $this->app->route->completeMatch(false);
+        //        });
         $this->app->event->listen('HttpRun', function () {
             $this->app->middleware->add(MultiApp::class);
         });
