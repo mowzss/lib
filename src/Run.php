@@ -55,10 +55,10 @@ class Run
         if (preg_match($pattern, $content)) {
             // 如果存在，则替换它
             return preg_replace($pattern, "$envKey=$envValue", $content);
-        } else {
-            // 如果不存在，则追加到文件末尾
-            return $content . PHP_EOL . "$envKey=$envValue";
         }
+        
+        // 如果不存在，则追加到文件末尾
+        return $content . PHP_EOL . "$envKey=$envValue";
     }
 
     /**
