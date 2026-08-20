@@ -43,13 +43,13 @@ class Service extends BaseService
         });
         
         $this->app->bind([
-            'mowzs\lib\Url' => Url::class,
+            'happy\admin\libs\Url' => Url::class,
         ]);
         // 注册命令行
         $this->registerCommand();
         
     }
-
+    
     /**
      * @return array
      * @throws DataNotFoundException
@@ -88,7 +88,7 @@ class Service extends BaseService
         }
         return array_merge($this->app->config->get('view.tpl_replace_string', []), $data);
     }
-
+    
     /**
      * 注册命令行
      * @return void
