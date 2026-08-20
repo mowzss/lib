@@ -22,7 +22,8 @@ class AuthHelper extends Helper
         }
         $node = NodeHelper::instance()->wholeNode($node);
         try {
-            $nodes = NodeHelper::instance()->getMethods();
+            $nodes = NodeHelper::instance()->getMethods(true);
+            
         } catch (Exception $e) {
             $this->app->log->error($e->getMessage());
             return false;

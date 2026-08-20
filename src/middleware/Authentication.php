@@ -27,7 +27,7 @@ class Authentication
 
     public function handle(Request $request, \Closure $next)
     {
-        if ($this->app->config->get('route.controller_layer') === 'admin') {
+        if ($this->app->http->getName() === 'admin') {
             //权限校验 或 忽略控制器
             if (AuthHelper::instance()->cheek()) {
                 return $next($request);

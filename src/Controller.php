@@ -85,6 +85,7 @@ abstract class Controller
      */
     protected function fetch(string $template = '', array $vars = []): string
     {
+        
         foreach ($this as $name => $value) {
             $vars[$name] = $value;
         }

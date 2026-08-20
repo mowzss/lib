@@ -538,9 +538,8 @@ class Forms
         if ($this->outputMode === 'page') {
             throw new HttpResponseException(display($html));
         }
-        $config = array_merge($this->old_view_config, ['view_path' => '']);
-        View::config($config);
-        Helper::instance()->app->config->set($config, 'view');
+        View::config($this->old_view_config);
+        Helper::instance()->app->config->set($this->old_view_config, 'view');
         return $html;
     }
 
