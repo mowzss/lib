@@ -19,7 +19,6 @@ class NodeHelper extends Helper
     {
         parent::initialize();
         $this->layer = $this->app->config->get('route.controller_layer', 'controller');
-        // 多应用下缓存键必须包含当前应用名
         $appName = $this->app->http->getName();
         $this->cache_key = "SystemNodeAll_{$appName}_{$this->layer}";
     }
@@ -68,7 +67,7 @@ class NodeHelper extends Helper
     }
     
     /**
-     * 获取全部节点信息（多应用适配版）
+     * 获取全部节点信息
      * @param bool $force_flush 是否强制刷新
      * @return array
      * @throws Exception
@@ -86,6 +85,7 @@ class NodeHelper extends Helper
         $basePath = $this->app->getAppPath() . $this->layer . DIRECTORY_SEPARATOR;
         $baseNamespace = rtrim($this->app->getNamespace(), '\\') . '\\' . $this->layer;
         
+        // ✅ 仅排除 \happy\admin\libs\Controller 基类的方法
         $excludeMethods = [];
         if (class_exists('\happy\admin\libs\Controller')) {
             $excludeMethods = get_class_methods('\happy\admin\libs\Controller');
@@ -109,7 +109,6 @@ class NodeHelper extends Helper
                 continue;
             }
             
-            // 文件路径 → 命名空间（PSR-4）
             $relativePath = substr($file->getPathname(), strlen($basePath));
             $relativeClass = str_replace(
                 [DIRECTORY_SEPARATOR, '.php'],
@@ -125,7 +124,6 @@ class NodeHelper extends Helper
                 
                 $reflection = new ReflectionClass($fullClass);
                 
-                // 跳过抽象类、接口、Trait
                 if ($reflection->isAbstract() || $reflection->isInterface() || $reflection->isTrait()) {
                     continue;
                 }
@@ -133,22 +131,23 @@ class NodeHelper extends Helper
                 // 解析类注释
                 $classComment = $this->parseComment($reflection->getDocComment());
                 $nodeKey = $this->snake(str_replace('\\', '/', $relativeClass));
-                
                 $data[$nodeKey] = $classComment;
                 
-                // 解析公共方法
+                // ✅ 获取所有 public 方法（含继承、含 Trait），仅靠黑名单过滤
                 $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
                 foreach ($methods as $method) {
-                    if (in_array($method->getName(), $excludeMethods)
-                        
-                        || str_starts_with($method->getName(), '__')
-                        || $method->getDeclaringClass()->getName() !== $fullClass
-                    ) {
+                    $methodName = $method->getName();
+                    // 跳过魔术方法和构造函数
+                    if (str_starts_with($methodName, '__')) {
+                        continue;
+                    }
+                    // ✅ 仅排除 Controller 基类方法，其余全部保留
+                    if (in_array($methodName, $excludeMethods, true)) {
                         continue;
                     }
                     
                     $methodComment = $this->parseComment($method->getDocComment());
-                    $methodNodeKey = $nodeKey . '/' . strtolower($method->getName());
+                    $methodNodeKey = $nodeKey . '/' . strtolower($methodName);
                     $data[$methodNodeKey] = $methodComment;
                 }
             } catch (\Throwable $e) {
@@ -163,17 +162,23 @@ class NodeHelper extends Helper
     
     /**
      * 获取类的公共方法及注释（保留原签名供外部调用）
+     * @param string $appName
+     * @param string $layer
+     * @param string $className
+     * @param array $excludeMethods
+     * @param array $data
+     * @return void
      * @throws Exception
      */
     public function getPublicMethodComments(
         string $appName,
         string $layer,
         string $className,
-        array  $excludeMethods = [],
-        array  &$data = []
+        array $excludeMethods = [],
+        array &$data = []
     ): void
     {
-        $class = strtr($appName . '/' . $layer . '/' . $className, '/', '\\');
+        $class = str_replace('/', '\\', $appName . '/' . $layer . '/' . $className);
         
         if (!class_exists($class)) {
             throw new Exception("Class '$class' does not exist.");
@@ -191,24 +196,24 @@ class NodeHelper extends Helper
         
         $publicMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
         foreach ($publicMethods as $method) {
-            if (in_array($method->getName(), $excludeMethods)) {
+            $methodName = $method->getName();
+            
+            if (in_array($methodName, $excludeMethods, true)) {
                 continue;
             }
-            if (str_starts_with($method->getName(), '__')) {
-                continue;
-            }
-            // 只采集当前类自身声明的方法
-            if ($method->getDeclaringClass()->getName() !== $class) {
+            if (str_starts_with($methodName, '__')) {
                 continue;
             }
             
             $comment = $this->parseComment($method->getDocComment());
-            $data[$key . '/' . strtolower($method->getName())] = $comment;
+            $data[$key . '/' . strtolower($methodName)] = $comment;
         }
     }
     
     /**
      * 清理标题
+     * @param string $title
+     * @return string
      */
     protected function cleanTitle(string $title): string
     {
@@ -218,6 +223,8 @@ class NodeHelper extends Helper
     
     /**
      * 解析 DocBlock 注释
+     * @param string|null $comment
+     * @return array
      */
     protected function parseComment(?string $comment): array
     {

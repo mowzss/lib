@@ -43,7 +43,7 @@ class AuthHelper extends Helper
         if (empty($check['is_auth']) && !empty($this->getUser())) {
             return true;
         }
-        if (in_array($node, $this->getUserNodes())) {
+        if (in_array($node, $this->getUserNodes(), true)) {
             return true;
         }
         //其它未判定
@@ -58,7 +58,7 @@ class AuthHelper extends Helper
     {
         $user = $this->getUser();
         if (!empty($user['auth_id'])) {
-            return UserAuth::where('id', $user['auth_id'])->value('nodes');
+            return json_decode(UserAuth::where('id', $user['auth_id'])->value('nodes'), true);
         }
         return [];
     }
