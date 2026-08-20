@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace happy\admin\libs;
+namespace happy\admin\libs\middleware;
 
 use Closure;
 use think\App;

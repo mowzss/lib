@@ -8,6 +8,7 @@ use happy\admin\libs\command\Build;
 use happy\admin\libs\command\Clear;
 use think\db\exception\DbException;
 use happy\admin\libs\command\AdminInit;
+use happy\admin\libs\middleware\MultiApp;
 use happy\admin\libs\command\AdminUpgrade;
 use happy\admin\libs\task\command\TaskRun;
 use happy\admin\libs\command\AdminModuleInit;
