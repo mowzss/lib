@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\forms;
+namespace happy\admin\libs\forms;
 
 interface RendererInterface
 {

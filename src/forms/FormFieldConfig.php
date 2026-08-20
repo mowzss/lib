@@ -1,8 +1,8 @@
 <?php
 
-namespace mowzs\lib\forms;
+namespace happy\admin\libs\forms;
 
-use mowzs\lib\Helper;
+use happy\admin\libs\Helper;
 
 class FormFieldConfig
 {

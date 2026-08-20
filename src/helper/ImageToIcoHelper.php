@@ -1,9 +1,9 @@
 <?php
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
 
-use mowzs\lib\Exception\LibsException;
+use happy\admin\libs\Exception\LibsException;
 
 class ImageToIcoHelper
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace mowzs\lib\forms\field;
+namespace happy\admin\libs\forms\field;
 
-use mowzs\lib\forms\FormFieldRenderer;
-use mowzs\lib\forms\RendererInterface;
-use mowzs\lib\forms\FormatFieldOption;
+use happy\admin\libs\forms\FormFieldRenderer;
+use happy\admin\libs\forms\RendererInterface;
+use happy\admin\libs\forms\FormatFieldOption;
 
 class Switchs extends FormFieldRenderer implements RendererInterface
 {

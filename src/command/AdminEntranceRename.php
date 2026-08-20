@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\command;
+namespace happy\admin\libs\command;
 
 use think\Exception;
 use think\console\Command;

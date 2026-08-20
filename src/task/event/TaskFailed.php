@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\task\event;
+namespace happy\admin\libs\task\event;
 
 class TaskFailed extends TaskEvent
 {

@@ -1,14 +1,14 @@
 <?php
 
-namespace mowzs\lib\task\command;
+namespace happy\admin\libs\task\command;
 
 use Carbon\Carbon;
-use mowzs\lib\task\event\TaskFailed;
-use mowzs\lib\task\event\TaskProcessed;
-use mowzs\lib\task\event\TaskSkipped;
-use mowzs\lib\task\Scheduler;
 use think\console\Command;
 use think\exception\Handle;
+use happy\admin\libs\task\Scheduler;
+use happy\admin\libs\task\event\TaskFailed;
+use happy\admin\libs\task\event\TaskSkipped;
+use happy\admin\libs\task\event\TaskProcessed;
 
 class TaskRun extends Command
 {

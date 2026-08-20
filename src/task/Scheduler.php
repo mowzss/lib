@@ -1,14 +1,14 @@
 <?php
 
-namespace mowzs\lib\task;
+namespace happy\admin\libs\task;
 
 use Exception;
 use think\App;
 use Cron\CronExpression;
 use app\model\system\SystemTasks;
-use mowzs\lib\task\event\TaskFailed;
-use mowzs\lib\task\event\TaskSkipped;
-use mowzs\lib\task\event\TaskProcessed;
+use happy\admin\libs\task\event\TaskFailed;
+use happy\admin\libs\task\event\TaskSkipped;
+use happy\admin\libs\task\event\TaskProcessed;
 
 class Scheduler
 {

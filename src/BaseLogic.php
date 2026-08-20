@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib;
+namespace happy\admin\libs;
 
 use think\App;
 use think\Model;
@@ -10,7 +10,7 @@ use think\Container;
 use think\facade\Log;
 use think\facade\Cache;
 use think\db\BaseQuery;
-use mowzs\lib\Exception\LogicException;
+use happy\admin\libs\Exception\LogicException;
 
 /**
  * 基础服务类

@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\extend;
+namespace happy\admin\libs\extend;
 
 class SiteMapExtend
 {

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\forms;
+namespace happy\admin\libs\forms;
 
 use think\Exception;
-use mowzs\lib\helper\ExecutorHelper;
+use happy\admin\libs\helper\ExecutorHelper;
 
 class FormatFieldOption
 {

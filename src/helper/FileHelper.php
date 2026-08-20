@@ -1,11 +1,11 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Helper;
-use RecursiveDirectoryIterator;
+use happy\admin\libs\Helper;
 use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
 
 class FileHelper extends Helper
 {

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Helper;
-use think\facade\Db;
 use Throwable;
+use think\facade\Db;
+use happy\admin\libs\Helper;
 
 class ColumnCacheHelper extends Helper
 {

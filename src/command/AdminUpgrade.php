@@ -1,13 +1,13 @@
 <?php
 
-namespace mowzs\lib\command;
+namespace happy\admin\libs\command;
 
+use think\console\Input;
+use think\console\Output;
+use think\console\Command;
 use app\common\util\SqlExecutor;
 use app\logic\system\UpgradeLogic;
 use app\model\system\SystemUpgradeLog;
-use think\console\Command;
-use think\console\Input;
-use think\console\Output;
 
 class AdminUpgrade extends Command
 {

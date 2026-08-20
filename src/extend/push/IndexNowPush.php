@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\extend\push;
+namespace happy\admin\libs\extend\push;
 
 use Exception;
 

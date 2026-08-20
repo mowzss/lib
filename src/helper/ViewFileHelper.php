@@ -1,10 +1,10 @@
 <?php
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Helper;
-use think\db\exception\DataNotFoundException;
+use happy\admin\libs\Helper;
 use think\db\exception\DbException;
+use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 
 class ViewFileHelper extends Helper

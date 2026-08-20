@@ -1,11 +1,11 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib\middleware;
+namespace happy\admin\libs\middleware;
 
 use think\App;
 use think\Request;
-use mowzs\lib\helper\AuthHelper;
+use happy\admin\libs\helper\AuthHelper;
 use think\exception\HttpResponseException;
 
 class Authentication

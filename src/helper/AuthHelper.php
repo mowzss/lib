@@ -1,11 +1,11 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use app\model\user\UserAuth;
-use mowzs\lib\Helper;
 use think\Exception;
+use happy\admin\libs\Helper;
+use app\model\user\UserAuth;
 
 class AuthHelper extends Helper
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Exception\LibsException;
+use happy\admin\libs\Exception\LibsException;
 
 /**
  * 日期处理助手类

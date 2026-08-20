@@ -1,11 +1,11 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use app\model\user\UserGroup;
 use app\model\user\UserInfo;
-use mowzs\lib\Helper;
+use happy\admin\libs\Helper;
+use app\model\user\UserGroup;
 
 /**
  * 用户信息助手类

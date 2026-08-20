@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace mowzs\lib;
 
-use mowzs\lib\command\Build;
-use mowzs\lib\command\Clear;
-use mowzs\lib\command\AdminInit;
 use think\Service as BaseService;
-use mowzs\lib\command\AdminUpgrade;
-use mowzs\lib\task\command\TaskRun;
+use happy\admin\libs\command\Build;
+use happy\admin\libs\command\Clear;
 use think\db\exception\DbException;
-use mowzs\lib\command\AdminModuleInit;
-use mowzs\lib\task\command\TaskSchedule;
-use mowzs\lib\command\AdminEntranceRename;
-use mowzs\lib\command\AdminFaviconFromConfig;
+use happy\admin\libs\command\AdminInit;
+use happy\admin\libs\command\AdminUpgrade;
+use happy\admin\libs\task\command\TaskRun;
+use happy\admin\libs\command\AdminModuleInit;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
+use happy\admin\libs\task\command\TaskSchedule;
+use happy\admin\libs\command\AdminEntranceRename;
+use happy\admin\libs\command\AdminFaviconFromConfig;
 
 /**
  * 应用服务类
@@ -29,11 +29,11 @@ class Service extends BaseService
         // 注册session
         $this->app->middleware->add(\think\middleware\SessionInit::class);
         // 注册权限中间件
-        $this->app->middleware->add(\mowzs\lib\middleware\Authentication::class, 'route');
+        $this->app->middleware->add(\happy\admin\libs\middleware\Authentication::class, 'route');
         //注册请求响应过滤中间件
-        $this->app->middleware->add(\mowzs\lib\middleware\HttpResponse::class, 'route');
+        $this->app->middleware->add(\happy\admin\libs\middleware\HttpResponse::class, 'route');
         // 注册JWT默认权限
-        $this->app->middleware->add(\mowzs\lib\middleware\JWTAuthDefaultScene::class, 'route');
+        $this->app->middleware->add(\happy\admin\libs\middleware\JWTAuthDefaultScene::class, 'route');
         //注册多模块路由
         $this->app->event->listen('RouteLoaded', function () {
             $this->app->route->auto()->completeMatch(false);

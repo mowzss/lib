@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
 use ReflectionClass;
 use think\Exception;
@@ -23,7 +23,7 @@ class ExecutorHelper
         }
 
         // 进一步解析并检查类和方法是否存在
-        list($classMethod, $params) = self::parseString($string);
+        [$classMethod, $params] = self::parseString($string);
 
         [$className, $methodName] = explode('@', $classMethod, 2);
 
@@ -69,7 +69,7 @@ class ExecutorHelper
     public static function execute(string $string)
     {
         // 解析字符串
-        list($classMethod, $params) = self::parseString($string);
+        [$classMethod, $params] = self::parseString($string);
 
         // 分离类名和方法名
         [$className, $methodName] = explode('@', $classMethod, 2);

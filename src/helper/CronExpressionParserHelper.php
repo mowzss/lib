@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
 use InvalidArgumentException;
 

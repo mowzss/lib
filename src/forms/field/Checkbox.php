@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\forms\field;
+namespace happy\admin\libs\forms\field;
 
-use mowzs\lib\forms\FormatFieldOption;
-use mowzs\lib\forms\FormFieldRenderer;
-use mowzs\lib\forms\RendererInterface;
+use happy\admin\libs\forms\FormatFieldOption;
+use happy\admin\libs\forms\FormFieldRenderer;
+use happy\admin\libs\forms\RendererInterface;
 
 class Checkbox extends FormFieldRenderer implements RendererInterface
 {

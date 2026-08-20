@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
+use happy\admin\libs\Helper;
 use app\model\system\SystemOperationLog;
-use mowzs\lib\Helper;
 
 class OperationLogHelper extends Helper
 {

@@ -2,13 +2,13 @@
 
 declare (strict_types=1);
 
-namespace mowzs\lib\taglib\extends;
+namespace happy\admin\libs\taglib\extends;
 
 use think\facade\Db;
-use mowzs\lib\taglib\TaglibBase;
 use mowzs\cms\logic\ColumnBaseLogic;
 use mowzs\cms\logic\ContentBaseLogic;
-use mowzs\lib\helper\ColumnCacheHelper;
+use happy\admin\libs\taglib\TaglibBase;
+use happy\admin\libs\helper\ColumnCacheHelper;
 
 class Lists extends TaglibBase
 {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\command;
+namespace happy\admin\libs\command;
 
 use think\console\Input;
 use think\console\Output;

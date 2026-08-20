@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
 use think\facade\Log;
-use mowzs\lib\Helper;
 use think\facade\Cache;
+use happy\admin\libs\Helper;
 
 /**
  * 通用Redis滚动列表存储器

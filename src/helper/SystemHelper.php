@@ -1,8 +1,8 @@
 <?php
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Helper;
+use happy\admin\libs\Helper;
 
 class SystemHelper extends Helper
 {

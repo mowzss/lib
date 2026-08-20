@@ -1,11 +1,11 @@
 <?php
 
-namespace mowzs\lib\extend\push;
+namespace happy\admin\libs\extend\push;
 
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 use think\Exception;
+use think\db\exception\DbException;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 
 /**
  * 百度搜索引擎链接主动推送（快速收录）客户端

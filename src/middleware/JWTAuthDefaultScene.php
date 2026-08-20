@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\middleware;
+namespace happy\admin\libs\middleware;
 
 use think\App;
 use think\Request;

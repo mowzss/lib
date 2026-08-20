@@ -1,8 +1,8 @@
 <?php
 
-namespace mowzs\lib\task\event;
+namespace happy\admin\libs\task\event;
 
-use mowzs\lib\task\Task;
+use happy\admin\libs\task\Task;
 
 abstract class TaskEvent
 {

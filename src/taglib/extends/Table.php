@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\taglib\extends;
+namespace happy\admin\libs\taglib\extends;
 
-use mowzs\lib\taglib\TaglibBase;
+use happy\admin\libs\taglib\TaglibBase;
 
 class Table extends TaglibBase
 {

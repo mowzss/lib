@@ -1,14 +1,14 @@
 <?php
 
-namespace mowzs\lib\command;
+namespace happy\admin\libs\command;
 
-use app\logic\system\ConfigLogic;
 use Exception;
-use mowzs\lib\helper\ImageToIcoHelper;
-use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 use think\facade\Request;
+use think\console\Command;
+use app\logic\system\ConfigLogic;
+use happy\admin\libs\helper\ImageToIcoHelper;
 
 class AdminFaviconFromConfig extends Command
 {

@@ -8,7 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-namespace mowzs\lib\command;
+namespace happy\admin\libs\command;
 
 use think\console\Input;
 use think\console\Output;

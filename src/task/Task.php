@@ -1,6 +1,6 @@
 <?php
 
-namespace mowzs\lib\task;
+namespace happy\admin\libs\task;
 
 use Closure;
 use think\App;

@@ -1,9 +1,9 @@
 <?php
 
-namespace mowzs\lib\baidu;
+namespace happy\admin\libs\baidu;
 
-use mowzs\lib\helper\HttpHelper;
 use think\Exception;
+use happy\admin\libs\helper\HttpHelper;
 
 class AipNlp extends BaseBaiduAip
 {

@@ -1,10 +1,10 @@
 <?php
 declare (strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Exception\LibsException;
-use mowzs\lib\Helper;
+use happy\admin\libs\Helper;
+use happy\admin\libs\Exception\LibsException;
 
 class MimeHelper extends Helper
 {

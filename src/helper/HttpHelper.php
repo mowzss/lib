@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace mowzs\lib\helper;
+namespace happy\admin\libs\helper;
 
-use mowzs\lib\Helper;
 use GuzzleHttp\Client;
+use happy\admin\libs\Helper;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response as PsrResponse;

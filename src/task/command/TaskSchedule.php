@@ -1,11 +1,11 @@
 <?php
 
-namespace mowzs\lib\task\command;
+namespace happy\admin\libs\task\command;
 
-use Symfony\Component\Process\Process;
-use think\console\Command;
 use think\console\Input;
 use think\console\Output;
+use think\console\Command;
+use Symfony\Component\Process\Process;
 
 class TaskSchedule extends Command
 {
