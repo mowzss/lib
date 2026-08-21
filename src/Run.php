@@ -67,10 +67,9 @@ class Run
      */
     public static function isDebug(): mixed
     {
-        var_dump(self::getRunEnv());
+        
         if (is_file(self::getRunEnv())) {
             Helper::instance()->app->env->load(self::getRunEnv());
-            dump(Helper::instance()->app->env->get('APP_DEBUG'));
             return Helper::instance()->app->env->get('APP_DEBUG');
         }
         if (!Helper::instance()->app->config->get('happy.installed', false)) {
