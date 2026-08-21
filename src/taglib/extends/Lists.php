@@ -47,7 +47,7 @@ class Lists extends TaglibBase
             $params['by'] = $config['by'] ?? 'desc';
         }
         //排序字段
-        if (stristr($config['order'], 'rand()')) {
+        if (stripos($config['order'], 'rand()') !== false) {
             $params['order'] = 'rand()';
         } elseif (!empty($config['order'])) {
             $params['order'] = $config['order'];
@@ -80,7 +80,7 @@ class Lists extends TaglibBase
             }
         }
         $name = $config['name'];
-
+        
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params) . json_encode($config));
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
@@ -91,7 +91,7 @@ class Lists extends TaglibBase
         }
         return $return;
     }
-
+    
     /**
      * 格式化查询结果，添加分类和标签信息
      *
@@ -123,7 +123,7 @@ class Lists extends TaglibBase
             return ContentBaseLogic::instance()->formatContentData($item);
         });
     }
-
+    
     /**
      * @param string $module
      * @param int|string $mid

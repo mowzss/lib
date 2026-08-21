@@ -8,7 +8,7 @@ use happy\admin\libs\taglib\TaglibBase;
 
 class Column extends TaglibBase
 {
-
+    
     public function run(string $module, mixed $config): mixed
     {
         $this->module = $module;
@@ -27,10 +27,10 @@ class Column extends TaglibBase
             $by = $config['by'] ?? 'desc';
         }
         $name = $config['name'];
-
+        
         $cacheName = 'tpl_cata_' . $name . '_' . $module . '_' . md5(json_encode($config));
         $return = $this->app->cache->get($cacheName);
-
+        
         if (empty($return) || $config['cache'] == -1) {
             $table = $module . '_column';;
             $list = $this->app->db->name($table);
@@ -46,7 +46,7 @@ class Column extends TaglibBase
             if (!empty($config['rows'])) {
                 $list = $list->limit($config['rows']);
             }
-            if (stristr($config['order'], 'rand()')) {
+            if (stripos($config['order'], 'rand()') !== false) {
                 $list = $list->orderRaw('rand()');
             } else {
                 $list = $list->order($config['order'], $by);

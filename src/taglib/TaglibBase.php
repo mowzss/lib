@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace happy\admin\libs\taglib;
 
+use think\App;
 use think\Container;
 use think\facade\Log;
 use mowzs\cms\logic\FieldBaseLogic;
@@ -10,14 +11,14 @@ use mowzs\cms\logic\FieldBaseLogic;
 abstract class TaglibBase
 {
     protected App $app;
-
+    
     protected \think\Request $request;
     /**
      * 当前操作模块
      * @var string
      */
     protected string $module;
-
+    
     /**
      * @param App $app
      */
@@ -26,11 +27,13 @@ abstract class TaglibBase
         $this->app = $app;
         $this->request = $this->app->request;
     }
-
-    protected function getModel(mixed $module, string $db_name) {}
-
+    
+    protected function getModel(mixed $module, string $db_name)
+    {
+    }
+    
     abstract public function run(string $module, mixed $config);
-
+    
     /**
      * 获取指定模块下某个分类及其子分类的ID列表
      *
@@ -42,15 +45,15 @@ abstract class TaglibBase
     {
         // 构建缓存键名
         $cacheKey = 'cate_sons_' . strtolower($module) . '_' . $cid;
-
+        
         try {
             // 尝试从缓存中获取数据
             $cachedData = $this->app->cache->get($cacheKey);
-
+            
             if ($cachedData !== false) {
                 return $cachedData;
             }
-
+            
             // 如果缓存中没有数据，则从数据库查询
             $tableName = strtolower($module) . '_column';
             $query = $this->app->db->name($tableName)
@@ -58,23 +61,23 @@ abstract class TaglibBase
                 ->where(function ($query) use ($cid) {
                     $query->where('pid', $cid)->whereOr('id', $cid);
                 });
-
+            
             $data = $query->column('id');
-
+            
             if (!empty($data)) {
                 // 将查询结果存入缓存，设置缓存过期时间为1小时
                 $this->app->cache->set($cacheKey, $data, 3600);
             }
-
+            
             return $data;
-
+            
         } catch (\Exception $e) {
             // 记录异常日志
             Log::error("Error fetching column sons for module [{$module}] and cid [{$cid}]: " . $e->getMessage());
             return [];
         }
     }
-
+    
     /**
      * 获取当前类的实例（用于静态调用）
      *
@@ -84,7 +87,7 @@ abstract class TaglibBase
     {
         return Container::getInstance()->make(static::class);
     }
-
+    
     /**
      * 解析排序字段
      * @param $sortString
@@ -108,7 +111,7 @@ abstract class TaglibBase
         }
         return $data ?? [];
     }
-
+    
     protected function parseWhereArray(string $whereString): array
     {
         // 定义简写到完整操作符的映射
@@ -139,7 +142,7 @@ abstract class TaglibBase
             'exp' => 'EXP',
             'find in set' => 'FIND IN SET',
         ];
-
+        
         // 将简写转换为完整形式
         $whereString = preg_replace_callback(
             '/(\w+)\|([^\|]+)\|(.*)/',
@@ -147,29 +150,29 @@ abstract class TaglibBase
                 $field = $matches[1];
                 $operator = strtoupper(trim($matches[2]));
                 $value = $matches[3];
-
+                
                 // 检查是否是简写
                 if (array_key_exists(strtolower($operator), $shorthandOperators)) {
                     $operator = $shorthandOperators[strtolower($operator)];
                 }
-
+                
                 return "$field|$operator|$value";
             },
             $whereString
         );
-
+        
         $conditions = [];
         $parts = explode('&', $whereString);
-
+        
         foreach ($parts as $part) {
             $condition = explode('|', $part, 3); // 最多分割成3个部分
-
+            
             if (count($condition) !== 3) {
                 continue; // 忽略不完整的条件
             }
-
+            
             [$field, $operator, $value] = $condition;
-
+            
             // 标准化操作符并处理特殊操作符
             switch (strtoupper($operator)) {
                 case '=':
@@ -264,10 +267,10 @@ abstract class TaglibBase
                     break;
             }
         }
-
+        
         return $conditions;
     }
-
+    
     /**
      * @param $mid
      * @return array
@@ -288,7 +291,7 @@ abstract class TaglibBase
         }
         return $where;
     }
-
+    
     /**
      * 合并多个 WHERE 条件数组，并根据字段名去重（后面的覆盖前面的）
      *
@@ -301,7 +304,7 @@ abstract class TaglibBase
     public function mergeWhereConditions(...$conditions): array
     {
         $merged = [];
-
+        
         // 遍历所有传入的条件数组
         foreach ($conditions as $conditionGroup) {
             if (!is_array($conditionGroup)) {
@@ -314,7 +317,7 @@ abstract class TaglibBase
                 }
             }
         }
-
+        
         // 返回重新索引的数组
         return array_values($merged);
     }
