@@ -14,7 +14,7 @@ class Run
      */
     protected static function getRunEnv(): string
     {
-        return Helper::instance()->app->getRuntimePath() . self::$run_env;
+        return Helper::instance()->app->getRootPath() . 'runtime' . DIRECTORY_SEPARATOR . self::$run_env;
     }
     
     /**
