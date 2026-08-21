@@ -10,8 +10,8 @@ use happy\admin\libs\forms\field\Text;
 class FormFieldRenderer
 {
     private static array $renderers = [];
-
-
+    
+    
     /**
      * 初始化渲染器映射
      */
@@ -19,11 +19,10 @@ class FormFieldRenderer
     {
         // 从配置文件中加载表单字段类型
         $formConfig = FormFieldConfig::get();
-
         // 动态生成渲染器映射
         foreach ($formConfig as $type => $label) {
             // 假设渲染器类名与字段类型相同，并位于 `Mowzs\Libs\forms\field` 命名空间下
-            $className = 'mowzs\\lib\\forms\\field\\' . ucfirst($type);
+            $className = 'happy\\admin\\libs\\forms\\field\\' . ucfirst($type);
             // 检查类是否存在
             if (class_exists($className)) {
                 self::$renderers[$type] = $className;
@@ -34,7 +33,7 @@ class FormFieldRenderer
             }
         }
     }
-
+    
     /**
      * 创建渲染器实例
      * @param string $type
@@ -47,7 +46,7 @@ class FormFieldRenderer
         $class = self::$renderers[$type] ?? Text::class; // 默认为文本输入框
         return new $class();
     }
-
+    
     /**
      * 渲染表单字段
      * @param array $field
@@ -55,6 +54,7 @@ class FormFieldRenderer
      */
     public function renderField(array $field = []): string
     {
+        
         $type = $field['type'] ?? 'text';
         $name = $field['name'] ?? '';
         $label = $field['label'] ?? '';
@@ -74,7 +74,7 @@ class FormFieldRenderer
             return '';
         }
     }
-
+    
     /**
      * 渲染模板
      * @param string $template
@@ -83,7 +83,7 @@ class FormFieldRenderer
      */
     protected function fetch(string $template = '', array $vars = []): string
     {
-        $template = '/field/' . $template;
+        $template = 'field/' . $template;
         return View::fetch($template, $vars);
     }
 }
