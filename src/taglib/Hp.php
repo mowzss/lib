@@ -26,9 +26,9 @@ class Hp extends \think\template\TagLib
             'attr' => 'name,module,where,item,rows，val,cache,status,whereor,order,by,offset,length,key,mod,sub',
             'level' => 3,
             'close' => 1,
-        ]
+        ],
     ];
-
+    
     /**
      * 获取数据表数据
      * @param array $tag
@@ -52,7 +52,7 @@ class Hp extends \think\template\TagLib
         $val = $tag['val'] ?? false;
         $vals = $tag['val'] ?? $tag['name'];
         $parse = '<?php ';
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Table::getInstance()->run("' . $table . '",[
+        $parse .= '$' . $vals . '=\\happy\\admin\\libs\\taglib\\extends\\Table::getInstance()->run("' . $table . '",[
         "page"=>' . $page . ',
         "status"=>' . $status . ',
         "pagenum"=>' . $pageNum . ',
@@ -77,7 +77,7 @@ class Hp extends \think\template\TagLib
         }
         return $parse;
     }
-
+    
     /**
      * 获取栏目数据列表信息
      * @param array $tag
@@ -105,8 +105,8 @@ class Hp extends \think\template\TagLib
         $key = !empty($tag['key']) ? $tag['key'] : 'i';
         $empty = $tag['empty'] ?? '';
         $parse = '<?php ';
-
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Column::getInstance()->run("' . $module . '",[
+        
+        $parse .= '$' . $vals . '=\\happy\\admin\\libs\\taglib\\extends\\Column::getInstance()->run("' . $module . '",[
         "status"=>' . $status . ',
         "rows"=>' . $rows . ',
         "name"=>"' . $name . '",
@@ -117,7 +117,7 @@ class Hp extends \think\template\TagLib
         "whereor"=>"' . $whereor . '",
         "cache"=>' . $cache . ',
         ]);';
-
+        
         if (!empty($val)) {
             $parse .= '?>';
             $parse .= $content;
@@ -134,13 +134,13 @@ class Hp extends \think\template\TagLib
             $parse .= 'foreach($__LIST__ as $key=>$' . $item . '): ';
             $parse .= '$mod = ($' . $key . ' % ' . $mod . ' );';
             $parse .= '++$' . $key . ';?>';
-
+            
             $parse .= $content;
             $parse .= '<?php endforeach; endif; else: echo "' . $empty . '" ;endif; ?>';
         }
         return $parse;
     }
-
+    
     /**
      * 获取数据列表信息
      * @param array $tag
@@ -172,7 +172,7 @@ class Hp extends \think\template\TagLib
         $val = $tag['val'] ?? false;
         $vals = $tag['val'] ?? $tag['name'];
         $parse = '<?php ';
-        $parse .= '$' . $vals . '=\\mowzs\\lib\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
+        $parse .= '$' . $vals . '=\\happy\\admin\\libs\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
         "module" => "' . $module . '",
         "page"=>' . $page . ',
         "filter"=>' . $filter . ',
@@ -206,5 +206,5 @@ class Hp extends \think\template\TagLib
         }
         return $parse;
     }
-
+    
 }
