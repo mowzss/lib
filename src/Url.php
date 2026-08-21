@@ -165,14 +165,14 @@ class Url extends UrlBuild
         $url = str_replace('/', $depr, $url);
         
         $file = $request->baseFile();
-        if ($file && 0 !== strpos($request->url(), $file)) {
+        if ($file && !str_starts_with($request->url(), $file)) {
             $file = str_replace('\\', '/', dirname($file));
         }
         
         $url = rtrim($file, '/') . '/' . ltrim($url, '/');
         
         // URL后缀
-        if ('/' == substr($url, -1) || '' == $url) {
+        if ('/' === substr($url, -1) || '' == $url) {
             $suffix = '';
         } else {
             $suffix = $this->parseSuffix($suffix);

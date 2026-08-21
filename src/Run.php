@@ -8,7 +8,7 @@ use think\App;
 class Run
 {
     protected static string $run_env = '.env';
-
+    
     /**
      * @return string
      */
@@ -16,7 +16,7 @@ class Run
     {
         return Helper::instance()->app->getRuntimePath() . self::$run_env;
     }
-
+    
     /**
      * @return App
      */
@@ -24,7 +24,7 @@ class Run
     {
         return (new App())->debug(self::isDebug());
     }
-
+    
     /**
      * 设置运行环境为调试模式或生产模式
      * @param bool $debug
@@ -34,13 +34,13 @@ class Run
     {
         $currentContent = file_exists(self::getRunEnv()) ? file_get_contents(self::getRunEnv()) : '';
         $newContent = self::updateEnvContent($currentContent, 'APP_DEBUG', $debug ? 'true' : 'false');
-
+        
         // 写入新的.env文件内容
         if (file_put_contents(self::getRunEnv(), $newContent) === false) {
             throw new \RuntimeException("Failed to write to " . self::getRunEnv());
         }
     }
-
+    
     /**
      * 更新.env文件的内容
      * @param string $content 当前.env文件的内容
@@ -60,15 +60,17 @@ class Run
         // 如果不存在，则追加到文件末尾
         return $content . PHP_EOL . "$envKey=$envValue";
     }
-
+    
     /**
      * 获取当前环境是否为debug
      * @return array|false|mixed|null
      */
     public static function isDebug(): mixed
     {
+        var_dump(self::getRunEnv());
         if (is_file(self::getRunEnv())) {
             Helper::instance()->app->env->load(self::getRunEnv());
+            dump(Helper::instance()->app->env->get('APP_DEBUG'));
             return Helper::instance()->app->env->get('APP_DEBUG');
         }
         if (!Helper::instance()->app->config->get('happy.installed', false)) {
@@ -76,7 +78,7 @@ class Run
         }
         return false;
     }
-
+    
     /**
      * @param string $app_name 应用名称&环境变量名
      * @return void
