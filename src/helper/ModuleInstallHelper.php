@@ -17,8 +17,8 @@ class ModuleInstallHelper extends Helper
         $allFilesData = [];
 
         // 如果是单个目录，则将其转换为数组以便统一处理
-
-        $directories = $this->app->getAppPath() . 'common/install';
+        
+        $directories = $this->app->getBasePath() . 'common/install';
 
         $files = $this->scanInfoPhpFiles($directories);
         foreach ($files as $file) {
