@@ -47,7 +47,7 @@ class Service extends BaseService
         }
         
         $this->app->bind([
-            'happy\admin\libs\Url' => Url::class,
+            'think\route\Url' => Url::class,
         ]);
         // 注册命令行
         $this->registerCommand();
