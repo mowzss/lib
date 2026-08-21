@@ -91,5 +91,13 @@ class Run
         $response->send();
         $http->end($response);
     }
-
+    
+    /**
+     * 判断当前是否为admin应用
+     * @return bool
+     */
+    public static function isAdmin()
+    {
+        return Helper::instance()->app->http->getName() === 'admin';
+    }
 }

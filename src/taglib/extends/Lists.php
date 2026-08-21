@@ -5,10 +5,15 @@ declare (strict_types=1);
 namespace happy\admin\libs\taglib\extends;
 
 use think\facade\Db;
+use think\Paginator;
+use think\Collection;
+use think\db\exception\DbException;
 use mowzs\cms\logic\ColumnBaseLogic;
 use mowzs\cms\logic\ContentBaseLogic;
 use happy\admin\libs\taglib\TaglibBase;
+use think\db\exception\DataNotFoundException;
 use happy\admin\libs\helper\ColumnCacheHelper;
+use think\db\exception\ModelNotFoundException;
 
 class Lists extends TaglibBase
 {
@@ -95,8 +100,11 @@ class Lists extends TaglibBase
     /**
      * 格式化查询结果，添加分类和标签信息
      *
-     * @param \think\Paginator|\think\Collection $data 查询结果对象
+     * @param Paginator|Collection $data 查询结果对象
      * @return void
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
     protected function formatData(&$data): void
     {
