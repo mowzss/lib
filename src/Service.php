@@ -39,12 +39,12 @@ class Service extends BaseService
         $this->app->event->listen('HttpRun', function () {
             $this->app->middleware->add(MultiApp::class);
         });
-        if ($this->app->http->getName() === 'admin') {
-            // 注册路由 开启多模块
-            $this->app->event->listen('RouteLoaded', function () {
-                $this->app->route->auto()->completeMatch(false);
-            });
-        }
+        
+        // 注册路由 开启多模块
+        $this->app->event->listen('RouteLoaded', function () {
+            $this->app->route->auto()->completeMatch(false);
+        });
+        
         
         $this->app->bind([
             'think\route\Url' => Url::class,
