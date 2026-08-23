@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace happy\admin\libs;
 
-use think\facade\Route;
 use think\Service as BaseService;
 use think\db\exception\DbException;
 use happy\admin\libs\command\AdminInit;
@@ -34,9 +33,9 @@ class Service extends BaseService
         // 注册JWT默认权限
         $this->app->middleware->add(\happy\admin\libs\middleware\JWTAuthDefaultScene::class, 'route');
         // 注册多模块路由自动加载
-        $this->app->event->listen('RouteLoaded', function () {
-            Route::auto();
-        });
+        //        $this->app->event->listen('RouteLoaded', function () {
+        //            Route::auto()->completeMatch(false);
+        //        });
         // 注册命令行
         $this->registerCommand();
         

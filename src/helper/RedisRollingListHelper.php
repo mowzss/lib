@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace happy\admin\libs\helper;
 
+use think\App;
 use think\facade\Log;
 use think\facade\Cache;
 use happy\admin\libs\Helper;
@@ -111,7 +112,7 @@ class RedisRollingListHelper extends Helper
                 return [];
             }
             
-            return array_map(fn($item) => json_decode($item, true), $rawList);
+            return array_map(fn ($item) => json_decode($item, true), $rawList);
         } catch (\Throwable $e) {
             Log::error("RedisRollingList::getList failed: " . $e->getMessage());
             return [];
