@@ -14,7 +14,7 @@ class Run
      */
     protected static function getRunEnv(): string
     {
-        return Helper::instance()->app->getRootPath() . 'runtime' . DIRECTORY_SEPARATOR . self::$run_env;
+        return Helper::instance()->app->getRuntimePath() . self::$run_env;
     }
     
     /**
@@ -85,9 +85,9 @@ class Run
     public static function initApp(string $app_name = 'home'): void
     {
         // 执行HTTP应用并响应
-        $http = self::init()->http;
+        $http = self::init()->setEnvName($app_name)->http;
         
-        $response = $http->name($app_name)->run();
+        $response = $http->run();
         $response->send();
         $http->end($response);
     }
