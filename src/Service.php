@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace happy\admin\libs;
 
+use think\facade\Route;
 use think\Service as BaseService;
 use happy\admin\libs\command\Build;
 use happy\admin\libs\command\Clear;
@@ -35,17 +36,19 @@ class Service extends BaseService
         $this->app->middleware->add(\happy\admin\libs\middleware\HttpResponse::class, 'route');
         // 注册JWT默认权限
         $this->app->middleware->add(\happy\admin\libs\middleware\JWTAuthDefaultScene::class, 'route');
+        
+        
+        // 注册路由 开启多模块
+        if ($this->app->http->getName() === 'admin') {
+            $this->app->event->listen('RouteLoaded', function () {
+                Route::auto();
+            });
+        }
+        
         // 注册多应用中间件
         $this->app->event->listen('HttpRun', function () {
             $this->app->middleware->add(MultiApp::class);
         });
-        
-        // 注册路由 开启多模块
-        $this->app->event->listen('RouteLoaded', function () {
-            $this->app->route->auto()->completeMatch(false);
-        });
-        
-        
         $this->app->bind([
             'think\route\Url' => Url::class,
         ]);
@@ -56,9 +59,6 @@ class Service extends BaseService
     
     /**
      * @return array
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
      */
     protected function tplReplaceString(): array
     {
@@ -67,29 +67,7 @@ class Service extends BaseService
                 '__STATIC__' => '/static',
             ]);
         }
-        if (function_exists('sys_config')) {
-            switch (sys_config('static_upload')) {
-                case 'oss':
-                    $data = [
-                        '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
-                    ];
-                    break;
-                case 'qiniu':
-                    $data = [
-                        '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
-                    ];
-                    break;
-                default:
-                    $data = [
-                        '__STATIC__' => '/static',
-                    ];
-                    break;
-            }
-        } else {
-            $data = [
-                '__STATIC__' => '/static',
-            ];
-        }
+        $data = $this->getSysConfigTpl();
         return array_merge($this->app->config->get('view.tpl_replace_string', []), $data);
     }
     
@@ -110,5 +88,38 @@ class Service extends BaseService
             Build::class,
             Clear::class,
         ]);
+    }
+    
+    /**
+     * @return string[]
+     */
+    private function getSysConfigTpl(): array
+    {
+        try {
+            if (function_exists('sys_config')) {
+                switch (sys_config('static_upload')) {
+                    case 'oss':
+                        $data = [
+                            '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
+                        ];
+                        break;
+                    case 'qiniu':
+                        $data = [
+                            '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
+                        ];
+                        break;
+                    default:
+                        $data = [
+                            '__STATIC__' => '/static',
+                        ];
+                        break;
+                }
+                return $data;
+            }
+        } catch (DataNotFoundException|ModelNotFoundException|DbException|\Throwable $e) {
+            return ['__STATIC__' => '/static',];
+        }
+        return ['__STATIC__' => '/static',];
+        
     }
 }
