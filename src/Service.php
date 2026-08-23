@@ -33,14 +33,10 @@ class Service extends BaseService
         $this->app->middleware->add(\happy\admin\libs\middleware\HttpResponse::class, 'route');
         // 注册JWT默认权限
         $this->app->middleware->add(\happy\admin\libs\middleware\JWTAuthDefaultScene::class, 'route');
-        
-        
-        // 注册路由 开启多模块
-        if ($this->app->http->getName() === 'admin') {
-            $this->app->event->listen('RouteLoaded', function () {
-                Route::auto();
-            });
-        }
+        // 注册多模块路由自动加载
+        $this->app->event->listen('RouteLoaded', function () {
+            Route::auto();
+        });
         // 注册命令行
         $this->registerCommand();
         
