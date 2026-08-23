@@ -608,8 +608,8 @@ class Forms
     protected function setFormsViewPath($theme = null): void
     {
         $this->old_view_config = Helper::instance()->app->config->get('view');
-        View::config(['view_path' => $this->getFormsViewPath($theme)]);
-        Helper::instance()->app->config->set(['view_path' => $this->getFormsViewPath($theme)], 'view');
+        View::config(['view_dir_name' => $this->getFormsViewPath($theme)]);
+        Helper::instance()->app->config->set(['view_dir_name' => $this->getFormsViewPath($theme)], 'view');
     }
 
     /**
