@@ -27,7 +27,7 @@ class Authentication
     
     public function handle(Request $request, \Closure $next)
     {
-        if ($this->app->http->getName() === 'admin') {
+        if ($this->app->config->get('route.controller_layer') === 'admin') {
             //权限校验 或 忽略控制器
             if (AuthHelper::instance()->cheek()) {
                 return $next($request);
@@ -38,8 +38,7 @@ class Authentication
             }
             //未登录
             $login_url = $this->app->config->get('happy.auth_login') ?: 'index/login/index';
-            $login_url = url($login_url);
-            return dump((string)$login_url);
+            $login_url = urls($login_url);
             if ($request->isAjax()) {
                 throw new HttpResponseException(json(['code' => 0, 'info' => lang('请重新登录！'), 'url' => $login_url]));
             }

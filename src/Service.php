@@ -5,11 +5,8 @@ namespace happy\admin\libs;
 
 use think\facade\Route;
 use think\Service as BaseService;
-use happy\admin\libs\command\Build;
-use happy\admin\libs\command\Clear;
 use think\db\exception\DbException;
 use happy\admin\libs\command\AdminInit;
-use happy\admin\libs\middleware\MultiApp;
 use happy\admin\libs\command\AdminUpgrade;
 use happy\admin\libs\task\command\TaskRun;
 use happy\admin\libs\command\AdminModuleInit;
@@ -44,14 +41,6 @@ class Service extends BaseService
                 Route::auto();
             });
         }
-        
-        // 注册多应用中间件
-        $this->app->event->listen('HttpRun', function () {
-            $this->app->middleware->add(MultiApp::class);
-        });
-        $this->app->bind([
-            'think\route\Url' => Url::class,
-        ]);
         // 注册命令行
         $this->registerCommand();
         
@@ -85,8 +74,6 @@ class Service extends BaseService
             AdminFaviconFromConfig::class,
             TaskRun::class,
             TaskSchedule::class,
-            Build::class,
-            Clear::class,
         ]);
     }
     
