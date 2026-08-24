@@ -32,7 +32,8 @@ class Column extends TaglibBase
         $return = $this->app->cache->get($cacheName);
         
         if (empty($return) || $config['cache'] == -1) {
-            $table = $module . '_column';;
+            $table = $module . '_column';
+            ;
             $list = $this->app->db->name($table);
             if (!empty($config['status'])) {
                 $list = $list->where(['status' => $config['status']]);
@@ -52,7 +53,7 @@ class Column extends TaglibBase
                 $list = $list->order($config['order'], $by);
             }
             $list = $list->select()->each(function ($item) {
-                $item['url'] = urls($this->module . '/column/index', ['id' => $item['id']]);
+                $item['url'] = urls($this->module . '/columns/index', ['id' => $item['id']]);
                 return $item;
             });
             if (empty($sub)) {
