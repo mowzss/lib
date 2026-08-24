@@ -134,7 +134,7 @@ class NodeHelper extends Helper
     public function getPublicMethodComments(string $app_name, string $layer, string $className, array $excludeMethods = [], array &$data = []): void
     {
         //组合class
-        $class = strtr($app_name . '/' . $layer . '/' . $className, '/', '\\');
+        $class = str_replace('/', '\\', $app_name . '/' . $layer . '/' . $className);
         
         // 检测类是否存在
         if (!class_exists($class)) {
