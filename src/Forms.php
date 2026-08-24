@@ -86,7 +86,7 @@ class Forms
      * @var array|Forms
      */
     protected array|Forms $trigger = [];
-
+    
     /**
      * @param array $options
      * @throws Exception
@@ -108,7 +108,7 @@ class Forms
         $this->form_html = isset($options['form_html']) ? $this->setFormHtml($options['form_html']) : '';
         $this->trigger = isset($options['trigger']) ? $this->setTriggers($options['trigger']) : [];
     }
-
+    
     /**
      * 设置联动显示隐藏效果
      *
@@ -124,12 +124,12 @@ class Forms
         if (is_string($field)) {
             $field = explode(',', $field);
         }
-
+        
         // 确保 $field 是一个数组
         if (!is_array($field)) {
             throw new FormsException('触发字段必须是字符串或数组');
         }
-
+        
         // 查找已存在的 trigger，如果有则合并 value 和 field
         foreach ($this->trigger as &$existingTrigger) {
             if ($existingTrigger['name'] === $name) {
@@ -142,12 +142,12 @@ class Forms
                 return $this;
             }
         }
-
+        
         // 关键：循环未 `return`，说明未找到同名项，也需取消设置引用变量（以防 $this->trigger 为空数组）
         // 在 foreach 结束后，如果循环体从未执行，$existingTrigger 可能不存在，
         // 但执行 unset 也不会报错，所以这是安全的。
         unset($existingTrigger);
-
+        
         // 如果没有找到已存在的 trigger，则创建一个新的
         $this->trigger[] = [
             'name' => $name,
@@ -158,10 +158,10 @@ class Forms
                 ],
             ],
         ];
-
+        
         return $this;
     }
-
+    
     /**
      * 批量设置联动显示隐藏效果
      *
@@ -175,18 +175,18 @@ class Forms
             if (!isset($trigger['name'], $trigger['values'])) {
                 throw new FormsException('每个触发条件必须包含 name 和 values');
             }
-
+            
             // 确保 values 是一个数组
             if (!is_array($trigger['values'])) {
                 throw new FormsException('触发条件的 values 必须是一个数组');
             }
-
+            
             // 遍历 values 数组，调用 setTrigger 方法来设置每个触发条件
             foreach ($trigger['values'] as $valueConfig) {
                 if (!isset($valueConfig['value'], $valueConfig['field'])) {
                     throw new FormsException('每个 valueConfig 必须包含 value 和 field');
                 }
-
+                
                 $this->setTrigger(
                     $trigger['name'],
                     $valueConfig['value'],
@@ -194,10 +194,10 @@ class Forms
                 );
             }
         }
-
+        
         return $this;
     }
-
+    
     /**
      * 获取所有触发条件
      *
@@ -212,18 +212,18 @@ class Forms
         if (empty($field)) {
             $field = $this->inputData;
         }
-
+        
         // 解析字段数据并生成触发条件
         foreach ($field as $item) {
             if (!empty($item['options'])) {
                 $this->parseOptionsTriggers($item);
             }
         }
-
+        
         // 将触发条件传递给视图层
         View::assign('trigger', $this->trigger);
     }
-
+    
     /**
      * 解析 options 字段并生成触发条件
      *
@@ -244,10 +244,10 @@ class Forms
             if (count($parts) < 2) {
                 continue;  // 忽略无效的选项
             }
-
+            
             $value = $parts[0];
             $dependentFields = isset($parts[2]) ? explode(',', $parts[2]) : [];
-
+            
             // 如果有依赖字段，则设置触发条件
             if (!empty($dependentFields)) {
                 $this->setTrigger(
@@ -258,8 +258,8 @@ class Forms
             }
         }
     }
-
-
+    
+    
     /**
      * 静态实例化
      * @param array $options
@@ -270,7 +270,7 @@ class Forms
     {
         return new static($options);
     }
-
+    
     /**
      * 设置默认值
      * @param array $value
@@ -281,7 +281,7 @@ class Forms
         $this->value = $value;
         return $this;
     }
-
+    
     /**
      * 设置提交地址
      * @param string $action
@@ -292,7 +292,7 @@ class Forms
         $this->action = $action;
         return $this;
     }
-
+    
     /**
      * 设置提交方式
      * @param string $method
@@ -303,7 +303,7 @@ class Forms
         $this->method = $method;
         return $this;
     }
-
+    
     /**
      * 设置主键
      * @param string|null $pk
@@ -314,7 +314,7 @@ class Forms
         $this->pk = $pk;
         return $this;
     }
-
+    
     /**
      * 设置说明提示
      * @param string $description
@@ -325,7 +325,7 @@ class Forms
         $this->description = $description;
         return $this;
     }
-
+    
     /**
      * 设置输出方式
      * @param string $outputMode
@@ -336,7 +336,7 @@ class Forms
         $this->outputMode = in_array($outputMode, ['page', 'tpl']) ? $outputMode : 'page';
         return $this;
     }
-
+    
     /**
      * 设置按钮
      * @param string $title
@@ -347,7 +347,7 @@ class Forms
         $this->submit[] = $this->setButton('reset', $title, 'layui-btn layui-btn-primary');
         return $this;
     }
-
+    
     /**
      * 提交按钮
      * @param string $title
@@ -359,7 +359,7 @@ class Forms
         $this->submit[] = $this->setButton('submit', $title, $class, true);
         return $this;
     }
-
+    
     /**
      * 设置按钮
      * @param string $type 按钮类型
@@ -380,7 +380,7 @@ class Forms
             'lay_submit' => $lay_submit,
         ]]);
     }
-
+    
     /**
      * 设置表单字段
      * @param mixed $type
@@ -417,7 +417,7 @@ class Forms
         }
         return $this;
     }
-
+    
     /**
      * 设置多个表单字段
      * @param array $fields
@@ -430,7 +430,7 @@ class Forms
         }
         return $this;
     }
-
+    
     /**
      * 合并字段值
      * @param array $field
@@ -440,12 +440,12 @@ class Forms
     {
         $name = $field['name'] ?? '';
         $value = $field['value'] ?? null;
-
+        
         // 如果字段名包含方括号，则尝试解析为嵌套数组
         if (str_contains($name, '[') && str_contains($name, ']')) {
             // 去掉方括号并分割成键数组
             $parts = explode('[', str_replace(']', '', $name));
-
+            
             // 从 this->value 中获取最深层的值
             $tempValue = $this->value;
             foreach ($parts as $part) {
@@ -456,7 +456,7 @@ class Forms
                     break;
                 }
             }
-
+            
             if ($tempValue !== null) {
                 $field['value'] = $tempValue;
             } elseif ($value !== null) {
@@ -470,10 +470,10 @@ class Forms
                 $field['value'] = $value;
             }
         }
-
+        
         return $field;
     }
-
+    
     /**
      * 渲染表单
      * @param array $data 覆盖或合并的数据
@@ -484,11 +484,11 @@ class Forms
      */
     public function render(array $data = [], string $template = '', ?string $outputMode = null): mixed
     {
-
+        
         $this->outputMode = $outputMode ?? $this->outputMode;
         // 处理传入的数据
         $fields = array_merge($this->inputData, $data);
-
+        
         if (empty($fields)) {
             return $this->outputMode();
         }
@@ -505,7 +505,7 @@ class Forms
         ]);
         return $this->outputMode($html);
     }
-
+    
     public function setFormHtml(string|array $html = ''): static
     {
         if (is_array($html)) {
@@ -521,13 +521,13 @@ class Forms
             // 将所有属性连接成一个字符串
             $html = implode(' ', $attributes);
         }
-
+        
         // 追加生成的HTML或原始字符串到form_html属性中
         $this->form_html .= $html;
-
+        
         return $this;
     }
-
+    
     /**
      * 输出模式
      * @param string $html
@@ -538,11 +538,12 @@ class Forms
         if ($this->outputMode === 'page') {
             throw new HttpResponseException(display($html));
         }
-        View::config($this->old_view_config);
-        Helper::instance()->app->config->set($this->old_view_config, 'view');
+        $config = array_merge($this->old_view_config, ['view_path' => '']);
+        View::config($config);
+        Helper::instance()->app->config->set($config, 'view');
         return $html;
     }
-
+    
     /**
      * 生成提交按钮
      * @return string
@@ -557,7 +558,7 @@ class Forms
         // 生成提交按钮
         return implode('', $this->submit);
     }
-
+    
     /**
      * @param array $fields
      * @return $this
@@ -581,7 +582,7 @@ class Forms
         ]);
         return $this;
     }
-
+    
     /**
      * 获取模板目录
      * @param string|null $theme_name
@@ -599,7 +600,7 @@ class Forms
         $theme = $theme_name ?: $theme;
         return Helper::instance()->app->getRootPath() . 'view' . DIRECTORY_SEPARATOR . $path . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR;
     }
-
+    
     /**
      * 设置模板风格路径
      * @param $theme
@@ -608,10 +609,10 @@ class Forms
     protected function setFormsViewPath($theme = null): void
     {
         $this->old_view_config = Helper::instance()->app->config->get('view');
-        View::config(['view_dir_name' => $this->getFormsViewPath($theme)]);
-        Helper::instance()->app->config->set(['view_dir_name' => $this->getFormsViewPath($theme)], 'view');
+        View::config(['view_path' => $this->getFormsViewPath($theme)]);
+        Helper::instance()->app->config->set(['view_path' => $this->getFormsViewPath($theme)], 'view');
     }
-
+    
     /**
      * 渲染模板
      * @param string $template
