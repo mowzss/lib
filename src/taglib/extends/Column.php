@@ -12,7 +12,7 @@ class Column extends TaglibBase
     public function run(string $module, mixed $config): mixed
     {
         $this->module = $module;
-        $sub = boolval($config['sub'] ?? true);
+        $sub = (bool)($config['sub'] ?? true);
         if (!empty($config['where'])) {
             $config['where'] = $this->parseWhereArray($config['where']);
         }
