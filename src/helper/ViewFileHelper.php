@@ -29,7 +29,7 @@ class ViewFileHelper extends Helper
         }
         return $view_root_path . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $controller;
     }
-
+    
     /**
      * 获取主题视图下的模板文件列表
      * @param string $module 模块名
@@ -37,22 +37,22 @@ class ViewFileHelper extends Helper
      * @param bool $mobile 是否为移动端
      * @return array 返回符合条件的文件列表
      */
-    public function getThemeView(string $module = 'article', string $controller = 'column', bool $mobile = false): array
+    public function getThemeView(string $module = 'article', string $controller = 'columns', bool $mobile = false): array
     {
         try {
             $path = $this->getThemePath($module, $controller, $mobile);
         } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
             return [];
         }
-
+        
         // 检查路径是否存在
         if (!is_dir($path)) {
             return [];
         }
-
+        
         // 初始化结果数组
         $result = [];
-
+        
         // 打开目录并读取文件
         if ($handle = opendir($path)) {
             while (false !== ($file = readdir($handle))) {
@@ -69,7 +69,7 @@ class ViewFileHelper extends Helper
             }
             closedir($handle);
         }
-
+        
         return $result;
     }
 }
