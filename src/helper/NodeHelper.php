@@ -8,7 +8,7 @@ use think\Exception;
 use ReflectionMethod;
 use think\helper\Str;
 use think\facade\Config;
-use happy\admin\libs\helper;
+use happy\admin\libs\Helper;
 use happy\admin\libs\Controller;
 
 class NodeHelper extends Helper
