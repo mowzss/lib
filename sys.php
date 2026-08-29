@@ -59,18 +59,18 @@ if (!function_exists('is_within_days')) {
         
         // 处理基准时间（默认为现在）
         if ($baseTime === 'now' || empty($baseTime)) {
-            $baseTime = time();
+            $newBaseTime = time();
         } elseif (is_numeric($baseTime)) {
-            $baseTime = (int)$baseTime;
+            $newBaseTime = (int)$baseTime;
         } else {
-            $baseTime = strtotime($baseTime);
+            $newBaseTime = strtotime($baseTime);
         }
         
         // 计算 N 天前的时间戳
-        $nDaysAgo = strtotime("-{$days} days", $baseTime);
+        $nDaysAgo = strtotime("-{$days} days", $newBaseTime);
         
         // 判断 inputTime 是否在 [n天前, 当前时间] 这个区间内
-        return $inputTime >= $nDaysAgo && $inputTime <= $baseTime;
+        return $inputTime >= $nDaysAgo && $inputTime <= $newBaseTime;
     }
 }
 if (!function_exists('highlight_keywords')) {
@@ -84,7 +84,6 @@ if (!function_exists('highlight_keywords')) {
      * @return string
      */
     function highlight_keywords(string $text, array|string $keywords, string $tag = 'mark', array $attrs = []): string
-    
     {
         if ($text === '') {
             return $text;
@@ -100,14 +99,14 @@ if (!function_exists('highlight_keywords')) {
         // ============================================
         
         // 1. 去重 & 过滤空值
-        $keywords = array_unique(array_filter($keywords, fn($k) => $k !== ''));
+        $keywords = array_unique(array_filter($keywords, fn ($k) => $k !== ''));
         
         if (empty($keywords)) {
             return $text;
         }
         
         // 2. 按长度降序排列，防止短词优先匹配破坏长词
-        usort($keywords, fn($a, $b) => mb_strlen($b) - mb_strlen($a));
+        usort($keywords, fn ($a, $b) => mb_strlen($b) - mb_strlen($a));
         
         // 3. 构建属性字符串
         $attrStr = '';
