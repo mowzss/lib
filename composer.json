@@ -8,6 +8,7 @@
   ],
   "require": {
     "php": ">=8.0.0",
+    "mowzs/happy-module-installer": "dev-master",
     "topthink/framework": "^8.1",
     "topthink/think-view": "^2.0.4",
     "endroid/qr-code": "^4.0",
