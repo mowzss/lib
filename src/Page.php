@@ -4,7 +4,6 @@ namespace happy\admin\libs;
 
 use think\paginator\driver\Bootstrap;
 
-
 class Page extends Bootstrap
 {
     /**
@@ -16,7 +15,7 @@ class Page extends Bootstrap
     {
         return '<span class="active">' . $text . '</span>';
     }
-
+    
     /**
      * 生成一个可点击的按钮
      * @param string $url
@@ -27,7 +26,7 @@ class Page extends Bootstrap
     {
         return '<a href="' . htmlentities($url) . '">' . $page . '</a>';
     }
-
+    
     /**
      * 生成统计信息
      * @return string
@@ -38,7 +37,7 @@ class Page extends Bootstrap
             //.  "/" . $this->total
             . "</a>";
     }
-
+    
     /**
      * 生成一个禁用的按钮
      * @param string $text
@@ -48,7 +47,7 @@ class Page extends Bootstrap
     {
         return '<span class="disabled">' . $text . '</span>';
     }
-
+    
     /**
      * 生成省略号按钮
      * @return string
@@ -57,7 +56,7 @@ class Page extends Bootstrap
     {
         return $this->getDisabledTextWrapper('...');
     }
-
+    
     /**
      * 页码按钮
      * @return string
@@ -79,15 +78,15 @@ class Page extends Bootstrap
         if ($this->simple) {
             return '';
         }
-
+        
         $current = $this->currentPage();
         $last = $this->lastPage;
         $side = 3; // 前后各显示3页
-
+        
         // 计算页码范围
         $start = max(1, $current - $side);
         $end = min($last, $current + $side);
-
+        
         // 如果总页数不足7页，从第1页开始补齐
         if ($end - $start + 1 < 7) {
             // 尝试向左或向右扩展
@@ -97,12 +96,12 @@ class Page extends Bootstrap
                 $start = max(1, $end - 6); // 确保至少7个页码
             }
         }
-
+        
         $urls = $this->getUrlRange($start, $end);
-
+        
         return $this->getUrlLinks($urls);
     }
-
+    
     /**
      * 下一页按钮
      * @param string $text
@@ -113,12 +112,12 @@ class Page extends Bootstrap
         if (!$this->hasMore) {
             return $this->getDisabledTextWrapper($text);
         }
-
+        
         $url = $this->url($this->currentPage() + 1);
-
+        
         return $this->getPageLinkWrapper($url, $text);
     }
-
+    
     /**
      * 生成普通页码按钮
      * @param string $url
@@ -130,10 +129,10 @@ class Page extends Bootstrap
         if ($this->currentPage() == $page) {
             return $this->getActivePageWrapper($page);
         }
-
+        
         return $this->getAvailablePageWrapper($url, $page);
     }
-
+    
     /**
      * 上一页按钮
      * @param string $text
@@ -141,18 +140,18 @@ class Page extends Bootstrap
      */
     protected function getPreviousButton(string $text = '上一页'): string
     {
-
+        
         if ($this->currentPage() <= 1) {
             return $this->getDisabledTextWrapper($text);
         }
-
+        
         $url = $this->url(
             $this->currentPage() - 1
         );
-
+        
         return $this->getPageLinkWrapper($url, $text);
     }
-
+    
     /**
      * 批量生成页码按钮.
      * @param array $urls
@@ -161,17 +160,17 @@ class Page extends Bootstrap
     protected function getUrlLinks(array $urls): string
     {
         $html = '';
-
+        
         foreach ($urls as $page => $url) {
             $html .= $this->getPageLinkWrapper($url, $page);
         }
-
+        
         return $html;
     }
-
+    
     /**
      * 渲染分页html
-     * @return mixed
+     * @return ?string|void
      */
     public function render()
     {
@@ -182,7 +181,9 @@ class Page extends Bootstrap
                     $this->getWapPreviousButton(),
                     $this->getWapNextButton(),
                 );
-            } elseif (request()->isMobile()) {
+            }
+            
+            if (request()->isMobile()) {
                 return sprintf(
                     '<div class="page-pagination">%s %s %s %s</div>',
                     $this->getPreviousButton(),
@@ -190,19 +191,19 @@ class Page extends Bootstrap
                     $this->getEnd(),
                     $this->getNextButton()
                 );
-            } else {
-                return sprintf(
-                    '<div class="page-pagination">%s %s %s %s %s</div>',
-                    $this->getPreviousButton(),
-                    $this->getHome(),
-                    $this->getLinks(),
-                    $this->getEnd(),
-                    $this->getNextButton()
-                );
             }
+            
+            return sprintf(
+                '<div class="page-pagination">%s %s %s %s %s</div>',
+                $this->getPreviousButton(),
+                $this->getHome(),
+                $this->getLinks(),
+                $this->getEnd(),
+                $this->getNextButton()
+            );
         }
     }
-
+    
     /**
      * 上一页按钮
      * @param string $text
@@ -210,17 +211,17 @@ class Page extends Bootstrap
      */
     protected function getWapPreviousButton(string $text = '上一页'): string
     {
-
+        
         if ($this->currentPage() <= 1) {
             return $this->getDisabledTextWrapper($text);
         }
-
+        
         $url = $this->url(
             $this->currentPage() - 1
         );
         return $this->getPageLinkWrapper($url, $text);
     }
-
+    
     /**
      * 下一页按钮
      * @param string $text
@@ -231,12 +232,12 @@ class Page extends Bootstrap
         if (!$this->hasMore) {
             return $this->getDisabledTextWrapper($text);
         }
-
+        
         $url = $this->url($this->currentPage() + 1);
-
+        
         return $this->getPageLinkWrapper($url, $text);
     }
-
+    
     /**
      * 首页
      * @param string $text
@@ -250,7 +251,7 @@ class Page extends Bootstrap
         $url = $this->url(1);
         return $this->getPageLinkWrapper($url, $text);
     }
-
+    
     /**
      * 尾页
      * @param string $text
