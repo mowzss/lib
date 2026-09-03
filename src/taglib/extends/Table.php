@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace happy\admin\libs\taglib\extends;
 
+use think\facade\Db;
 use happy\admin\libs\taglib\TaglibBase;
 
 class Table extends TaglibBase
@@ -10,7 +11,6 @@ class Table extends TaglibBase
     
     public function run(string $module, mixed $config)
     {
-        $config['pagenum'] = !empty($config['pagenum']) ? $config['pagenum'] : $this->request->param('page');
         $config['rows'] = $config['rows'] ?? 20;
         $config['page'] = $config['page'] ?? false;
         if (!empty($config['where'])) {
@@ -33,7 +33,7 @@ class Table extends TaglibBase
         $return = $this->app->cache->get($cacheName);
         
         if (empty($return) || $config['cache'] == -1) {
-            $list = $this->app->db->connect()->name($module);
+            $list = Db::name($module);
             if (!empty($config['where']) && is_array($config['where'])) {
                 $list->where($config['where']);
             }
@@ -49,12 +49,7 @@ class Table extends TaglibBase
                 $list->order($config['order'], $by);
             }
             if (!empty($config['page'])) {
-                $pageCofig = [
-                    'page' => $config['pagenum'],
-                    'list_rows' => $config['rows'],
-                    'query' => $this->app->request->get(),
-                ];
-                $return = $list->paginate($pageCofig);
+                $return = $list->paginate($config['rows']);
             } else {
                 $return = $list->select()->toArray();
             }
