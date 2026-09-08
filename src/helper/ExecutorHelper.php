@@ -17,7 +17,7 @@ class ExecutorHelper
     {
         try {
             // 严格匹配: 类名(含命名空间) @ 方法名 @ 参数(可选)
-            if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*@[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(?:@.*)?$/', $string)) {
+            if (!preg_match('/^\\\\?[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*@[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(?:@.*)?$/', $string)) {
                 return false;
             }
             
