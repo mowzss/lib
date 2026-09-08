@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace happy\admin\libs\forms;
 
-use think\Exception;
 use happy\admin\libs\helper\ExecutorHelper;
+use happy\admin\libs\Exception\LibsException;
 
 class FormatFieldOption
 {
@@ -12,8 +12,10 @@ class FormatFieldOption
      * @param mixed $options 参数
      * @return void
      */
-    public static function getOptions(mixed $options = []) {}
-
+    public static function getOptions(mixed $options = [])
+    {
+    }
+    
     /**
      * 将特定格式的字符串转换为数组，提取每行的第一个键值对。
      * @param mixed $inputString 输入的字符串
@@ -24,7 +26,7 @@ class FormatFieldOption
         try {
             // 检测并执行方法
             return ExecutorHelper::runIfValid($inputString);
-        } catch (Exception $exception) {
+        } catch (LibsException) {
             // 去除字符串两端的空白字符
             $inputString = trim($inputString);
             // 使用换行符分割字符串，得到每一行
@@ -40,13 +42,13 @@ class FormatFieldOption
                 }
                 // 使用竖线（|）分割行，获取第一个键值对
                 $parts = explode('|', $line); // 限制分割次数为2，以确保只获取第一个键值对
-                [$key, $value] = $parts;
+                [$key, $value] = array_slice($parts, 0, 2);
                 //                // 添加到结果数组
                 if ($key === 'searchUrl' || $key === 'dataInit') {
                     //判断value是否包含@
                     if (str_contains($value, '@')) {
                         $values = explode('@', $value);
-                        [$value, $method] = $values;
+                        [$value, $method] = array_slice($values, 0, 2);
                     }
                     $value = urls($value, $method ?? []);
                 }
@@ -57,7 +59,7 @@ class FormatFieldOption
             }
             return $result;
         }
-
+        
     }
 
 }
