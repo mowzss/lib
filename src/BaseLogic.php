@@ -70,6 +70,7 @@ abstract class BaseLogic
      *
      * @return string|null
      */
+    
     protected function getModule(): ?string
     {
         if (self::$module === null) {
