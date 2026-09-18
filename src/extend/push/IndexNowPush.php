@@ -26,10 +26,10 @@ class IndexNowPush
      * @var string|mixed
      */
     private string $keyLocation;
-
+    
     /**
      * @param string $domain 域名不以/结尾
-     * @param string $key 秘钥
+     * @param string|null $key 秘钥
      * @param string $keyLocation 秘钥文本可为空
      */
     public function __construct(string $domain, string|null $key = null, string $keyLocation = '')
@@ -43,7 +43,7 @@ class IndexNowPush
         }
         $this->keyLocation = $keyLocation;
     }
-
+    
     /**
      * @param array $urls 网址组
      * @return array code 1 推送成功 0 推送失败 message推送失败原因
@@ -56,31 +56,31 @@ class IndexNowPush
             'host' => $this->host,
             'key' => $this->key,
             'keyLocation' => $this->keyLocation,
-            'urlList' => $urls
+            'urlList' => $urls,
         ];
         $dataJson = json_encode($data);
-
+        
         // 发送 POST 请求
         $ch = curl_init($this->indexNowUrl);
-
+        
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $dataJson);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json; charset=utf-8',
-            'Host: api.indexnow.org'
+            'Host: api.indexnow.org',
         ]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
+        
         // 发送请求并获取响应
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
+        
         // 检查是否有错误发生
         if (curl_errno($ch)) {
             $error_msg = curl_error($ch);
             throw new Exception("cURL Error: " . $error_msg);
         }
-
+        
         // 关闭 cURL 句柄
         curl_close($ch);
         // 解析 HTTP 响应码
@@ -105,7 +105,7 @@ class IndexNowPush
                 $result = ['code' => '0', 'status' => 'Unknown Error', 'message' => 'Unknown HTTP response code', 'response' => $response];
                 break;
         }
-
+        
         // 返回结果
         return $result;
     }

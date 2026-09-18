@@ -2,9 +2,9 @@
 
 namespace happy\admin\libs\extend\push;
 
-use think\Exception;
 use think\db\exception\DbException;
 use think\db\exception\DataNotFoundException;
+use happy\admin\libs\Exception\LibsException;
 use think\db\exception\ModelNotFoundException;
 
 /**
@@ -16,21 +16,26 @@ class BaiduPush
     protected mixed $site;           // 你的网站域名，如：www.example.com
     protected mixed $token;          // 百度搜索资源平台获取的 token
     protected string $apiUrl = 'http://data.zz.baidu.com/urls';
-
+    
+    /**
+     * @param $site
+     * @param $token
+     * @throws LibsException|\Throwable
+     */
     public function __construct($site = null, $token = null)
     {
         try {
             $this->site = $site ?: sys_config('baidu_push_domain');
             $this->token = $token ?: sys_config('baidu_push_token');
         } catch (DataNotFoundException|ModelNotFoundException|DbException $e) {
-            throw new Exception('百度推送配置 site 或 token 获取失败');
+            throw new LibsException('百度推送配置 site 或 token 获取失败');
         }
-
+        
         if (empty($this->site) || empty($this->token)) {
-            throw new Exception('百度推送配置错误：缺少 site 或 token。');
+            throw new LibsException('百度推送配置错误：缺少 site 或 token。');
         }
     }
-
+    
     /**
      * 推送单个 URL
      *
@@ -41,7 +46,7 @@ class BaiduPush
     {
         return $this->pushBatch([$url]);
     }
-
+    
     /**
      * 批量推送多个 URL
      *
@@ -54,14 +59,14 @@ class BaiduPush
         $urls = array_filter($urls, function ($url) {
             return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
         });
-
+        
         if (empty($urls)) {
             return ['success' => false, 'msg' => '没有有效的 URL 需要推送', 'result' => null];
         }
-
+        
         // 正确拼接 URL：site 和 token 作为查询参数
         $apiUrl = $this->apiUrl . '?site=' . $this->site . '&token=' . $this->token;
-
+        
         try {
             $ch = curl_init();
             curl_setopt_array($ch, [
@@ -69,19 +74,19 @@ class BaiduPush
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => implode("\n", $urls), // ✅ 纯文本 POST 内容
                 CURLOPT_HTTPHEADER => [
-                    'Content-Type: text/plain',           // ✅ 必须是 text/plain
-                    'Accept: application/json'            // 推荐接收 JSON 响应
+                    'Content-Type: text/plain',            // ✅ 必须是 text/plain
+                    'Accept: application/json',            // 推荐接收 JSON 响应
                 ],
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 10,
                 CURLOPT_SSL_VERIFYPEER => false, // 生产环境建议开启验证
             ]);
-
+            
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
             curl_close($ch);
-
+            
             if ($error) {
                 return [
                     'success' => false,
@@ -91,9 +96,9 @@ class BaiduPush
                     'urls' => $urls,
                 ];
             }
-
+            
             $result = json_decode($response, true);
-
+            
             // 百度返回 200 并且包含 success 字段表示成功
             if ($httpCode === 200 && isset($result['success'])) {
                 return [
@@ -121,7 +126,7 @@ class BaiduPush
                 'result' => null,
                 'post' => $apiUrl,
                 'urls' => $urls,
-
+            
             ];
         }
     }
