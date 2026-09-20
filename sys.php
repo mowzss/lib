@@ -135,28 +135,27 @@ if (!function_exists('highlight_keywords')) {
 if (!function_exists('vite_asset')) {
     
     /**
-     * 获取 Vite 构建产物的带哈希路径
+     * 获取 Vite 构建数据
+     * @param string $entry
+     * @param string $type 默认为 'file'，可选值有 'file'、'css'、'name'
+     * @return mixed|string
+     * @throws JsonException
      */
-    function vite_asset(string $entry): string
+    function vite_asset(string $entry, string $type = 'file'): mixed
     {
         static $manifest = null;
         
         // 开发环境：直接指向 Vite Dev Server
-        if (env('APP_DEV')) {
+        if (env('APP_DEV', false)) {
             return "http://localhost:5173/src/{$entry}";
         }
         
         if ($manifest === null) {
-            $manifestPath = public_path('assets/.vite/manifest.json');
-            $manifest = file_exists($manifestPath)
-                ? json_decode(file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR)
-                : [];
+            $manifestPath = public_path('.vite/') . 'manifest.json';
+            $manifest = file_exists($manifestPath) ? json_decode(file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR) : [];
         }
-        
         if (isset($manifest[$entry])) {
-            // ✅ 修复：manifest 中的 file 字段已经是 "assets/xxx.js" 完整相对路径
-            // 不需要再手动拼接 '/assets/' 前缀，否则会变成 "/assets/assets/xxx.js"
-            return '/' . $manifest[$entry]['file'];
+            return $manifest[$entry];
         }
         
         throw new \RuntimeException("Vite asset not found in manifest: {$entry}");
@@ -170,16 +169,19 @@ if (!function_exists('vite_js')) {
      * 开发环境输出 dev server 地址，生产环境输出带哈希的 module script
      * @param string $entry
      * @return string
-     * @throws JsonException
      */
     function vite_js(string $entry): string
     {
-        if (env('APP_DEV')) {
+        if (env('APP_DEV', false)) {
             return '<script type="module" src="http://localhost:5173/src/' . htmlspecialchars($entry) . '"></script>';
         }
         
-        $url = vite_asset($entry);
-        return '<script type="module" src="' . htmlspecialchars($url) . '"></script>';
+        try {
+            $url = vite_asset($entry);
+        } catch (JsonException $e) {
+            return '';
+        }
+        return '<script type="module" src="/' . htmlspecialchars($url['file']) . '"></script>';
     }
     
 }
@@ -187,25 +189,22 @@ if (!function_exists('vite_css')) {
     
     /**
      * 输出 Vite CSS 标签
-     * ✅ 核心改动：CSS 路径从对应 JS 入口的 manifest['css'] 数组中提取
+     * @param string $jsEntry
+     * @return string
      */
     function vite_css(string $jsEntry): string
     {
-        if (env('APP_DEV')) {
+        if (env('APP_DEV', false)) {
             // 开发环境下 Vite Dev Server 会通过 JS 自动注入样式，无需手动 link
             // 如果确实需要独立 CSS 入口，可在此处补充逻辑
             return '';
         }
-        
-        static $manifest = null;
-        if ($manifest === null) {
-            $manifestPath = public_path('assets/.vite/manifest.json');
-            $manifest = file_exists($manifestPath)
-                ? json_decode(file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR)
-                : [];
+        try {
+            $manifest = vite_asset($jsEntry, 'css');
+        } catch (JsonException $e) {
+            return ''; // 该入口没有关联 CSS，静默返回
         }
-        
-        if (!isset($manifest[$jsEntry]['css']) || empty($manifest[$jsEntry]['css'])) {
+        if (empty($manifest[$jsEntry]['css'])) {
             return ''; // 该入口没有关联 CSS，静默返回
         }
         
