@@ -99,14 +99,14 @@ if (!function_exists('highlight_keywords')) {
         // ============================================
         
         // 1. 去重 & 过滤空值
-        $keywords = array_unique(array_filter($keywords, fn ($k) => $k !== ''));
+        $keywords = array_unique(array_filter($keywords, fn($k) => $k !== ''));
         
         if (empty($keywords)) {
             return $text;
         }
         
         // 2. 按长度降序排列，防止短词优先匹配破坏长词
-        usort($keywords, fn ($a, $b) => mb_strlen($b) - mb_strlen($a));
+        usort($keywords, fn($a, $b) => mb_strlen($b) - mb_strlen($a));
         
         // 3. 构建属性字符串
         $attrStr = '';
@@ -130,5 +130,30 @@ if (!function_exists('highlight_keywords')) {
         
         // 5. 将占位符还原为真正的 HTML 标签
         return strtr($text, $placeholders);
+    }
+}
+if (!function_exists('vite_asset')) {
+    
+    function vite_asset(string $entry): string
+    {
+        static $manifest = null;
+        // 开发环境：直接指向 Vite Dev Server
+        if (env('APP_DEV')) {
+            return "http://localhost:5173/src/{$entry}";
+        }
+        if ($manifest === null) {
+            $manifestPath = public_path('assets/.vite/manifest.json');
+            $manifest = file_exists($manifestPath)
+                ? json_decode(file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR)
+                : [];
+        }
+        
+        // 生产环境：从 manifest 读取带哈希的文件名
+        if (isset($manifest[$entry])) {
+            return '/assets/' . $manifest[$entry]['file'];
+        }
+        
+        
+        throw new \RuntimeException("Vite asset not found: {$entry}");
     }
 }
