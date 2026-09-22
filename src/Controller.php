@@ -4,6 +4,7 @@ declare (strict_types=1);
 namespace happy\admin\libs;
 
 use think\App;
+use think\Request;
 use think\Response;
 use think\Validate;
 use think\facade\View;
@@ -15,13 +16,13 @@ abstract class Controller
     
     /**
      * Request实例
-     * @var \think\Request
+     * @var Request
      */
-    protected \think\Request $request;
+    protected Request $request;
     
     /**
      * 应用实例
-     * @var \think\App
+     * @var APP
      */
     protected App $app;
     

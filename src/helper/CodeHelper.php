@@ -23,7 +23,7 @@ class CodeHelper
         $sumOfFirstTwoDigits = $firstDigit + $secondDigit;
         return $sumOfFirstTwoDigits . substr($timestampStr, 2);
     }
-
+    
     /**
      * 生成基于时间戳和随机数的唯一ID。
      *
@@ -51,7 +51,7 @@ class CodeHelper
         }
         return $prefix . $compressedTimestamp . $randomPart;
     }
-
+    
     /**
      * 生成完全随机的唯一字符串（包括字母和数字）。
      *
@@ -68,22 +68,22 @@ class CodeHelper
         if ($actualLength < 0) {
             throw new \InvalidArgumentException('Prefix is too long for the specified length.');
         }
-
+        
         try {
             $randomString = '';
             $charLength = strlen($characters);
             $bytes = random_bytes($actualLength);
-
+            
             for ($i = 0; $i < $actualLength; $i++) {
                 $randomString .= $characters[ord($bytes[$i]) % $charLength];
             }
         } catch (\Exception $e) {
             throw new LibsException('Failed to generate random string: ' . $e->getMessage(), 0, $e);
         }
-
+        
         return $prefix . $randomString;
     }
-
+    
     /**
      * 自动检测文本编码并转换为指定的目标编码，默认为UTF-8。
      *

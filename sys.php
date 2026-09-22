@@ -173,7 +173,7 @@ if (!function_exists('vite_js')) {
     function vite_js(string $entry): string
     {
         if (env('APP_DEV', false)) {
-            return '<script type="module" src="http://localhost:5173/src/' . htmlspecialchars($entry) . '"></script>';
+            return '<script type="module" src="http://localhost:5173/' . htmlspecialchars($entry) . '"></script>';
         }
         
         try {
@@ -201,15 +201,15 @@ if (!function_exists('vite_css')) {
         }
         try {
             $manifest = vite_asset($jsEntry, 'css');
-        } catch (JsonException $e) {
+        } catch (JsonException) {
             return ''; // 该入口没有关联 CSS，静默返回
         }
-        if (empty($manifest[$jsEntry]['css'])) {
+        if (empty($manifest['css'])) {
             return ''; // 该入口没有关联 CSS，静默返回
         }
         
         $tags = '';
-        foreach ($manifest[$jsEntry]['css'] as $cssFile) {
+        foreach ($manifest['css'] as $cssFile) {
             $tags .= '<link rel="stylesheet" href="/' . htmlspecialchars($cssFile) . '">' . "\n";
         }
         
