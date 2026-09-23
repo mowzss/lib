@@ -21,7 +21,7 @@ class AdminFaviconFromConfig extends Command
         $this->setName('admin:favicon')
             ->setDescription('根据配置生成favicon.ico并保存到public目录');
     }
-
+    
     /**
      * @param Input $input
      * @param Output $output
@@ -35,12 +35,12 @@ class AdminFaviconFromConfig extends Command
     {
         // 获取配置值
         $logoUrl = ConfigLogic::instance()->getConfigValue('square_logo');
-
+        
         if (empty($logoUrl)) {
             $output->writeln("配置项 'square_logo' 的值为空，无法生成 favicon.");
             return;
         }
-
+        
         // 处理相对协议 URL
         if (strpos($logoUrl, '//') === 0) {
             $scheme = Request::instance()->isSsl() ? 'https:' : 'http:';
@@ -51,10 +51,10 @@ class AdminFaviconFromConfig extends Command
         try {
             // 创建ImageToIcoHelper实例
             $icoHelper = new ImageToIcoHelper();
-
+            
             // 添加图像（可以是本地路径或远程URL），并指定输出尺寸（例如 16x16）
-            $icoHelper->addImage($logoUrl, [32, 32]);
-
+            $icoHelper->addImage($logoUrl, [96, 96]);
+            
             // 将生成的ICO图标保存到指定路径
             if ($icoHelper->saveIco($targetPath)) {
                 $output->writeln("favicon.ico 生成成功。");
