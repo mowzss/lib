@@ -16,7 +16,9 @@ use function scandir;
 use function file_exists;
 use function json_decode;
 
-#[\Attribute]
+/**
+ * @deprecated 该命令已弃用，请使用composer安装happy-admin-installer包代替。
+ */
 class AdminModuleInit extends Command
 {
     /**

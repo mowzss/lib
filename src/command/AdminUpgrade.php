@@ -31,7 +31,6 @@ class AdminUpgrade extends Command
      * @param Output $output
      * @return int
      * @throws \think\Exception
-     * @throws \Exception
      */
     protected function execute(Input $input, Output $output): int
     {
