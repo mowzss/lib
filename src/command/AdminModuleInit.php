@@ -16,6 +16,7 @@ use function scandir;
 use function file_exists;
 use function json_decode;
 
+#[\Attribute]
 class AdminModuleInit extends Command
 {
     /**

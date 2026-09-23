@@ -9,7 +9,6 @@ use think\db\exception\DbException;
 use happy\admin\libs\command\AdminInit;
 use happy\admin\libs\command\AdminUpgrade;
 use happy\admin\libs\task\command\TaskRun;
-use happy\admin\libs\command\AdminModuleInit;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use happy\admin\libs\task\command\TaskSchedule;
@@ -64,7 +63,6 @@ class Service extends BaseService
     {
         $this->commands([
             AdminInit::class,
-            AdminModuleInit::class,
             AdminUpgrade::class,
             AdminEntranceRename::class,
             AdminFaviconFromConfig::class,
