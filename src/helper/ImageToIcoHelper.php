@@ -2,7 +2,6 @@
 
 namespace happy\admin\libs\helper;
 
-
 use happy\admin\libs\Exception\LibsException;
 
 class ImageToIcoHelper
@@ -13,7 +12,7 @@ class ImageToIcoHelper
      * @var array
      */
     private array $images = [];
-
+    
     /**
      * 添加图像到生成器中。
      *
@@ -33,30 +32,30 @@ class ImageToIcoHelper
         } else {
             $im = $this->loadImageFile($file);
         }
-
+        
         if ($im === false) {
             throw new LibsException("读取图片文件失败");
         }
-
+        
         if (empty($size)) {
             $size = [imagesx($im), imagesy($im)];
         }
-
+        
         [$width, $height] = $size;
         $image = imagecreatetruecolor($width, $height);
         imagecolortransparent($image, imagecolorallocatealpha($image, 0, 0, 0, 127));
         imagealphablending($image, false);
         imagesavealpha($image, true);
-
+        
         [$sourceWidth, $sourceHeight] = [imagesx($im), imagesy($im)];
         if (!imagecopyresampled($image, $im, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight)) {
             throw new LibsException("解析和处理图片失败");
         }
-
+        
         $this->addImageData($image, $width, $height);
         return $this;
     }
-
+    
     /**
      * 将 ICO 内容写入到文件。
      *
@@ -78,7 +77,7 @@ class ImageToIcoHelper
         fclose($fh);
         return true;
     }
-
+    
     /**
      * 生成并获取 ICO 图像数据。
      */
@@ -93,38 +92,38 @@ class ImageToIcoHelper
             $pixelData .= pack('CCCCvvVV', $image['width'], $image['height'], 0, 0, 1, 32, $image['size'], $offset);
             $offset += $image['size'];
         }
-
+        
         $icoHeader = pack('vvv', 0, 1, count($this->images)); // Reserved, Type, Count
         return $icoHeader . $pixelData . implode('', array_map(function ($img) {
                 return $img['data'];
             }, $this->images));
     }
-
+    
     private function addImageData($im, int $width, int $height)
     {
         // ICO文件头大小（40字节）
         $headerSize = 40;
-
+        
         // 创建一个空字符串用于存储ICO数据
         $data = pack('VVVvvVVVVVV', $headerSize, $width, $height * 2, 1, 32, 0, 0, 0, 0, 0, 0);
-
+        
         // 遍历每个像素并转换为BGRA格式
         for ($y = $height - 1; $y >= 0; --$y) {
             for ($x = 0; $x < $width; ++$x) {
                 // 获取像素的颜色值
                 $color = imagecolorat($im, $x, $y);
-
+                
                 // 提取RGB和Alpha值
                 $r = ($color >> 16) & 0xFF;
                 $g = ($color >> 8) & 0xFF;
                 $b = $color & 0xFF;
                 $a = (int)((1 - ((($color & 0x7F000000) >> 24) / 127)) * 255); // 计算Alpha值
-
+                
                 // 将颜色值以BGRA顺序打包
                 $data .= pack('CCCC', $b, $g, $r, $a);
             }
         }
-
+        
         // 添加到图像数据数组中
         $this->images[] = [
             'data' => $data,
@@ -135,7 +134,7 @@ class ImageToIcoHelper
             'colors' => 0,
         ];
     }
-
+    
     /**
      * 读取图片资源。
      *
