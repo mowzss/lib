@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace happy\admin\libs;
 
+use think\Paginator;
 use think\facade\Route;
+use think\exception\Handle;
 use think\Service as BaseService;
 use think\db\exception\DbException;
 use happy\admin\libs\command\AdminInit;
@@ -12,6 +14,7 @@ use happy\admin\libs\task\command\TaskRun;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use happy\admin\libs\task\command\TaskSchedule;
+use happy\admin\libs\Exception\ExceptionHandle;
 use happy\admin\libs\command\AdminEntranceRename;
 use happy\admin\libs\command\AdminFaviconFromConfig;
 
@@ -39,6 +42,19 @@ class Service extends BaseService
         // 注册命令行
         $this->registerCommand();
         
+    }
+    
+    /**
+     * 注册服务
+     * @return void
+     */
+    public function register(): void
+    {
+        // 绑定类
+        $this->app->bind([
+            Paginator::class => Page::class,
+            Handle::class => ExceptionHandle::class,
+        ]);
     }
     
     /**
