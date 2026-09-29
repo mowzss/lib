@@ -17,7 +17,7 @@ class Hp extends \think\template\TagLib
         ],
         //数据列表
         'lists' => [
-            'attr' => 'name,module,mid,where,item,rows,page,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field',
+            'attr' => 'name,module,mid,where,item,rows,page,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field,field',
             'level' => 3,
             'close' => 1,
         ],
@@ -164,6 +164,7 @@ class Hp extends \think\template\TagLib
         $order = $tag['order'] ?? 0;
         $by = $tag['by'] ?? 0;
         $whereor = $tag['whereor'] ?? '';
+        $field = $tag['field'] ?? '';
         $sort_field = $tag['sort_field'] ?? '';
         $week = $tag['week'] ?? '';
         $month = $tag['month'] ?? '';
@@ -191,6 +192,7 @@ class Hp extends \think\template\TagLib
         "order"=>"' . $order . '",
         "by"=>"' . $by . '",
         "get"=>"' . $get . '",
+        "field"=>"' . $field . '",
         ]);';
         if (!empty($page)) {
             $parse .= '$' . $count . ' = $' . $vals . '->total();';
@@ -206,5 +208,5 @@ class Hp extends \think\template\TagLib
         }
         return $parse;
     }
-    
+
 }

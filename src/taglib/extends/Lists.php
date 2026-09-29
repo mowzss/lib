@@ -84,6 +84,9 @@ class Lists extends TaglibBase
                 $params['by'] = $data['by'];
             }
         }
+        if (!empty($config['field'])) {
+            $params['field'] = $config['field'];
+        }
         $name = $config['name'];
         
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params) . json_encode($config));
