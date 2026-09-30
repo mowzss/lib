@@ -13,6 +13,9 @@ class Table extends TaglibBase
     {
         $config['rows'] = $config['rows'] ?? 20;
         $config['page'] = $config['page'] ?? false;
+        if (!empty($config['page'])) {
+            $config['page_num'] = $this->request->param('page', 1);
+        }
         if (!empty($config['where'])) {
             $config['where'] = $this->parseWhereArray($config['where']);
         }
@@ -49,7 +52,11 @@ class Table extends TaglibBase
                 $list->order($config['order'], $by);
             }
             if (!empty($config['page'])) {
-                $return = $list->paginate($config['rows']);
+                $return = $list->paginate([
+                    'list_rows' => $config['rows'],
+                    'query' => request()->get(),
+                    'page' => $config['page_num'],
+                ]);
             } else {
                 $return = $list->select()->toArray();
             }
