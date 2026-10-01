@@ -51,6 +51,7 @@ class Service extends BaseService
         // 绑定类
         $this->app->bind([
             Paginator::class => Page::class,
+            \think\Request::class => Request::class,
             //Handle::class => ExceptionHandle::class,
         ]);
     }
