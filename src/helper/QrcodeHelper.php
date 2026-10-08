@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use Endroid\QrCode\Builder\Builder;

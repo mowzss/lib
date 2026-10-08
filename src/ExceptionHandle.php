@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs;
 
 use Throwable;
@@ -28,7 +29,7 @@ class ExceptionHandle extends Handle
         DataNotFoundException::class,
         ValidateException::class,
     ];
-
+    
     /**
      * 记录异常信息（包括日志或者其它方式记录）
      *
@@ -41,7 +42,7 @@ class ExceptionHandle extends Handle
         // 使用内置的方式记录异常日志
         parent::report($exception);
     }
-
+    
     /**
      * Render an exception into an HTTP response.
      *
@@ -53,7 +54,7 @@ class ExceptionHandle extends Handle
     public function render($request, Throwable $e): Response
     {
         // 添加自定义异常处理机制
-
+        
         // 其他错误交给系统处理
         return parent::render($request, $e);
     }

@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Exception\LibsException;
@@ -95,8 +96,8 @@ class ImageToIcoHelper
         
         $icoHeader = pack('vvv', 0, 1, count($this->images)); // Reserved, Type, Count
         return $icoHeader . $pixelData . implode('', array_map(function ($img) {
-                return $img['data'];
-            }, $this->images));
+            return $img['data'];
+        }, $this->images));
     }
     
     private function addImageData($im, int $width, int $height)

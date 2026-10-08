@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\extend;
 
 use think\facade\Console;
@@ -24,7 +25,7 @@ class RuntimeExtend
         }
         return file_exists($file_path);
     }
-
+    
     /**
      * 运行路由缓存命令
      * @return \think\console\Output|\think\console\output\driver\Buffer

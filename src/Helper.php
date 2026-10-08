@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs;
 
 use think\App;
@@ -13,7 +14,7 @@ class Helper
      * @var App
      */
     public App $app;
-
+    
     /**
      * Constructor.
      * @param App $app
@@ -23,14 +24,14 @@ class Helper
         $this->app = $app;
         $this->initialize();
     }
-
+    
     /**
      * 初始化服务
      */
     protected function initialize()
     {
     }
-
+    
     /**
      * 静态实例对象
      * @param array $var 实例参数

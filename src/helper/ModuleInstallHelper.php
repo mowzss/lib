@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -15,11 +16,11 @@ class ModuleInstallHelper extends Helper
     public function scanAndReadInfoPhpFiles(): array
     {
         $allFilesData = [];
-
+        
         // 如果是单个目录，则将其转换为数组以便统一处理
         
         $directories = $this->app->getBasePath() . 'common/install';
-
+        
         $files = $this->scanInfoPhpFiles($directories);
         foreach ($files as $file) {
             // 读取info.php文件内容
@@ -27,14 +28,14 @@ class ModuleInstallHelper extends Helper
             // 将文件路径与内容一并存储
             $allFilesData[] = [
                 'path' => $file,
-                'content' => $content
+                'content' => $content,
             ];
         }
-
-
+        
+        
         return $allFilesData;
     }
-
+    
     /**
      * 扫描指定目录下的所有 info.php 文件。
      *
@@ -44,25 +45,27 @@ class ModuleInstallHelper extends Helper
     private function scanInfoPhpFiles(string $directory): array
     {
         $files = [];
-
+        
         if (file_exists($directory) && is_dir($directory)) {
             $dirHandle = opendir($directory);
-
+            
             while (($file = readdir($dirHandle)) !== false) {
                 $path = $directory . DIRECTORY_SEPARATOR . $file;
-
-                if ($file === '.' || $file === '..') continue;
-
+                
+                if ($file === '.' || $file === '..') {
+                    continue;
+                }
+                
                 if (is_dir($path)) {
                     $files = array_merge($files, $this->scanInfoPhpFiles($path));
                 } elseif (basename($path) === 'info.php') {
                     $files[] = $path;
                 }
             }
-
+            
             closedir($dirHandle);
         }
-
+        
         return $files;
     }
 }

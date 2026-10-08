@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\forms\field;
 
 use happy\admin\libs\forms\FormFieldRenderer;
@@ -21,7 +22,7 @@ class Switchs extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
-
+        
         if (!is_array($option)) {
             $option = FormatFieldOption::strToArray($option);
         }

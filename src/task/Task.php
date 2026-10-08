@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\task;
 
 use Closure;
@@ -10,7 +11,7 @@ use app\model\system\SystemTasks;
 
 abstract class Task
 {
-
+    
     /**
      * @var SystemTasks
      */
@@ -19,22 +20,22 @@ abstract class Task
      * @var string|null 时区
      */
     public ?string $timezone = null;
-
+    
     /**
      * @var string 任务周期
      */
     public mixed $expression = '* * * * *';
-
+    
     /**
      * @var bool 任务是否可以重叠执行
      */
     public bool $withoutOverlapping = false;
-
+    
     /**
      * @var int 最大执行时间(重叠执行检查用)
      */
     public int $expiresAt = 1440;
-
+    
     /**
      * @var bool 分布式部署 是否仅在一台服务器上运行
      */
@@ -47,12 +48,12 @@ abstract class Task
      * @var array
      */
     protected array $rejects = [];
-
+    
     /**
      * @var Cache
      */
     protected Cache $cache;
-
+    
     /**
      * @var App
      */
@@ -62,7 +63,7 @@ abstract class Task
      * @var array
      */
     protected array $task_info = [];
-
+    
     /**
      * @param App $app
      * @param array $task
@@ -78,7 +79,7 @@ abstract class Task
         }
         $this->configure();
     }
-
+    
     /**
      * 是否到期执行
      * @return bool
@@ -88,14 +89,14 @@ abstract class Task
         $cronExpression = new CronExpression($this->expression);
         return $cronExpression->isDue('now', $this->timezone);
     }
-
+    
     /**
      * 配置任务
      */
     protected function configure()
     {
     }
-
+    
     /**
      * 执行任务
      * @return void
@@ -104,13 +105,13 @@ abstract class Task
     {
         $this->app->invoke([$this, 'handle'], [], true);
     }
-
+    
     /**
      * 任务执行入口
      * @return mixed
      */
     abstract public function handle();
-
+    
     /**
      * 运行任务
      * @return void
@@ -122,11 +123,11 @@ abstract class Task
             !$this->createMutex()) {
             return;
         }
-
+        
         register_shutdown_function(function () {
             $this->removeMutex();
         });
-
+        
         try {
             $this->execute();
             $this->updateTask();
@@ -134,7 +135,7 @@ abstract class Task
             $this->removeMutex();
         }
     }
-
+    
     /**
      * @return void
      * @throws \Exception
@@ -152,7 +153,7 @@ abstract class Task
         $update['count'] = $this->app->db->raw('count+1');
         $this->model->update($update);
     }
-
+    
     /**
      * 过滤
      * @return bool
@@ -164,16 +165,16 @@ abstract class Task
                 return false;
             }
         }
-
+        
         foreach ($this->rejects as $callback) {
             if (call_user_func($callback)) {
                 return false;
             }
         }
-
+        
         return true;
     }
-
+    
     /**
      * 任务标识
      */
@@ -181,7 +182,7 @@ abstract class Task
     {
         return 'task-' . sha1(static::class);
     }
-
+    
     /**
      * 移除锁
      * @return bool
@@ -190,7 +191,7 @@ abstract class Task
     {
         return $this->cache->delete($this->mutexName());
     }
-
+    
     /**
      * 创建锁
      * @return bool
@@ -198,10 +199,10 @@ abstract class Task
     protected function createMutex(): bool
     {
         $name = $this->mutexName();
-
+        
         return $this->cache->set($name, time(), $this->expiresAt);
     }
-
+    
     /**
      * 检测是否正在执行
      * @return bool
@@ -214,7 +215,7 @@ abstract class Task
         }
         return false;
     }
-
+    
     /**
      * 跳过执行
      * @param Closure $callback
@@ -223,10 +224,10 @@ abstract class Task
     public function when(Closure $callback): static
     {
         $this->filters[] = $callback;
-
+        
         return $this;
     }
-
+    
     /**
      * 跳过执行
      * @param Closure $callback
@@ -235,10 +236,10 @@ abstract class Task
     public function skip(Closure $callback): static
     {
         $this->rejects[] = $callback;
-
+        
         return $this;
     }
-
+    
     /**
      * 不重叠执行
      * @param $expiresAt
@@ -247,14 +248,14 @@ abstract class Task
     public function withoutOverlapping($expiresAt = 1440): static
     {
         $this->withoutOverlapping = true;
-
+        
         $this->expiresAt = $expiresAt;
-
+        
         return $this->skip(function () {
             return $this->existsMutex();
         });
     }
-
+    
     /**
      * 仅在一台服务器上运行
      * @return $this
@@ -262,7 +263,7 @@ abstract class Task
     public function onOneServer(): static
     {
         $this->onOneServer = true;
-
+        
         return $this;
     }
 }

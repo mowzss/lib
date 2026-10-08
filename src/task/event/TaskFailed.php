@@ -1,11 +1,12 @@
 <?php
 
+
 namespace happy\admin\libs\task\event;
 
 class TaskFailed extends TaskEvent
 {
     public $exception;
-
+    
     public function __construct($task, $exception)
     {
         parent::__construct($task);

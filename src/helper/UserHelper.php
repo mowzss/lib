@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use app\model\user\UserInfo;
@@ -20,7 +21,7 @@ class UserHelper extends Helper
     {
         return $this->app->session->get('user.id', $default);
     }
-
+    
     /**
      * 获取登录信息
      * @param string|int $uid
@@ -35,14 +36,14 @@ class UserHelper extends Helper
         } else {
             $user_info = (new UserInfo())->findOrEmpty($uid)->toArray();
         }
-
+        
         if (empty($field)) {
             return $user_info;
         }
         return $user_info[$field] ?? $default;
-
+        
     }
-
+    
     /**
      * 获取用户组信息
      * @param string|int $uid

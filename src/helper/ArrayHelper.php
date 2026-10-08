@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -16,7 +17,7 @@ class ArrayHelper extends Helper
     public function customArrayMerge(array $array1, array $array2): array
     {
         $result = [];
-
+        
         foreach ($array1 as $key => $value) {
             if (array_key_exists($key, $array2)) {
                 if (is_array($value) && is_array($array2[$key])) {
@@ -29,14 +30,14 @@ class ArrayHelper extends Helper
                 $result[$key] = $value;
             }
         }
-
+        
         // 添加$array2中$array1中没有的键和值
         foreach ($array2 as $key => $value) {
             if (!array_key_exists($key, $result)) {
                 $result[$key] = $value;
             }
         }
-
+        
         return $result;
     }
 }

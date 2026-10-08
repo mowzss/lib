@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use Throwable;
@@ -23,7 +24,7 @@ class ColumnCacheHelper extends Helper
         }
         return $module;
     }
-
+    
     /**
      * 获取模块所有栏目的 ID 和标题映射
      *
@@ -35,17 +36,17 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         // 定义缓存键名
         $cacheKey = "{$module}_columns_id_title";
-
+        
         // 从缓存中获取栏目数据，如果不存在则查询数据库并缓存
         return $this->app->cache->remember($cacheKey, function () use ($module) {
             $tableColumn = $module . '_column';
             return Db::name($tableColumn)->column('title', 'id');
         }, 86400);
     }
-
+    
     /**
      * 清除模块所有栏目的 ID 和标题映射缓存
      *
@@ -57,11 +58,11 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         $cacheKey = "{$module}_columns_id_title";
         return $this->app->cache->delete($cacheKey);
     }
-
+    
     /**
      * 获取单个栏目的详细信息
      *
@@ -74,17 +75,17 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         // 定义缓存键名
         $cacheKey = "{$module}_column_{$columnId}";
-
+        
         // 从缓存中获取栏目数据，如果不存在则查询数据库并缓存
         return $this->app->cache->remember($cacheKey, 3600, function () use ($module, $columnId) {
             $tableColumn = $module . '_column';
             return Db::name($tableColumn)->where('id', $columnId)->findOrEmpty()->toArray();
         });
     }
-
+    
     /**
      * 清除单个栏目的缓存
      *
@@ -96,11 +97,11 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         $cacheKey = "{$module}_column_{$columnId}";
         return $this->app->cache->delete($cacheKey);
     }
-
+    
     /**
      * 获取模块所有栏目的详细信息
      *
@@ -112,17 +113,17 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         // 定义缓存键名
         $cacheKey = "{$module}_all_columns";
-
+        
         // 从缓存中获取栏目数据，如果不存在则查询数据库并缓存
         return $this->app->cache->remember($cacheKey, 86400, function () use ($module) {
             $tableColumn = $module . '_column';
             return Db::name($tableColumn)->select()->toArray();
         });
     }
-
+    
     /**
      * 清除模块所有栏目的缓存
      *
@@ -134,11 +135,11 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         $cacheKey = "{$module}_all_columns";
         return $this->app->cache->delete($cacheKey);
     }
-
+    
     /**
      * 清除模块所有栏目相关的缓存（包括单个栏目、全部栏目和 id-title 映射）
      *
@@ -150,19 +151,19 @@ class ColumnCacheHelper extends Helper
     {
         // 自动获取或验证模块名称
         $module = $this->getModule($module);
-
+        
         // 清除单个栏目缓存
         $allColumns = $this->getColumnsByIdTitle($module);
         foreach (array_keys($allColumns) as $columnId) {
             $this->clearColumnCache($module, $columnId);
         }
-
+        
         // 清除全部栏目缓存
         $this->clearAllColumnsCache($module);
-
+        
         // 清除 id-title 映射缓存
         $this->clearColumnsByIdTitleCache($module);
-
+        
         return true;
     }
 }

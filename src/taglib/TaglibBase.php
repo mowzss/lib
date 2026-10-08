@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\taglib;
 
 use think\App;
@@ -28,11 +29,72 @@ abstract class TaglibBase
         $this->request = $this->app->request;
     }
     
-    protected function getModel(mixed $module, string $db_name)
+    /**
+     * 获取当前类的实例（用于静态调用）
+     *
+     * @return static 返回当前类的实例
+     */
+    public static function getInstance(): static
     {
+        return Container::getInstance()->make(static::class);
     }
     
     abstract public function run(string $module, mixed $config);
+    
+    /**
+     * @param $mid
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getModelWhere($mid): array
+    {
+        $fields = FieldBaseLogic::instance()->getSearchFieldsKey($mid);
+        $where = [];
+        foreach ($fields as $field) {
+            $get_data = $this->request->param($field);
+            if (!empty($get_data)) {
+                $where[] = [$field, '=', $get_data];
+            }
+        }
+        return $where;
+    }
+    
+    /**
+     * 合并多个 WHERE 条件数组，并根据字段名去重（后面的覆盖前面的）
+     *
+     * @param array ...$conditions 一个或多个条件数组，每个元素为 [field, operator, value]
+     * @return array 合并并去重后的索引数组
+     *
+     * 示例：
+     *   mergeWhereConditions($where, $params['where']);
+     */
+    public function mergeWhereConditions(...$conditions): array
+    {
+        $merged = [];
+        
+        // 遍历所有传入的条件数组
+        foreach ($conditions as $conditionGroup) {
+            if (!is_array($conditionGroup)) {
+                continue;
+            }
+            foreach ($conditionGroup as $cond) {
+                if (is_array($cond) && count($cond) >= 3) {
+                    $field = $cond[0];
+                    $merged[$field] = $cond; // 后面的字段覆盖前面的
+                }
+            }
+        }
+        
+        // 返回重新索引的数组
+        return array_values($merged);
+    }
+    
+    protected function getModel(mixed $module, string $db_name)
+    {
+    }
     
     /**
      * 获取指定模块下某个分类及其子分类的ID列表
@@ -76,16 +138,6 @@ abstract class TaglibBase
             Log::error("Error fetching column sons for module [{$module}] and cid [{$cid}]: " . $e->getMessage());
             return [];
         }
-    }
-    
-    /**
-     * 获取当前类的实例（用于静态调用）
-     *
-     * @return static 返回当前类的实例
-     */
-    public static function getInstance(): static
-    {
-        return Container::getInstance()->make(static::class);
     }
     
     /**
@@ -269,56 +321,5 @@ abstract class TaglibBase
         }
         
         return $conditions;
-    }
-    
-    /**
-     * @param $mid
-     * @return array
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
-     */
-    public function getModelWhere($mid): array
-    {
-        $fields = FieldBaseLogic::instance()->getSearchFieldsKey($mid);
-        $where = [];
-        foreach ($fields as $field) {
-            $get_data = $this->request->param($field);
-            if (!empty($get_data)) {
-                $where[] = [$field, '=', $get_data];
-            }
-        }
-        return $where;
-    }
-    
-    /**
-     * 合并多个 WHERE 条件数组，并根据字段名去重（后面的覆盖前面的）
-     *
-     * @param array ...$conditions 一个或多个条件数组，每个元素为 [field, operator, value]
-     * @return array 合并并去重后的索引数组
-     *
-     * 示例：
-     *   mergeWhereConditions($where, $params['where']);
-     */
-    public function mergeWhereConditions(...$conditions): array
-    {
-        $merged = [];
-        
-        // 遍历所有传入的条件数组
-        foreach ($conditions as $conditionGroup) {
-            if (!is_array($conditionGroup)) {
-                continue;
-            }
-            foreach ($conditionGroup as $cond) {
-                if (is_array($cond) && count($cond) >= 3) {
-                    $field = $cond[0];
-                    $merged[$field] = $cond; // 后面的字段覆盖前面的
-                }
-            }
-        }
-        
-        // 返回重新索引的数组
-        return array_values($merged);
     }
 }

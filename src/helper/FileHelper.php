@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -24,40 +25,40 @@ class FileHelper extends Helper
         if (!is_dir($directory)) {
             return $files;
         }
-
+        
         // 如果需要相对路径且没有指定基准路径，则使用 app 目录作为基准路径
         if ($relativePath && empty($baseDir)) {
             $baseDir = rtrim(dirname(realpath($directory)), '\\/');
         }
-
+        
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory),
             RecursiveIteratorIterator::SELF_FIRST,
             RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
         );
-
+        
         foreach ($iterator as $file) {
             if (!$file->isFile()) {
                 continue;
             }
-
+            
             if (!empty($extension) && pathinfo($file->getPathname(), PATHINFO_EXTENSION) !== $extension) {
                 continue;
             }
-
+            
             if ($depth > 0 && substr_count($file->getPath(), DIRECTORY_SEPARATOR) - substr_count(rtrim($directory, '\\/'), DIRECTORY_SEPARATOR) >= $depth) {
                 continue;
             }
-
+            
             if ($relativePath) {
                 $filePath = str_replace(rtrim($baseDir, '\\/') . DIRECTORY_SEPARATOR, '', $file->getPathname());
             } else {
                 $filePath = $file->getPathname();
             }
-
+            
             $files[] = $filePath;
         }
-
+        
         return $files;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -18,26 +19,7 @@ class EventHelper extends Helper
     {
         $this->loadAndTriggerListeners($event, $params);
     }
-
-    /**
-     * 自动处理事件，并根据监听器返回的数据更新传入参数
-     * @access public
-     * @param object|string $event 事件名称
-     * @param mixed|null $params 传入参数
-     * @param bool $once 只获取一个有效返回值
-     * @return void
-     */
-    public function listen(object|string $event, mixed &$params = [], bool $once = false): void
-    {
-        $data = $this->loadAndTriggerListeners($event, $params);
-
-        if (empty($once) && !empty($data) && !empty($params)) {
-            // 假设array3_merge是你的自定义函数，用于合并数组
-            $data = $this->array3_merge($data, $params);
-            $params = array_merge($params, $data);
-        }
-    }
-
+    
     /**
      * 加载并触发事件监听器
      * @param object|string $event 事件名称
@@ -51,21 +33,40 @@ class EventHelper extends Helper
             $event_plugins = app()->cache->remember('ha_system_event_listen_' . $event, function () use ($event) {
                 return $this->app->db->name('SystemEventListen')->where([
                     'status' => 1,
-                    'event_key' => $event
+                    'event_key' => $event,
                 ])->column('event_class');
             });
         } catch (\Throwable $e) {
             $event_plugins = [];
             $this->app->log->error('事件报错:' . $e->getMessage());
         }
-
+        
         // 注册事件监听器
         $this->app->event->listenEvents([$event => $event_plugins]);
-
+        
         // 触发事件并获取所有监听器的返回结果
         return $this->app->event->trigger($event, $params);
     }
-
+    
+    /**
+     * 自动处理事件，并根据监听器返回的数据更新传入参数
+     * @access public
+     * @param object|string $event 事件名称
+     * @param mixed|null $params 传入参数
+     * @param bool $once 只获取一个有效返回值
+     * @return void
+     */
+    public function listen(object|string $event, mixed &$params = [], bool $once = false): void
+    {
+        $data = $this->loadAndTriggerListeners($event, $params);
+        
+        if (empty($once) && !empty($data) && !empty($params)) {
+            // 假设array3_merge是你的自定义函数，用于合并数组
+            $data = $this->array3_merge($data, $params);
+            $params = array_merge($params, $data);
+        }
+    }
+    
     /**
      * 合并修改项
      * @param array $data

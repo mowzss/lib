@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -9,7 +10,26 @@ use happy\admin\libs\Exception\LibsException;
 class MimeHelper extends Helper
 {
     protected array $mimeTypes = [];
-
+    
+    /**
+     * 根据 MIME 类型获取扩展名
+     *
+     * @param string $mimeType MIME 类型
+     * @return mixed|null
+     * @throws \Exception
+     */
+    public function getExtensionByMimeType(string $mimeType): mixed
+    {
+        $this->init();
+        
+        // 反转数组以支持通过 MIME 类型获取扩展名
+        foreach ($this->mimeTypes as $ext => $type) {
+            $reversedMimeTypes[$type][] = $ext;
+        }
+        
+        return $reversedMimeTypes[$mimeType] ?? null;
+    }
+    
     /**
      * 初始化 MIME 类型映射
      * @throws LibsException
@@ -26,39 +46,7 @@ class MimeHelper extends Helper
             }
         }
     }
-
-    /**
-     * 根据扩展名获取 MIME 类型
-     *
-     * @param string $extension 文件扩展名
-     * @return string|null MIME 类型
-     * @throws \Exception
-     */
-    public function getMimeTypeByExtension(string $extension): ?string
-    {
-        $this->init();
-        return $this->mimeTypes[$extension] ?? null;
-    }
-
-    /**
-     * 根据 MIME 类型获取扩展名
-     *
-     * @param string $mimeType MIME 类型
-     * @return mixed|null
-     * @throws \Exception
-     */
-    public function getExtensionByMimeType(string $mimeType): mixed
-    {
-        $this->init();
-
-        // 反转数组以支持通过 MIME 类型获取扩展名
-        foreach ($this->mimeTypes as $ext => $type) {
-            $reversedMimeTypes[$type][] = $ext;
-        }
-
-        return $reversedMimeTypes[$mimeType] ?? null;
-    }
-
+    
     /**
      * 根据多个扩展名获取对应的 MIME 类型
      *
@@ -81,5 +69,18 @@ class MimeHelper extends Helper
             // }
         }
         return $mimeTypes;
+    }
+    
+    /**
+     * 根据扩展名获取 MIME 类型
+     *
+     * @param string $extension 文件扩展名
+     * @return string|null MIME 类型
+     * @throws \Exception
+     */
+    public function getMimeTypeByExtension(string $extension): ?string
+    {
+        $this->init();
+        return $this->mimeTypes[$extension] ?? null;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\taglib;
 
 class Hp extends \think\template\TagLib
@@ -208,5 +209,5 @@ class Hp extends \think\template\TagLib
         }
         return $parse;
     }
-
+    
 }

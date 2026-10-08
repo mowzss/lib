@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use think\Exception;
@@ -33,12 +34,12 @@ class AuthHelper extends Helper
             return true;
         }
         $check = $nodes[$node];
-
+        
         //无需校验页面 is_auth 为true时 is_login 永远为 true
         if (empty($check['is_login'])) {
             return true;
         }
-
+        
         // 仅登录节点
         if (empty($check['is_auth']) && !empty($this->getUser())) {
             return true;
@@ -49,7 +50,28 @@ class AuthHelper extends Helper
         //其它未判定
         return false;
     }
-
+    
+    /**
+     * 是否超管
+     * @return bool
+     */
+    public function isAuthAdmin(): bool
+    {
+        if ($this->getAuthAdmin() == $this->getUserName()) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 用户信息
+     * @return mixed
+     */
+    protected function getUser(): mixed
+    {
+        return $this->app->session->get('user');
+    }
+    
     /**
      * 获取用户权限节点
      * @return array|mixed
@@ -62,7 +84,25 @@ class AuthHelper extends Helper
         }
         return [];
     }
-
+    
+    /**
+     * 获取超管账号
+     * @return array|mixed
+     */
+    protected function getAuthAdmin(): mixed
+    {
+        return $this->app->config->get('happy.auth_admin');
+    }
+    
+    /**
+     * 获取用户账号
+     * @return mixed
+     */
+    protected function getUserName()
+    {
+        return $this->app->session->get('user.username');
+    }
+    
     /**
      * @return array|string[]|\string[][]
      */
@@ -73,28 +113,7 @@ class AuthHelper extends Helper
             return str_replace('.', '/', $item);
         }, $nodes);
     }
-
-    /**
-     * 获取超管账号
-     * @return array|mixed
-     */
-    protected function getAuthAdmin(): mixed
-    {
-        return $this->app->config->get('happy.auth_admin');
-    }
-
-    /**
-     * 是否超管
-     * @return bool
-     */
-    public function isAuthAdmin(): bool
-    {
-        if ($this->getAuthAdmin() == $this->getUserName()) {
-            return true;
-        }
-        return false;
-    }
-
+    
     /**
      * 是否登录
      * @return bool
@@ -102,23 +121,5 @@ class AuthHelper extends Helper
     public function isLogin(): bool
     {
         return (bool)$this->getUser();
-    }
-
-    /**
-     * 用户信息
-     * @return mixed
-     */
-    protected function getUser(): mixed
-    {
-        return $this->app->session->get('user');
-    }
-
-    /**
-     * 获取用户账号
-     * @return mixed
-     */
-    protected function getUserName()
-    {
-        return $this->app->session->get('user.username');
     }
 }

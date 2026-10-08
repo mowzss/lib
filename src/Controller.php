@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs;
 
 use think\App;
@@ -15,17 +16,23 @@ abstract class Controller
 {
     
     /**
+     * @var array|mixed
+     */
+    public mixed $get;
+    /**
+     * @var array|mixed
+     */
+    public mixed $post;
+    /**
      * Request实例
      * @var Request
      */
     protected Request $request;
-    
     /**
      * 应用实例
      * @var APP
      */
     protected App $app;
-    
     /**
      * 是否批量验证
      * @var bool
@@ -41,14 +48,6 @@ abstract class Controller
      * @var array
      */
     protected array $middleware = [];
-    /**
-     * @var array|mixed
-     */
-    public mixed $get;
-    /**
-     * @var array|mixed
-     */
-    public mixed $post;
     
     /**
      * 构造方法
@@ -70,98 +69,26 @@ abstract class Controller
     }
     
     /**
+     * 操作错误跳转的快捷方法
+     * @access protected
+     * @param mixed|string $msg 提示信息
+     * @param null|string $data 返回的数据
+     * @param string|null $url 跳转的URL地址
+     * @param integer $wait 跳转等待时间
+     * @param array $header 发送的Header信息
+     * @return void
+     */
+    protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): void
+    {
+        $this->response($url, $msg, $data, $wait, $header, 0);
+    }
+    
+    /**
      * 初始化
      * @return void
      */
     protected function initialize()
     {
-    }
-    
-    
-    /**
-     * 渲染模板
-     * @param string $template
-     * @param array $vars
-     * @return string
-     */
-    protected function fetch(string $template = '', array $vars = []): string
-    {
-        
-        foreach ($this as $name => $value) {
-            $vars[$name] = $value;
-        }
-        return View::fetch($template, $vars);
-    }
-    
-    /**
-     * 数据回调
-     * @param string $name
-     * @param array $one
-     * @param array $two
-     * @param array $thr
-     * @return bool
-     */
-    public function callback(string $name, mixed &$one = [], mixed &$two = [], mixed &$thr = []): bool
-    {
-        if (is_callable($name)) {
-            return call_user_func($name, $this, $one, $two, $thr);
-        }
-        foreach (["_{$this->app->request->action()}{$name}", $name] as $method) {
-            if (method_exists($this, $method) && false === $this->$method($one, $two, $thr)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    
-    /**
-     * 模板变量赋值
-     * @param mixed $name 要显示的模板变量
-     * @param mixed $value 变量的值
-     * @return \think\View
-     */
-    public function assign(mixed $name, mixed $value = ''): \think\View
-    {
-        return View::assign($name, $value);
-    }
-    
-    
-    /**
-     * 验证数据
-     * @access protected
-     * @param array $data 数据
-     * @param string|array $validate 验证器名或者验证规则数组
-     * @param array $message 提示信息
-     * @param bool $batch 是否批量验证
-     * @return array|string|true
-     * @throws ValidateException
-     */
-    protected function validate(array $data, string|array $validate, array $message = [], bool $batch = false): bool|array|string
-    {
-        if (is_array($validate)) {
-            $v = new Validate();
-            $v->rule($validate);
-        } else {
-            if (strpos($validate, '.')) {
-                // 支持场景
-                [$validate, $scene] = explode('.', $validate);
-            }
-            $class = false !== strpos($validate, '\\') ? $validate : $this->app->parseClass('validate', $validate);
-            $v = new $class();
-            if (!empty($scene)) {
-                $v->scene($scene);
-            }
-        }
-        
-        $v->message($message);
-        
-        // 是否批量验证
-        if ($batch || $this->batchValidate) {
-            $v->batch(true);
-        }
-        
-        return $v->failException(true)->check($data);
     }
     
     /**
@@ -209,6 +136,100 @@ abstract class Controller
     }
     
     /**
+     * 获取当前的response 输出类型
+     * @access protected
+     * @return string
+     */
+    private function getResponseType(): string
+    {
+        return $this->request->isJson() || $this->request->isAjax() ? 'json' : 'html';
+    }
+    
+    /**
+     * 模板变量赋值
+     * @param mixed $name 要显示的模板变量
+     * @param mixed $value 变量的值
+     * @return \think\View
+     */
+    public function assign(mixed $name, mixed $value = ''): \think\View
+    {
+        return View::assign($name, $value);
+    }
+    
+    /**
+     * 数据回调
+     * @param string $name
+     * @param array $one
+     * @param array $two
+     * @param array $thr
+     * @return bool
+     */
+    public function callback(string $name, mixed &$one = [], mixed &$two = [], mixed &$thr = []): bool
+    {
+        if (is_callable($name)) {
+            return call_user_func($name, $this, $one, $two, $thr);
+        }
+        foreach (["_{$this->app->request->action()}{$name}", $name] as $method) {
+            if (method_exists($this, $method) && false === $this->$method($one, $two, $thr)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * 渲染模板
+     * @param string $template
+     * @param array $vars
+     * @return string
+     */
+    protected function fetch(string $template = '', array $vars = []): string
+    {
+        
+        foreach ($this as $name => $value) {
+            $vars[$name] = $value;
+        }
+        return View::fetch($template, $vars);
+    }
+    
+    /**
+     * 验证数据
+     * @access protected
+     * @param array $data 数据
+     * @param string|array $validate 验证器名或者验证规则数组
+     * @param array $message 提示信息
+     * @param bool $batch 是否批量验证
+     * @return array|string|true
+     * @throws ValidateException
+     */
+    protected function validate(array $data, string|array $validate, array $message = [], bool $batch = false): bool|array|string
+    {
+        if (is_array($validate)) {
+            $v = new Validate();
+            $v->rule($validate);
+        } else {
+            if (strpos($validate, '.')) {
+                // 支持场景
+                [$validate, $scene] = explode('.', $validate);
+            }
+            $class = false !== strpos($validate, '\\') ? $validate : $this->app->parseClass('validate', $validate);
+            $v = new $class();
+            if (!empty($scene)) {
+                $v->scene($scene);
+            }
+        }
+        
+        $v->message($message);
+        
+        // 是否批量验证
+        if ($batch || $this->batchValidate) {
+            $v->batch(true);
+        }
+        
+        return $v->failException(true)->check($data);
+    }
+    
+    /**
      * 操作成功跳转的快捷方法
      * @access protected
      * @param mixed $msg 提示信息
@@ -228,21 +249,6 @@ abstract class Controller
     }
     
     /**
-     * 操作错误跳转的快捷方法
-     * @access protected
-     * @param mixed|string $msg 提示信息
-     * @param null|string $data 返回的数据
-     * @param string|null $url 跳转的URL地址
-     * @param integer $wait 跳转等待时间
-     * @param array $header 发送的Header信息
-     * @return void
-     */
-    protected function error(mixed $msg = '', null|string $data = '', ?string $url = null, int $wait = 3, array $header = []): void
-    {
-        $this->response($url, $msg, $data, $wait, $header, 0);
-    }
-    
-    /**
      * 闭站/模块提示
      * @param string $msg
      * @param string|null $url
@@ -253,16 +259,6 @@ abstract class Controller
     {
         $tpl = $this->app->config->get('app.dispatch_close_site_tmpl');
         $this->response($url, $msg, [], $wait, [], 0, $tpl);
-    }
-    
-    /**
-     * 获取当前的response 输出类型
-     * @access protected
-     * @return string
-     */
-    private function getResponseType(): string
-    {
-        return $this->request->isJson() || $this->request->isAjax() ? 'json' : 'html';
     }
     
     /**

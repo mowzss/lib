@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\extend;
 
 
@@ -10,7 +11,7 @@ class SitemapIndexExtend
      * @var array<int, array{loc: string, lastmod?: string}>
      */
     private array $sitemaps = [];
-
+    
     /**
      * 添加一个 Sitemap 文件地址
      *
@@ -24,7 +25,7 @@ class SitemapIndexExtend
             'lastmod' => $lastmod ? htmlspecialchars($lastmod, ENT_XML1, 'UTF-8') : null,
         ];
     }
-
+    
     /**
      * 生成 Sitemap Index XML 内容
      *
@@ -34,7 +35,7 @@ class SitemapIndexExtend
     {
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         $xml .= "<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
-
+        
         foreach ($this->sitemaps as $sitemap) {
             $xml .= "\t<sitemap>\n";
             $xml .= "\t\t<loc>{$sitemap['loc']}</loc>\n";
@@ -43,12 +44,12 @@ class SitemapIndexExtend
             }
             $xml .= "\t</sitemap>\n";
         }
-
+        
         $xml .= "</sitemapindex>";
-
+        
         return $xml;
     }
-
+    
     /**
      * 将生成的 Sitemap Index 保存为文件
      *
@@ -60,7 +61,7 @@ class SitemapIndexExtend
         $content = $this->generate();
         return file_put_contents($filePath, $content, LOCK_EX) !== false;
     }
-
+    
     /**
      * 清空当前所有已添加的 sitemap
      */

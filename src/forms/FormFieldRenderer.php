@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\forms;
 
 use think\facade\Log;
@@ -10,42 +11,6 @@ use happy\admin\libs\forms\field\Text;
 class FormFieldRenderer
 {
     private static array $renderers = [];
-    
-    
-    /**
-     * 初始化渲染器映射
-     */
-    public static function initRenderers(): void
-    {
-        // 从配置文件中加载表单字段类型
-        $formConfig = FormFieldConfig::get();
-        // 动态生成渲染器映射
-        foreach ($formConfig as $type => $label) {
-            // 假设渲染器类名与字段类型相同，并位于 `Mowzs\Libs\forms\field` 命名空间下
-            $className = 'happy\\admin\\libs\\forms\\field\\' . ucfirst($type);
-            // 检查类是否存在
-            if (class_exists($className)) {
-                self::$renderers[$type] = $className;
-            } else {
-                // 如果类不存在，记录日志或使用默认的 Text 渲染器
-                Log::warning("Renderer class not found for type: {$type}");
-                self::$renderers[$type] = Text::class;
-            }
-        }
-    }
-    
-    /**
-     * 创建渲染器实例
-     * @param string $type
-     * @return mixed
-     */
-    protected static function create(string $type): mixed
-    {
-        // 初始化表单字段渲染器
-        self::initRenderers();
-        $class = self::$renderers[$type] ?? Text::class; // 默认为文本输入框
-        return new $class();
-    }
     
     /**
      * 渲染表单字段
@@ -72,6 +37,41 @@ class FormFieldRenderer
             // 记录错误日志并返回空字符串或默认渲染
             Log::error("Error rendering field: " . $e->getMessage());
             return '';
+        }
+    }
+    
+    /**
+     * 创建渲染器实例
+     * @param string $type
+     * @return mixed
+     */
+    protected static function create(string $type): mixed
+    {
+        // 初始化表单字段渲染器
+        self::initRenderers();
+        $class = self::$renderers[$type] ?? Text::class; // 默认为文本输入框
+        return new $class();
+    }
+    
+    /**
+     * 初始化渲染器映射
+     */
+    public static function initRenderers(): void
+    {
+        // 从配置文件中加载表单字段类型
+        $formConfig = FormFieldConfig::get();
+        // 动态生成渲染器映射
+        foreach ($formConfig as $type => $label) {
+            // 假设渲染器类名与字段类型相同，并位于 `Mowzs\Libs\forms\field` 命名空间下
+            $className = 'happy\\admin\\libs\\forms\\field\\' . ucfirst($type);
+            // 检查类是否存在
+            if (class_exists($className)) {
+                self::$renderers[$type] = $className;
+            } else {
+                // 如果类不存在，记录日志或使用默认的 Text 渲染器
+                Log::warning("Renderer class not found for type: {$type}");
+                self::$renderers[$type] = Text::class;
+            }
         }
     }
     

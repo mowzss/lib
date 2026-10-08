@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use GuzzleHttp\Client;
@@ -22,6 +23,19 @@ class HttpHelper extends Helper
         'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1',
         'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Mobile Safari/537.36',
     ];
+    
+    /**
+     * 发起 GET 请求
+     *
+     * @param string $url 请求 URL
+     * @param array $options 请求选项
+     * @return array 返回响应内容或解析后的 JSON 对象
+     * @throws \Exception|GuzzleException
+     */
+    public function get(string $url, array $options = []): array
+    {
+        return $this->request('GET', $url, $options);
+    }
     
     /**
      * 发起 HTTP 请求
@@ -137,19 +151,6 @@ class HttpHelper extends Helper
     private function getCurrentClientUserAgent(): string
     {
         return $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
-    }
-    
-    /**
-     * 发起 GET 请求
-     *
-     * @param string $url 请求 URL
-     * @param array $options 请求选项
-     * @return array 返回响应内容或解析后的 JSON 对象
-     * @throws \Exception|GuzzleException
-     */
-    public function get(string $url, array $options = []): array
-    {
-        return $this->request('GET', $url, $options);
     }
     
     /**

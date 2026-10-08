@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\command;
 
 use think\console\Input;
@@ -90,31 +91,6 @@ class AdminModuleInit extends Command
     }
     
     /**
-     * 执行命令
-     * @param Input $input 输入对象
-     * @param Output $output 输出对象
-     * @return int
-     */
-    protected function executeCommands(Input $input, Output $output): int
-    {
-        // 定义要执行的命令列表
-        $commands = [
-            'optimize:route',
-            'optimize:schema',
-        ];
-        if (!is_dir($this->app->getRuntimePath()) && !mkdir($concurrentDirectory = $this->app->getRuntimePath(), 0755, true) && !is_dir($concurrentDirectory)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
-        }
-        foreach ($commands as $commandName) {
-            $output->writeln("运行 <info>$commandName</info>...");
-            $commandOutput = $this->app->console->call($commandName)->fetch();
-            $output->writeln($commandOutput);
-        }
-        $output->writeln('<comment>所有初始化步骤已完成。</comment>');
-        return 0;
-    }
-    
-    /**
      * 处理路径（复制或替换）
      *
      * @param array $paths 路径配置
@@ -142,33 +118,54 @@ class AdminModuleInit extends Command
     }
     
     /**
-     * 处理文件（复制或替换）
-     * @param string $sourceFullPath 源文件路径
-     * @param string $targetFullPath 目标文件路径
-     * @param bool $forceReplace 是否强制替换
+     * 删除包的内容
+     *
+     * @param string $packageName 包名
      * @param Output $output 输出对象
-     * @return void
      */
-    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output): void
+    protected function deletePackageContent(string $packageName, Output $output): void
     {
-        // 确保目标文件所在的目录存在
-        $targetDir = dirname($targetFullPath);
-        if (!$this->ensureDirectoryExists($targetDir)) {
-            $output->writeln("错误：未能创建目录 '$targetDir'。");
+        $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
+        if (!file_exists($packagePath)) {
+            $output->writeln("警告：包路径 '$packagePath' 不存在。");
             return;
         }
-        if (file_exists($targetFullPath)) {
-            if ($forceReplace) {
-                unlink($targetFullPath); // 删除目标文件
-                copy($sourceFullPath, $targetFullPath);
-                //                $output->writeln("替换文件至 '$targetFullPath'。");
-            } else {
-                $output->writeln("警告：文件 '$targetFullPath' 已存在并将被跳过。");
-            }
-        } else {
-            copy($sourceFullPath, $targetFullPath);
-            //            $output->writeln("文件复制至 '$targetFullPath'。");
+        if (!is_dir($packagePath)) {
+            $output->writeln("错误：路径 '$packagePath' 不是目录。");
+            return;
         }
+        $output->writeln("删除包的内容：<info>$packageName</info>");
+        // 递归删除包的内容
+        if ($this->recursiveDelete($packagePath, $output)) {
+            $output->writeln("成功删除包的内容：<info>$packageName</info>");
+        } else {
+            $output->writeln("<error>删除包内容失败：$packageName</error>");
+        }
+    }
+    
+    /**
+     * 执行命令
+     * @param Input $input 输入对象
+     * @param Output $output 输出对象
+     * @return int
+     */
+    protected function executeCommands(Input $input, Output $output): int
+    {
+        // 定义要执行的命令列表
+        $commands = [
+            'optimize:route',
+            'optimize:schema',
+        ];
+        if (!is_dir($this->app->getRuntimePath()) && !mkdir($concurrentDirectory = $this->app->getRuntimePath(), 0755, true) && !is_dir($concurrentDirectory)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+        }
+        foreach ($commands as $commandName) {
+            $output->writeln("运行 <info>$commandName</info>...");
+            $commandOutput = $this->app->console->call($commandName)->fetch();
+            $output->writeln($commandOutput);
+        }
+        $output->writeln('<comment>所有初始化步骤已完成。</comment>');
+        return 0;
     }
     
     /**
@@ -215,28 +212,32 @@ class AdminModuleInit extends Command
     }
     
     /**
-     * 删除包的内容
-     *
-     * @param string $packageName 包名
+     * 处理文件（复制或替换）
+     * @param string $sourceFullPath 源文件路径
+     * @param string $targetFullPath 目标文件路径
+     * @param bool $forceReplace 是否强制替换
      * @param Output $output 输出对象
+     * @return void
      */
-    protected function deletePackageContent(string $packageName, Output $output): void
+    protected function processFile(string $sourceFullPath, string $targetFullPath, bool $forceReplace, Output $output): void
     {
-        $packagePath = $this->app->getRootPath() . 'vendor/' . $packageName;
-        if (!file_exists($packagePath)) {
-            $output->writeln("警告：包路径 '$packagePath' 不存在。");
+        // 确保目标文件所在的目录存在
+        $targetDir = dirname($targetFullPath);
+        if (!$this->ensureDirectoryExists($targetDir)) {
+            $output->writeln("错误：未能创建目录 '$targetDir'。");
             return;
         }
-        if (!is_dir($packagePath)) {
-            $output->writeln("错误：路径 '$packagePath' 不是目录。");
-            return;
-        }
-        $output->writeln("删除包的内容：<info>$packageName</info>");
-        // 递归删除包的内容
-        if ($this->recursiveDelete($packagePath, $output)) {
-            $output->writeln("成功删除包的内容：<info>$packageName</info>");
+        if (file_exists($targetFullPath)) {
+            if ($forceReplace) {
+                unlink($targetFullPath); // 删除目标文件
+                copy($sourceFullPath, $targetFullPath);
+                //                $output->writeln("替换文件至 '$targetFullPath'。");
+            } else {
+                $output->writeln("警告：文件 '$targetFullPath' 已存在并将被跳过。");
+            }
         } else {
-            $output->writeln("<error>删除包内容失败：$packageName</error>");
+            copy($sourceFullPath, $targetFullPath);
+            //            $output->writeln("文件复制至 '$targetFullPath'。");
         }
     }
     

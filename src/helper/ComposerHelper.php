@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\helper;
 
 use Exception;
@@ -15,22 +16,22 @@ class ComposerHelper
      */
     public static function readComposerLock(string $lockFilePath = 'vendor/composer/installed.json'): array
     {
-
+        
         $lockFilePath = root_path() . $lockFilePath;
         if (!file_exists($lockFilePath)) {
             throw new Exception("Composer lock file not found at path: {$lockFilePath}");
         }
-
+        
         $content = file_get_contents($lockFilePath);
         $data = json_decode($content, true);
-
+        
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception("Failed to decode composer.lock file: " . json_last_error_msg());
         }
-
+        
         return $data ?? [];
     }
-
+    
     /**
      * 获取所有 Composer 扩展包信息
      *
@@ -42,7 +43,7 @@ class ComposerHelper
     {
         $data = self::readComposerLock($lockFilePath);
         $packages = [];
-
+        
         foreach ($data['packages'] as $item) {
             $packages[] = [
                 'name' => $item['name'] ?? 'Unknown',
@@ -53,10 +54,10 @@ class ComposerHelper
                 'homepage' => $item['homepage'] ?? 'Unknown',
             ];
         }
-
+        
         return $packages;
     }
-
+    
     /**
      * 获取指定类型的 Composer 扩展包信息
      *
@@ -72,7 +73,7 @@ class ComposerHelper
             return $package['type'] === $type;
         });
     }
-
+    
     /**
      * 获取除指定类型外的所有 Composer 扩展包信息
      *

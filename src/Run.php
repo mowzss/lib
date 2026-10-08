@@ -1,6 +1,7 @@
 <?php
 declare (strict_types=1);
 
+
 namespace happy\admin\libs;
 
 use think\App;
@@ -8,22 +9,6 @@ use think\App;
 class Run
 {
     protected static string $run_env = '.env';
-    
-    /**
-     * @return string
-     */
-    protected static function getRunEnv(): string
-    {
-        return Helper::instance()->app->getRuntimePath() . self::$run_env;
-    }
-    
-    /**
-     * @return App
-     */
-    protected static function init(): App
-    {
-        return (new App())->debug(self::isDebug());
-    }
     
     /**
      * 设置运行环境为调试模式或生产模式
@@ -39,6 +24,14 @@ class Run
         if (file_put_contents(self::getRunEnv(), $newContent) === false) {
             throw new \RuntimeException("Failed to write to " . self::getRunEnv());
         }
+    }
+    
+    /**
+     * @return string
+     */
+    protected static function getRunEnv(): string
+    {
+        return Helper::instance()->app->getRuntimePath() . self::$run_env;
     }
     
     /**
@@ -62,6 +55,28 @@ class Run
     }
     
     /**
+     * @param string $app_name 应用名称&环境变量名
+     * @return void
+     */
+    public static function initApp(string $app_name = 'home'): void
+    {
+        // 执行HTTP应用并响应
+        $http = self::init()->setEnvName($app_name)->http;
+        
+        $response = $http->run();
+        $response->send();
+        $http->end($response);
+    }
+    
+    /**
+     * @return App
+     */
+    protected static function init(): App
+    {
+        return (new App())->debug(self::isDebug());
+    }
+    
+    /**
      * 获取当前环境是否为debug
      * @return array|false|mixed|null
      */
@@ -76,20 +91,6 @@ class Run
             return true;
         }
         return false;
-    }
-    
-    /**
-     * @param string $app_name 应用名称&环境变量名
-     * @return void
-     */
-    public static function initApp(string $app_name = 'home'): void
-    {
-        // 执行HTTP应用并响应
-        $http = self::init()->setEnvName($app_name)->http;
-        
-        $response = $http->run();
-        $response->send();
-        $http->end($response);
     }
     
     /**

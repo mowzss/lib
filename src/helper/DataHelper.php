@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -33,7 +34,7 @@ class DataHelper extends Helper
         }
         return $arr;
     }
-
+    
     /**
      * @param array $array
      * @param string $childrenKey
@@ -55,8 +56,8 @@ class DataHelper extends Helper
         }
         return $array;
     }
-
-
+    
+    
     /**
      * 二维数组转数据树表
      * @param array $items
@@ -77,9 +78,9 @@ class DataHelper extends Helper
                 $formattedTitle = $prefix . $item[$titleKey];
                 $result[] = [
                     $idKey => $item[$idKey],
-                    $titleKey => $formattedTitle
+                    $titleKey => $formattedTitle,
                 ];
-
+                
                 // 如果当前元素有子元素，则递归处理子元素
                 $children = $this->arrToTable($items, $idKey, $parentIdKey, $titleKey, $item[$idKey], $level + 1);
                 if (!empty($children)) {
@@ -89,7 +90,7 @@ class DataHelper extends Helper
         }
         return $result;
     }
-
+    
     /**
      * 三维数组提取key value
      * @param array $items

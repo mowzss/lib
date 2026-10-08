@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -9,27 +10,6 @@ use think\db\exception\ModelNotFoundException;
 
 class ViewFileHelper extends Helper
 {
-    /**
-     * 获取主题路径
-     * @param string $module 模块
-     * @param string $controller 控制器
-     * @param bool $mobile 是否手机端
-     * @return string
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
-     */
-    protected function getThemePath(string $module = 'article', string $controller = 'column', bool $mobile = false): string
-    {
-        $view_root_path = $this->app->getRootPath() . 'view' . DIRECTORY_SEPARATOR . 'home_style';
-        if ($mobile) {
-            $theme = sys_config('home_wap_style', 'default');
-        } else {
-            $theme = sys_config('home_pc_style', 'default');
-        }
-        return $view_root_path . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $controller;
-    }
-    
     /**
      * 获取主题视图下的模板文件列表
      * @param string $module 模块名
@@ -71,5 +51,26 @@ class ViewFileHelper extends Helper
         }
         
         return $result;
+    }
+    
+    /**
+     * 获取主题路径
+     * @param string $module 模块
+     * @param string $controller 控制器
+     * @param bool $mobile 是否手机端
+     * @return string
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     */
+    protected function getThemePath(string $module = 'article', string $controller = 'column', bool $mobile = false): string
+    {
+        $view_root_path = $this->app->getRootPath() . 'view' . DIRECTORY_SEPARATOR . 'home_style';
+        if ($mobile) {
+            $theme = sys_config('home_wap_style', 'default');
+        } else {
+            $theme = sys_config('home_pc_style', 'default');
+        }
+        return $view_root_path . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . $controller;
     }
 }

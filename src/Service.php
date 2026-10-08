@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs;
 
 use think\Paginator;
@@ -40,20 +41,6 @@ class Service extends BaseService
         // 注册命令行
         $this->registerCommand();
         
-    }
-    
-    /**
-     * 注册服务
-     * @return void
-     */
-    public function register(): void
-    {
-        // 绑定类
-        $this->app->bind([
-            Paginator::class => Page::class,
-            \think\Request::class => Request::class,
-            //Handle::class => ExceptionHandle::class,
-        ]);
     }
     
     /**
@@ -117,5 +104,19 @@ class Service extends BaseService
         }
         return ['__STATIC__' => '/static',];
         
+    }
+    
+    /**
+     * 注册服务
+     * @return void
+     */
+    public function register(): void
+    {
+        // 绑定类
+        $this->app->bind([
+            Paginator::class => Page::class,
+            \think\Request::class => Request::class,
+            //Handle::class => ExceptionHandle::class,
+        ]);
     }
 }

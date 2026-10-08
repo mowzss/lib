@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\command;
 
 use think\console\Input;
@@ -26,7 +27,7 @@ class AdminInit extends Command
             ->setDescription('Initialize the application with custom module configurations.')
             ->setHelp('This command runs a series of initialization steps including service discovery, vendor publishing, and module configuration.');
     }
-
+    
     /**
      * 执行命令
      * @param Input $input
@@ -58,7 +59,7 @@ class AdminInit extends Command
         $this->doRun($commands, $output);
         return 0;
     }
-
+    
     /**
      * 运行命令
      * @param array $commands

@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\task;
 
 use Exception;
@@ -14,21 +15,29 @@ class Scheduler
 {
     /** @var App */
     protected App $app;
-
+    
     protected array $tasks = [];
-
+    
     /**
      * @var SystemTasks
      */
     protected SystemTasks $model;
-
+    
     public function __construct(App $app)
     {
         $this->app = $app;
         $this->model = new SystemTasks();
         $this->getTasks();
     }
-
+    
+    /**
+     * @return void
+     */
+    protected function getTasks(): void
+    {
+        $this->tasks = $this->model->getTaskList();
+    }
+    
     public function run(): void
     {
         foreach ($this->tasks as $task_info) {
@@ -50,29 +59,7 @@ class Scheduler
             }
         }
     }
-
-    /**
-     * @return void
-     */
-    protected function getTasks(): void
-    {
-        $this->tasks = $this->model->getTaskList();
-    }
-
-    /**
-     * @param $task Task
-     * @return bool
-     */
-    protected function serverShouldRun(Task $task): bool
-    {
-        $key = $task->mutexName() . md5($task->mutexName());
-        if ($this->app->cache->has($key)) {
-            return false;
-        }
-        $this->app->cache->set($key, true, $task->expiresAt);
-        return true;
-    }
-
+    
     protected function runSingleServerTask($task): void
     {
         if ($this->serverShouldRun($task)) {
@@ -81,7 +68,7 @@ class Scheduler
             $this->app->event->trigger(new TaskSkipped($task));
         }
     }
-
+    
     /**
      * @param $task Task
      */
@@ -95,7 +82,61 @@ class Scheduler
             $this->app->cache->delete($task->mutexName() . md5($task->mutexName()));
         }
     }
-
+    
+    /**
+     * 运行命令行
+     * @param array $task_info
+     * @return void
+     */
+    protected function runCommandWithLock(array $task_info): void
+    {
+        // 生成锁的唯一键
+        $lockKey = 'task_lock_' . md5($task_info['task'] . $task_info['exptime'] . date('Y-m-d H:i'));
+        
+        // 尝试获取锁
+        if ($this->app->cache->has($lockKey)) {
+            // 如果锁已存在，触发任务跳过事件
+            $this->app->event->trigger(new TaskSkipped($task_info['task'], 'Task is already running'));
+            return;
+        }
+        
+        try {
+            // 设置锁
+            $this->app->cache->set($lockKey, true, 0);
+            // 执行命令
+            $command = explode(' ', $task_info['task']);
+            $outputContent = $this->app->console->call($command[0], array_slice($command, 1))->fetch();
+            
+            // 处理输出内容
+            $this->handleCommandOutput($task_info, $outputContent);
+            
+            // 触发任务完成事件
+            $this->app->event->trigger(new TaskProcessed($task_info['task'], $outputContent));
+            // 设置锁
+            $this->app->cache->delete($lockKey);
+        } catch (\Exception $e) {
+            // 如果命令执行失败，触发任务失败事件
+            $this->app->event->trigger(new TaskFailed($task_info['task'], $e));
+        } finally {
+            // 确保释放锁
+            $this->app->cache->delete($lockKey);
+        }
+    }
+    
+    /**
+     * @param $task Task
+     * @return bool
+     */
+    protected function serverShouldRun(Task $task): bool
+    {
+        $key = $task->mutexName() . md5($task->mutexName());
+        if ($this->app->cache->has($key)) {
+            return false;
+        }
+        $this->app->cache->set($key, true, $task->expiresAt);
+        return true;
+    }
+    
     /**
      *
      * @param mixed $task_info
@@ -121,7 +162,7 @@ class Scheduler
             // 合并开始 5 行、中间的 `.....` 和最后 5 行
             $finalContent = $first5LinesContent . PHP_EOL . '.....' . PHP_EOL . $last5LinesContent;
         }
-
+        
         // 保存本次运行记录
         $cronExpression = new CronExpression($task_info['exptime']);
         $currentTime = new \DateTime('now', new \DateTimeZone(date_default_timezone_get()));
@@ -132,45 +173,5 @@ class Scheduler
         $update['count'] = $this->app->db->raw('count+1');
         $update['output_msg'] = $finalContent; // 使用最终处理后的内容
         $this->model->update($update);
-    }
-
-    /**
-     * 运行命令行
-     * @param array $task_info
-     * @return void
-     */
-    protected function runCommandWithLock(array $task_info): void
-    {
-        // 生成锁的唯一键
-        $lockKey = 'task_lock_' . md5($task_info['task'] . $task_info['exptime'] . date('Y-m-d H:i'));
-
-        // 尝试获取锁
-        if ($this->app->cache->has($lockKey)) {
-            // 如果锁已存在，触发任务跳过事件
-            $this->app->event->trigger(new TaskSkipped($task_info['task'], 'Task is already running'));
-            return;
-        }
-
-        try {
-            // 设置锁
-            $this->app->cache->set($lockKey, true, 0);
-            // 执行命令
-            $command = explode(' ', $task_info['task']);
-            $outputContent = $this->app->console->call($command[0], array_slice($command, 1))->fetch();
-
-            // 处理输出内容
-            $this->handleCommandOutput($task_info, $outputContent);
-
-            // 触发任务完成事件
-            $this->app->event->trigger(new TaskProcessed($task_info['task'], $outputContent));
-            // 设置锁
-            $this->app->cache->delete($lockKey);
-        } catch (\Exception $e) {
-            // 如果命令执行失败，触发任务失败事件
-            $this->app->event->trigger(new TaskFailed($task_info['task'], $e));
-        } finally {
-            // 确保释放锁
-            $this->app->cache->delete($lockKey);
-        }
     }
 }

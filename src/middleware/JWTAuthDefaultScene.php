@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\middleware;
 
 use think\App;
@@ -10,7 +11,7 @@ use yzh52521\Jwt\Util\JWTUtil;
 class JWTAuthDefaultScene
 {
     protected App $app;
-
+    
     /**
      * Construct
      * @param App $app
@@ -20,15 +21,15 @@ class JWTAuthDefaultScene
     {
         $this->app = $app;
     }
-
+    
     public function handle(Request $request, $next)
     {
         if ($this->app->config->get('route.controller_layer') === 'api') {
-
+            
             if ($request->controller() === 'index.Login') {
                 return $next($request);
             }
-
+            
             try {
                 $token = JWTUtil::getToken($request);
                 if ($token === false) {
@@ -43,7 +44,7 @@ class JWTAuthDefaultScene
             } catch (\Exception $e) {
                 return json(['code' => 401, 'msg' => '未授权']);
             }
-
+            
         }
         return $next($request);
     }

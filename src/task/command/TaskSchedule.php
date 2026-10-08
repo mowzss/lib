@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\task\command;
 
 use think\console\Input;
@@ -9,21 +10,21 @@ use Symfony\Component\Process\Process;
 
 class TaskSchedule extends Command
 {
-
+    
     protected function configure()
     {
         $this->setName('task:schedule');
     }
-
+    
     protected function execute(Input $input, Output $output)
     {
-
+        
         if ('\\' == DIRECTORY_SEPARATOR) {
             $command = 'start /B "' . PHP_BINARY . '" think task:run';
         } else {
             $command = 'nohup "' . PHP_BINARY . '" think task:run >> /dev/null 2>&1 &';
         }
-
+        
         $process = Process::fromShellCommandline($command);
         $output->info('守护任务启动成功');
         while (true) {

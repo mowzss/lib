@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use happy\admin\libs\Helper;
@@ -15,7 +16,7 @@ class TemplateHelper extends Helper
         'home' => 'home_style',
         'user' => 'user_style',
     ];
-
+    
     /**
      * 获取指定类型下的所有风格信息
      *
@@ -27,27 +28,27 @@ class TemplateHelper extends Helper
         if (!isset($this->templateTypes[$type])) {
             throw new \InvalidArgumentException("未知的模板类型: {$type}");
         }
-
+        
         $styles = [];
         $path = app()->getRootPath() . 'view/' . $this->templateTypes[$type];
-
+        
         if (is_dir($path)) {
             $iterator = new \DirectoryIterator($path);
             foreach ($iterator as $file) {
                 if ($file->isDir()) {
                     $styleName = $file->getFilename();
                     $infoFile = $file->getPathname() . '/info.php';
-
+                    
                     if (is_file($infoFile)) {
                         $styles[$styleName] = include $infoFile;
                     }
                 }
             }
         }
-
+        
         return $styles;
     }
-
+    
     /**
      * 获取指定类型下的默认风格名称
      *
@@ -59,7 +60,7 @@ class TemplateHelper extends Helper
         $styles = $this->getStyleInfo($type);
         return isset($styles['default']) ? 'default' : null;
     }
-
+    
     /**
      * 获取指定类型下的模板数据
      *

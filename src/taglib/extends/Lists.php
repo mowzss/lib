@@ -2,6 +2,7 @@
 
 declare (strict_types=1);
 
+
 namespace happy\admin\libs\taglib\extends;
 
 use think\facade\Db;

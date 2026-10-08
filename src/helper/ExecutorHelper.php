@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use ReflectionClass;
@@ -10,6 +11,18 @@ use happy\admin\libs\Exception\LibsException;
 
 class ExecutorHelper
 {
+    /**
+     * 如果字符串符合规则，则执行它
+     */
+    public static function runIfValid(string $string): mixed
+    {
+        if (!self::isValidString($string)) {
+            throw new LibsException("字符串格式不正确或目标不可执行，应为 'Namespace\\ClassName@methodName@param1,param2' 的形式");
+        }
+        
+        return self::execute($string);
+    }
+    
     /**
      * 检查字符串是否符合 "Namespace\ClassName@methodName@param1,param2" 的格式
      */
@@ -38,18 +51,6 @@ class ExecutorHelper
         } catch (\Throwable) {
             return false;
         }
-    }
-    
-    /**
-     * 如果字符串符合规则，则执行它
-     */
-    public static function runIfValid(string $string): mixed
-    {
-        if (!self::isValidString($string)) {
-            throw new LibsException("字符串格式不正确或目标不可执行，应为 'Namespace\\ClassName@methodName@param1,param2' 的形式");
-        }
-        
-        return self::execute($string);
     }
     
     /**

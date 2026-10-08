@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\middleware;
 
 use think\App;

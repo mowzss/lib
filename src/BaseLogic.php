@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs;
 
 use think\App;
@@ -263,5 +264,5 @@ abstract class BaseLogic
         return $this->app->config->get($name, $default);
     }
     
-    
+
 }

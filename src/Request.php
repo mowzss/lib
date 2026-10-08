@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs;
 
 class Request extends \think\Request

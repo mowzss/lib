@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\command;
 
 use think\Exception;
@@ -14,7 +15,7 @@ class AdminEntranceRename extends Command
             ->setDescription('重命名管理入口文件名')
             ->setHelp('该命令用于重命名位于public目录下的管理入口文件。默认文件名为admin.php。');
     }
-
+    
     /**
      * @param \think\console\Input $input
      * @param \think\console\Output $output
@@ -30,17 +31,17 @@ class AdminEntranceRename extends Command
         // 获取配置文件中的管理入口文件名，默认为 'admin.php'
         $newFileName = $this->app->config->get('happy.admin_entrance', 'admin.php');
         $publicPath = $this->app->getRootPath() . 'public' . DIRECTORY_SEPARATOR;
-
+        
         // 默认文件路径
         $defaultFilePath = $publicPath . 'admin.php';
-
+        
         if ($newFileName === 'admin.php') {
             $output->writeln("目标文件名与默认文件名相同，无需处理。");
             return;
         }
-
+        
         $newFilePath = $publicPath . $newFileName;
-
+        
         // 如果新文件名对应的文件已经存在，则删除它
         if (file_exists($newFilePath)) {
             if (!unlink($newFilePath)) {
@@ -50,12 +51,12 @@ class AdminEntranceRename extends Command
             }
             $output->writeln("已删除旧的目标文件：{$newFilePath}");
         }
-
+        
         // 重命名默认文件到新的文件名
         if (!rename($defaultFilePath, $newFilePath)) {
             throw new Exception("无法重命名文件从 {$defaultFilePath} 到 {$newFilePath}");
         }
-
+        
         $output->writeln("成功将管理入口文件重命名为：{$newFileName}");
     }
 }

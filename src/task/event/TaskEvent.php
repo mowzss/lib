@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\task\event;
 
 use happy\admin\libs\task\Task;
@@ -11,13 +12,13 @@ abstract class TaskEvent
      * @var mixed|null
      */
     protected mixed $task_output;
-
+    
     public function __construct(Task|string $task, $task_output = null)
     {
         $this->task = $task;
         $this->task_output = $task_output;
     }
-
+    
     /**
      * @return false|Task|string
      */
@@ -28,7 +29,7 @@ abstract class TaskEvent
         }
         return get_class($this->task);
     }
-
+    
     /**
      *
      * @return mixed|null

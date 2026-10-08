@@ -1,5 +1,6 @@
 <?php
 
+
 namespace happy\admin\libs\extend;
 
 class SiteMapExtend
@@ -9,13 +10,13 @@ class SiteMapExtend
      * @var array
      */
     private array $items = [];
-
+    
     /**
      * 配置参数
      * @var array
      */
     private array $config = [];
-
+    
     /**
      * 初始化
      * @param array $config
@@ -35,12 +36,12 @@ class SiteMapExtend
         if (empty($this->config['tpl_path'])) {
             $this->config['tpl_path'] = __DIR__ . '/tpl/';
         }
-
+        
         if (!is_dir($this->config['path'])) {
             mkdir($this->config['path'], 0755, true);
         }
     }
-
+    
     /**
      * 设置标题
      * @param $title
@@ -50,7 +51,7 @@ class SiteMapExtend
     {
         $this->config['title'] = $title;
     }
-
+    
     /**
      * 设置文件保存路径
      * @param $filename
@@ -63,7 +64,7 @@ class SiteMapExtend
         }
         $this->config['path'] = $filename;
     }
-
+    
     /**
      * 设置模板路径
      * @param string $tplPath
@@ -72,7 +73,7 @@ class SiteMapExtend
     {
         $this->config['tpl_path'] = rtrim($tplPath, '/') . '/';
     }
-
+    
     /**
      * 添加一个节点
      * @param string $url
@@ -90,7 +91,7 @@ class SiteMapExtend
             'lastmod' => $lastmod,
         ];
     }
-
+    
     /**
      * 生成文件
      * @param string $type xml html txt
@@ -119,7 +120,7 @@ class SiteMapExtend
         $pathurl = $this->config['pathurl'] . $name;
         return $pathurl;
     }
-
+    
     /**
      * 保存数据生成文件
      * @param $file_name
@@ -138,7 +139,7 @@ class SiteMapExtend
         fclose($handle);
         0 && @chmod($filename, 0777);
     }
-
+    
     /**
      * 处理HTML模板
      * @param $arr
@@ -150,16 +151,16 @@ class SiteMapExtend
         if (!file_exists($templatePath)) {
             die("HTML模板文件不存在: {$templatePath}");
         }
-
+        
         $template = file_get_contents($templatePath);
         $replacements = [
             '{{title}}' => $this->config['title'],
             '{{items}}' => $this->generateHtmlItems($arr),
         ];
-
+        
         return strtr($template, $replacements);
     }
-
+    
     /**
      * 生成HTML中的项目列表
      * @param $arr
@@ -173,7 +174,7 @@ class SiteMapExtend
         }
         return $html;
     }
-
+    
     /**
      * 处理TXT模板
      * @param $arr
@@ -187,7 +188,7 @@ class SiteMapExtend
         }
         return $txt;
     }
-
+    
     /**
      * 处理XML模板
      * @param $arr
@@ -199,15 +200,15 @@ class SiteMapExtend
         if (!file_exists($templatePath)) {
             die("XML模板文件不存在: {$templatePath}");
         }
-
+        
         $template = file_get_contents($templatePath);
         $replacements = [
             '{{items}}' => $this->generateXmlItems($arr),
         ];
-
+        
         return strtr($template, $replacements);
     }
-
+    
     /**
      * 生成XML中的项目列表
      * @param $arr

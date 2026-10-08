@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+
 namespace happy\admin\libs\helper;
 
 use think\App;
@@ -44,19 +45,6 @@ class RedisRollingListHelper extends Helper
     }
     
     /**
-     * 获取完整的缓存Key
-     * @param string $suffix
-     * @return string
-     */
-    public function getCacheKey(string $suffix = ''): string
-    {
-        $safeSuffix = preg_replace('/[^a-zA-Z0-9_\-]/', '', $suffix);
-        // 现在可以安全地使用 $this->app 了
-        $systemPrefix = $this->app->config->get('cache.stores.redis.prefix', '');
-        return $systemPrefix . $this->keyPrefix . $safeSuffix;
-    }
-    
-    /**
      * 添加记录（自动去重 + 滚动覆盖）
      * @param array $data 要存储的数据
      * @param string $suffix Key后缀（如模块名、用户ID等）
@@ -95,6 +83,19 @@ class RedisRollingListHelper extends Helper
     }
     
     /**
+     * 获取完整的缓存Key
+     * @param string $suffix
+     * @return string
+     */
+    public function getCacheKey(string $suffix = ''): string
+    {
+        $safeSuffix = preg_replace('/[^a-zA-Z0-9_\-]/', '', $suffix);
+        // 现在可以安全地使用 $this->app 了
+        $systemPrefix = $this->app->config->get('cache.stores.redis.prefix', '');
+        return $systemPrefix . $this->keyPrefix . $safeSuffix;
+    }
+    
+    /**
      * 获取列表
      * @param int $limit
      * @param string $suffix
@@ -112,7 +113,7 @@ class RedisRollingListHelper extends Helper
                 return [];
             }
             
-            return array_map(fn ($item) => json_decode($item, true), $rawList);
+            return array_map(fn($item) => json_decode($item, true), $rawList);
         } catch (\Throwable $e) {
             Log::error("RedisRollingList::getList failed: " . $e->getMessage());
             return [];

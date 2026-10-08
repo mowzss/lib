@@ -1,13 +1,13 @@
 <?php
 
-namespace happy\admin\libs\helper;
 
+namespace happy\admin\libs\helper;
 
 use think\facade\Config;
 
 class CryptoHelper
 {
-
+    
     /**
      * Base64 编码
      *
@@ -18,7 +18,7 @@ class CryptoHelper
     {
         return base64_encode($data);
     }
-
+    
     /**
      * Base64 解码
      *
@@ -29,7 +29,7 @@ class CryptoHelper
     {
         return base64_decode($encodedData, true) ?: '';
     }
-
+    
     /**
      * AES 加密
      *
@@ -43,28 +43,28 @@ class CryptoHelper
         if ($key === null) {
             $key = Config::get('happy.default_encryption_key');
         }
-
+        
         // 确保密钥长度符合所选加密方法的要求
         $keyLength = openssl_cipher_iv_length($method);
         if (strlen($key) !== $keyLength) {
             throw new \InvalidArgumentException("Encryption key must be {$keyLength} bytes long for method '{$method}'.");
         }
-
+        
         // 生成一个初始化向量(iv)
         $ivlen = openssl_cipher_iv_length($method);
         $iv = openssl_random_pseudo_bytes($ivlen);
-
+        
         // 加密数据
         $ciphertext = openssl_encrypt($plaintext, $method, $key, OPENSSL_RAW_DATA, $iv);
-
+        
         if ($ciphertext === false) {
             return false;
         }
-
+        
         // 返回 iv 和 ciphertext 的 base64 编码组合
         return self::base64Encode($iv . $ciphertext);
     }
-
+    
     /**
      * AES 解密
      *
@@ -78,19 +78,19 @@ class CryptoHelper
         if ($key === null) {
             $key = Config::get('secure.default_encryption_key');
         }
-
+        
         // 确保密钥长度符合所选加密方法的要求
         $keyLength = openssl_cipher_iv_length($method);
         if (strlen($key) !== $keyLength) {
             throw new \InvalidArgumentException("Decryption key must be {$keyLength} bytes long for method '{$method}'.");
         }
-
+        
         // 解码并分离 iv 和 ciphertext
         $ciphertext = self::base64Decode($ciphertext);
         $ivlen = openssl_cipher_iv_length($method);
         $iv = substr($ciphertext, 0, $ivlen);
         $ciphertext = substr($ciphertext, $ivlen);
-
+        
         // 解密数据
         return openssl_decrypt($ciphertext, $method, $key, OPENSSL_RAW_DATA, $iv);
     }
