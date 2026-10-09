@@ -1,230 +1,154 @@
 <?php
-
+declare(strict_types=1);
 
 namespace happy\admin\libs\extend;
 
+use RuntimeException;
+
 class SiteMapExtend
 {
-    /**
-     * 节点参数
-     * @var array
-     */
     private array $items = [];
-    
-    /**
-     * 配置参数
-     * @var array
-     */
     private array $config = [];
     
-    /**
-     * 初始化
-     * @param array $config
-     */
     public function __construct(array $config = [])
     {
-        $this->config = $config;
-        if (empty($this->config['path'])) {
-            $this->config['path'] = './';
-        }
-        if (empty($this->config['pathurl'])) {
-            $this->config['pathurl'] = request()->domain();
-        }
-        if (empty($this->config['title'])) {
-            $this->config['title'] = '网站地图';
-        }
-        if (empty($this->config['tpl_path'])) {
-            $this->config['tpl_path'] = __DIR__ . '/tpl/';
-        }
+        $this->config = array_merge([
+            'path' => './',
+            'pathurl' => request()->domain(), // 注意：CLI下request()可能为空，建议在Command中显式传入
+            'title' => '网站地图',
+            'tpl_path' => __DIR__ . '/tpl/',
+        ], $config);
         
         if (!is_dir($this->config['path'])) {
-            mkdir($this->config['path'], 0755, true);
+            if (!mkdir($this->config['path'], 0755, true) && !is_dir($this->config['path'])) {
+                throw new RuntimeException("Sitemap目录创建失败: {$this->config['path']}");
+            }
         }
     }
     
     /**
-     * 设置标题
-     * @param $title
-     * @return void
-     */
-    public function setTitle($title): void
-    {
-        $this->config['title'] = $title;
-    }
-    
-    /**
-     * 设置文件保存路径
-     * @param $filename
-     */
-    public function setPath($filename): void
-    {
-        $end_str = substr($filename, -1);
-        if ($end_str != '/' && $end_str != "\/") {
-            $filename .= '/';
-        }
-        $this->config['path'] = $filename;
-    }
-    
-    /**
-     * 设置模板路径
-     * @param string $tplPath
-     */
-    public function setTplPath(string $tplPath): void
-    {
-        $this->config['tpl_path'] = rtrim($tplPath, '/') . '/';
-    }
-    
-    /**
-     * 添加一个节点
-     * @param string $url
-     * @param string $lastmod
-     * @param float $priority between 1~0.5
-     * @param string $changefreq Always 经常,hourly 每小时,daily 每天,weekly 每周,monthly 每月,yearly 每年,never 从不
+     * 添加节点（强制类型安全）
      */
     public function addItem(string $url, string $lastmod = '', float $priority = 0.8, string $changefreq = 'daily'): void
     {
-        $lastmod = $lastmod ?? date('Y-m-d');
+        // 防御性编程：确保 lastmod 有值且为合法字符串
+        if ($lastmod === '' || $lastmod === null) {
+            $lastmod = date('Y-m-d');
+        }
+        
         $this->items[] = [
             'url' => $url,
-            'priority' => $priority,
-            'changefreq' => $changefreq,
             'lastmod' => $lastmod,
+            'priority' => max(0.0, min(1.0, $priority)), // 限制在 0~1 之间
+            'changefreq' => $changefreq,
         ];
     }
     
     /**
-     * 生成文件
-     * @param string $type xml html txt
-     * @param int $chunk
+     * 生成文件并返回访问URL
+     * @throws RuntimeException
      */
-    public function generated(string $type, string $name = 'sitemap', $chunk = null)
+    public function generated(string $type, string $name = 'sitemap'): string
     {
-        if (!$this->items) {
-            die('请添加数据->addItem');
-        } else {
-            if (!$this->config['path']) {
-                die('请设置文件存放路径->setPath');
-            }
+        if (empty($this->items)) {
+            throw new RuntimeException('Sitemap生成失败：未添加任何数据 (addItem)');
         }
-        $chunk = $chunk ?? count($this->items);
-        $items = array_chunk($this->items, $chunk);
-        $function_type = 'handle' . ucfirst($type);
-        foreach ($items as $k => $item) {
-            $data = $this->$function_type($item);
-            if ($k) {
-                $name .= $k;
-            }
-            $name .= '.' . $type;
-            $this->saveFile($name, $data);
-        }
-        $pathurl = $this->config['pathurl'] . $name;
-        return $pathurl;
-    }
-    
-    /**
-     * 保存数据生成文件
-     * @param $file_name
-     * @param $data
-     */
-    private function saveFile($file_name, $data): void
-    {
-        $filename = $this->config['path'] . $file_name;
-        $handle = fopen($filename, 'w+');
-        !$handle && die("文件打开失败");
-        flock($handle, LOCK_EX);
-        if (!empty($data)) {
-            fwrite($handle, $data);
-        }
-        flock($handle, LOCK_UN);
-        fclose($handle);
-        0 && @chmod($filename, 0777);
-    }
-    
-    /**
-     * 处理HTML模板
-     * @param $arr
-     * @return string
-     */
-    private function handleHtml($arr): string
-    {
-        $templatePath = $this->config['tpl_path'] . 'html.tpl';
-        if (!file_exists($templatePath)) {
-            die("HTML模板文件不存在: {$templatePath}");
+        if (empty($this->config['path'])) {
+            throw new RuntimeException('Sitemap生成失败：未设置文件存放路径');
         }
         
-        $template = file_get_contents($templatePath);
-        $replacements = [
-            '{{title}}' => $this->config['title'],
-            '{{items}}' => $this->generateHtmlItems($arr),
-        ];
+        $functionType = 'handle' . ucfirst($type);
+        if (!method_exists($this, $functionType)) {
+            throw new RuntimeException("不支持的Sitemap类型: {$type}");
+        }
         
-        return strtr($template, $replacements);
+        // 【修复】移除内部的 array_chunk，分片逻辑应由 Command 层控制
+        // 避免 Command 已经按 5000 条分片后，这里又意外触发二次分片导致文件名错乱
+        $data = $this->$functionType($this->items);
+        
+        $fileName = $name . '.' . $type;
+        $this->saveFile($fileName, $data);
+        
+        // 清空当前实例的数据，防止复用实例时数据污染
+        $this->items = [];
+        
+        return rtrim($this->config['pathurl'], '/') . '/' . $fileName;
     }
     
-    /**
-     * 生成HTML中的项目列表
-     * @param $arr
-     * @return string
-     */
-    private function generateHtmlItems($arr): string
+    private function saveFile(string $fileName, string $data): void
     {
-        $html = '';
-        foreach ($arr as $item) {
-            $html .= '<a href="' . htmlspecialchars($item['url']) . '">' . htmlspecialchars($item['url']) . '</a>';
+        $filePath = rtrim($this->config['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+        
+        // 使用 file_put_contents 替代 fopen/fwrite，更原子化且不易出错
+        $result = file_put_contents($filePath, $data, LOCK_EX);
+        if ($result === false) {
+            throw new RuntimeException("Sitemap文件写入失败: {$filePath}");
         }
-        return $html;
     }
     
     /**
-     * 处理TXT模板
-     * @param $arr
-     * @return string
+     * 获取当前已添加的条目数
      */
-    private function handleTxt($arr): string
+    public function count(): int
     {
-        $txt = '';
-        foreach ($arr as $item) {
-            $txt .= $item['url'] . "\r\n";
-        }
-        return $txt;
+        return count($this->items);
     }
     
-    /**
-     * 处理XML模板
-     * @param $arr
-     * @return string
-     */
-    private function handleXml($arr): string
+    // ==================== 格式处理器 ====================
+    
+    private function handleXml(array $arr): string
     {
         $templatePath = $this->config['tpl_path'] . 'xml.tpl';
         if (!file_exists($templatePath)) {
-            die("XML模板文件不存在: {$templatePath}");
+            throw new RuntimeException("XML模板文件不存在: {$templatePath}");
         }
         
-        $template = file_get_contents($templatePath);
-        $replacements = [
+        return strtr(file_get_contents($templatePath), [
             '{{items}}' => $this->generateXmlItems($arr),
-        ];
-        
-        return strtr($template, $replacements);
+        ]);
     }
     
-    /**
-     * 生成XML中的项目列表
-     * @param $arr
-     * @return string
-     */
-    private function generateXmlItems($arr): string
+    private function generateXmlItems(array $arr): string
     {
         $xml = '';
         foreach ($arr as $item) {
             $xml .= "\t\t<url>\n";
-            $xml .= "\t\t\t<loc>" . htmlspecialchars($item['url']) . "</loc>\r\n";
-            $xml .= "\t\t\t<priority>" . htmlspecialchars($item['priority']) . "</priority>\r\n";
-            $xml .= "\t\t\t<lastmod>" . htmlspecialchars($item['lastmod']) . "</lastmod>\r\n";
-            $xml .= "\t\t\t<changefreq>" . htmlspecialchars($item['changefreq']) . "</changefreq>\r\n";
+            $xml .= "\t\t\t<loc>" . htmlspecialchars($item['url'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n";
+            $xml .= "\t\t\t<lastmod>" . htmlspecialchars($item['lastmod'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</lastmod>\n";
+            // priority 是数字，不需要 htmlspecialchars，格式化即可
+            $xml .= "\t\t\t<priority>" . number_format($item['priority'], 1) . "</priority>\n";
+            $xml .= "\t\t\t<changefreq>" . htmlspecialchars($item['changefreq'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</changefreq>\n";
             $xml .= "\t\t</url>\n";
         }
         return $xml;
+    }
+    
+    private function handleTxt(array $arr): string
+    {
+        $lines = array_column($arr, 'url');
+        return implode("\n", $lines) . "\n";
+    }
+    
+    private function handleHtml(array $arr): string
+    {
+        $templatePath = $this->config['tpl_path'] . 'html.tpl';
+        if (!file_exists($templatePath)) {
+            throw new RuntimeException("HTML模板文件不存在: {$templatePath}");
+        }
+        
+        return strtr(file_get_contents($templatePath), [
+            '{{title}}' => htmlspecialchars($this->config['title'], ENT_QUOTES, 'UTF-8'),
+            '{{items}}' => $this->generateHtmlItems($arr),
+        ]);
+    }
+    
+    private function generateHtmlItems(array $arr): string
+    {
+        $html = '';
+        foreach ($arr as $item) {
+            $safeUrl = htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8');
+            $html .= "<a href=\"{$safeUrl}\">{$safeUrl}</a>\n";
+        }
+        return $html;
     }
 }
