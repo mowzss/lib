@@ -35,7 +35,7 @@ class AdminInit extends Command
      * @return int
      * @throws DataNotFoundException
      * @throws DbException
-     * @throws ModelNotFoundException
+     * @throws ModelNotFoundException|\Throwable
      */
     protected function execute(Input $input, Output $output): int
     {
