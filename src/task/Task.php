@@ -9,6 +9,7 @@ use think\App;
 use think\Cache;
 use think\facade\Db;
 use Cron\CronExpression;
+use think\db\exception\DbException;
 
 /**
  * 计划任务基础类
@@ -16,11 +17,6 @@ use Cron\CronExpression;
  */
 abstract class Task
 {
-    
-    /**
-     * @var SystemTasks
-     */
-    protected mixed $model;
     /**
      * @var string|null 时区
      */
@@ -231,6 +227,7 @@ abstract class Task
     /**
      * 更新任务状态（最后执行时间、下次执行时间、计数）
      * @return void
+     * @throws DbException
      */
     protected function updateTask(): void
     {
