@@ -146,9 +146,9 @@ abstract class Task
     
     /**
      * 任务执行入口（子类必须实现）
-     * @return mixed
+     * @return void
      */
-    abstract public function handle(): mixed;
+    abstract public function handle(): void;
     
     /**
      * 运行任务（对外入口）
