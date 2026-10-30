@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace happy\admin\libs;
 
-use think\Paginator;
-use think\facade\Route;
-use think\Service as BaseService;
-use think\db\exception\DbException;
+use happy\admin\libs\command\AdminEntranceRename;
+use happy\admin\libs\command\AdminFaviconFromConfig;
 use happy\admin\libs\command\AdminInit;
 use happy\admin\libs\command\AdminUpgrade;
 use happy\admin\libs\task\command\TaskRun;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\ModelNotFoundException;
 use happy\admin\libs\task\command\TaskSchedule;
-use happy\admin\libs\command\AdminEntranceRename;
-use happy\admin\libs\command\AdminFaviconFromConfig;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
+use think\facade\Route;
+use think\Paginator;
+use think\Service as BaseService;
 
 /**
  * 应用服务类
@@ -40,9 +40,9 @@ class Service extends BaseService
         });
         // 注册命令行
         $this->registerCommand();
-        
+
     }
-    
+
     /**
      * @return array
      */
@@ -56,7 +56,7 @@ class Service extends BaseService
         $data = $this->getSysConfigTpl();
         return array_merge($this->app->config->get('view.tpl_replace_string', []), $data);
     }
-    
+
     /**
      * 注册命令行
      * @return void
@@ -72,40 +72,38 @@ class Service extends BaseService
             TaskSchedule::class,
         ]);
     }
-    
+
     /**
      * @return string[]
      */
     private function getSysConfigTpl(): array
     {
-        try {
-            if (function_exists('sys_config')) {
-                switch (sys_config('static_upload')) {
-                    case 'oss':
-                        $data = [
-                            '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
-                        ];
-                        break;
-                    case 'qiniu':
-                        $data = [
-                            '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
-                        ];
-                        break;
-                    default:
-                        $data = [
-                            '__STATIC__' => '/static',
-                        ];
-                        break;
-                }
-                return $data;
+
+        if (function_exists('sys_config')) {
+            try {
+                return match (sys_config('static_upload')) {
+                    'oss' => [
+                        '__STATIC__' => sys_config('oss_domain') . sys_config('static_prefix'),
+                    ],
+                    'qiniu' => [
+                        '__STATIC__' => sys_config('qiniu_domain') . sys_config('static_prefix'),
+                    ],
+                    default => [
+                        '__STATIC__' => sys_config('site_domain') . '/static',
+                    ],
+                };
+            } catch (DataNotFoundException|ModelNotFoundException|DbException|\Throwable $e) {
+                $this->app->log->error($e->getMessage());
             }
+        }
+        try {
+            return ['__STATIC__' => sys_config('site_domain') . '/static',];
         } catch (DataNotFoundException|ModelNotFoundException|DbException|\Throwable $e) {
             return ['__STATIC__' => '/static',];
         }
-        return ['__STATIC__' => '/static',];
-        
+
     }
-    
+
     /**
      * 注册服务
      * @return void
