@@ -27,21 +27,11 @@ class SiteMapExtend
     }
     
     /**
-     * 添加节点（强制类型安全）
+     * 添加节点（仅收录 URL；lastmod/changefreq/priority 均已废弃，Google 明确忽略后两者）
      */
-    public function addItem(string $url, string $lastmod = '', float $priority = 0.8, string $changefreq = 'daily'): void
+    public function addItem(string $url): void
     {
-        // 防御性编程：确保 lastmod 有值且为合法字符串
-        if ($lastmod === '' || $lastmod === null) {
-            $lastmod = date('Y-m-d');
-        }
-        
-        $this->items[] = [
-            'url' => $url,
-            'lastmod' => $lastmod,
-            'priority' => max(0.0, min(1.0, $priority)), // 限制在 0~1 之间
-            'changefreq' => $changefreq,
-        ];
+        $this->items[] = ['url' => $url];
     }
     
     /**
@@ -114,10 +104,6 @@ class SiteMapExtend
         foreach ($arr as $item) {
             $xml .= "\t\t<url>\n";
             $xml .= "\t\t\t<loc>" . htmlspecialchars($item['url'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n";
-            $xml .= "\t\t\t<lastmod>" . htmlspecialchars($item['lastmod'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</lastmod>\n";
-            // priority 是数字，不需要 htmlspecialchars，格式化即可
-            $xml .= "\t\t\t<priority>" . number_format($item['priority'], 1) . "</priority>\n";
-            $xml .= "\t\t\t<changefreq>" . htmlspecialchars($item['changefreq'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</changefreq>\n";
             $xml .= "\t\t</url>\n";
         }
         return $xml;
