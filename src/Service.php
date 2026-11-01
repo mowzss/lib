@@ -13,6 +13,7 @@ use happy\admin\libs\task\command\TaskSchedule;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\exception\Handle;
 use think\facade\Route;
 use think\Paginator;
 use think\Service as BaseService;
@@ -114,7 +115,7 @@ class Service extends BaseService
         $this->app->bind([
             Paginator::class => Page::class,
             \think\Request::class => Request::class,
-            //Handle::class => ExceptionHandle::class,
+            Handle::class => ExceptionHandle::class,
         ]);
     }
 }
