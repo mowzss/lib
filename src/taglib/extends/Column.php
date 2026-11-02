@@ -54,7 +54,15 @@ class Column extends TaglibBase
                 $list = $list->order($config['order'], $by);
             }
             $list = $list->select()->each(function ($item) {
-                $item['url'] = urls($this->module . '/columns/index', ['id' => $item['id']]);
+                // type: 1 正常栏目 | 2 内部节点(node + params) | 3 外部链接(url)
+                $type = (int)($item['type'] ?? 1);
+                if ($type === 3) {
+                    $item['url'] = (string)($item['url'] ?? '');
+                } elseif ($type === 2 && !empty($item['node'])) {
+                    $item['url'] = urls((string)$item['node'], !empty($item['params']) ? $item['params'] : []);
+                } else {
+                    $item['url'] = urls($this->module . '/columns/index', ['id' => $item['id']]);
+                }
                 return $item;
             });
             if (empty($sub)) {
