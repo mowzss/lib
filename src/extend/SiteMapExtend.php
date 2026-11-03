@@ -27,11 +27,13 @@ class SiteMapExtend
     }
     
     /**
-     * 添加节点（仅收录 URL；lastmod/changefreq/priority 均已废弃，Google 明确忽略后两者）
+     * 添加节点
+     * @param string $url 页面地址
+     * @param string|null $lastmod 最后修改时间（ISO8601 / Y-m-d），可为空
      */
-    public function addItem(string $url): void
+    public function addItem(string $url, ?string $lastmod = null): void
     {
-        $this->items[] = ['url' => $url];
+        $this->items[] = ['url' => $url, 'lastmod' => $lastmod];
     }
     
     /**
@@ -104,6 +106,9 @@ class SiteMapExtend
         foreach ($arr as $item) {
             $xml .= "\t\t<url>\n";
             $xml .= "\t\t\t<loc>" . htmlspecialchars($item['url'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n";
+            if (!empty($item['lastmod'])) {
+                $xml .= "\t\t\t<lastmod>" . htmlspecialchars((string)$item['lastmod'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</lastmod>\n";
+            }
             $xml .= "\t\t</url>\n";
         }
         return $xml;

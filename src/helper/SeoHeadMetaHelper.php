@@ -61,14 +61,22 @@ class SeoHeadMetaHelper extends Helper
 
         $listItems = $this->buildListItems($list, $siteDomain);
 
+        // 分页页标题补充"第N页"，与 <title> 保持一致
+        $page = (int)$request->get('page', 1);
+        if ($page > 1) {
+            $title .= ' - 第' . $page . '页';
+        }
+
         // 详情页判定：实体的 cid 表明它属于某个栏目；工具/栏目配置没有 cid
-        $isDetail = !empty($info['id']) && !empty($info['cid']);
-        $isList = !$isDetail && count($listItems) > 0;
+        // 工具页判定：实体来自 tools_content_1（含 node），且没有栏目关系
+        $isTool = empty($info['column']) && !empty($info['node']);
+        $isDetail = !empty($info['id']) && !empty($info['cid']) && !$isTool;
+        $isList = !$isDetail && !$isTool && count($listItems) > 0;
 
         $ogHtml = $this->buildOgHtml($info, $siteName, $title, $description, $pageUrl, $image, $isDetail);
         $jsonLdHtml = $this->buildJsonLdHtml(
             $info, $siteName, $siteDomain, $siteLogo, $siteDescription, $pageUrl,
-            $title, $description, $image, $listItems, $total, $isDetail, $isList
+            $title, $description, $image, $listItems, $total, $isDetail, $isList, $isTool
         );
 
         $type = strtolower($type);
@@ -135,7 +143,7 @@ class SeoHeadMetaHelper extends Helper
     private function buildJsonLdHtml(
         array $info, string $siteName, string $siteDomain, string $siteLogo, string $siteDescription, string $pageUrl,
         string $title, string $description, string $image, array $listItems, mixed $total,
-        bool $isDetail, bool $isList
+        bool $isDetail, bool $isList, bool $isTool = false
     ): string {
         $organization = [
             '@type' => 'Organization',
@@ -233,6 +241,38 @@ class SeoHeadMetaHelper extends Helper
             $graph[] = [
                 '@type' => 'BreadcrumbList',
                 'itemListElement' => $crumbs,
+            ];
+        } elseif ($isTool) {
+            // 工具/计算器页：WebApplication，而非 Article
+            $graph[] = $webPage;
+            $application = [
+                '@type' => 'WebApplication',
+                '@id' => $pageUrl . '#application',
+                'name' => $title,
+                'url' => $pageUrl,
+                'isPartOf' => ['@id' => $siteDomain . '/#website'],
+                'applicationCategory' => 'UtilitiesApplication',
+                'operatingSystem' => 'All',
+                'inLanguage' => 'zh-CN',
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => '0',
+                    'priceCurrency' => 'CNY',
+                ],
+            ];
+            if ($description !== '') {
+                $application['description'] = $description;
+            }
+            if ($image !== '') {
+                $application['image'] = $image;
+            }
+            $graph[] = $application;
+            $graph[] = [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => $siteName ?: '首页', 'item' => $siteDomain . '/'],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => $title, 'item' => $pageUrl],
+                ],
             ];
         } elseif ($isList) {
             $graph[] = $webPage;
