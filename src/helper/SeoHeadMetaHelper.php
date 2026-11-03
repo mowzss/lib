@@ -316,11 +316,7 @@ class SeoHeadMetaHelper extends Helper
     private function buildListItems(mixed $list, string $siteDomain): array
     {
         $items = [];
-        if (!is_iterable($list)) {
-            return $items;
-        }
-        foreach ($list as $row) {
-            $row = $this->toArray($row);
+        foreach ($this->flattenListRows($list) as $row) {
             $name = trim((string)($row['title'] ?? ($row['name'] ?? '')));
             $itemUrl = $this->absoluteUrl(trim((string)($row['url'] ?? '')), $siteDomain);
             if ($name === '' || $itemUrl === '') {
@@ -334,6 +330,26 @@ class SeoHeadMetaHelper extends Helper
             ];
         }
         return $items;
+    }
+
+    /**
+     * 展平列表数据（兼容按月分组的结构）
+     */
+    private function flattenListRows(mixed $list): array
+    {
+        $rows = [];
+        if (!is_iterable($list)) {
+            return $rows;
+        }
+        foreach ($list as $row) {
+            $row = $this->toArray($row);
+            if (is_iterable($row['items'] ?? null)) {
+                array_push($rows, ...$this->flattenListRows($row['items']));
+                continue;
+            }
+            $rows[] = $row;
+        }
+        return $rows;
     }
 
     /**
