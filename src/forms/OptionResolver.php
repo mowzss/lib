@@ -22,15 +22,6 @@ use happy\admin\libs\helper\ExecutorHelper;
 class OptionResolver
 {
     /**
-     * 兼容旧 xmSelect 配置的保留键
-     */
-    protected const CONFIG_KEYS = [
-        'mode', 'source', 'data', 'prop', 'searchUrl', 'initUrl', 'dataInit',
-        'remoteSearch', 'radio', 'multiple', 'pageSize', 'autoAdd',
-        'minKeywordLength', 'showToolbar', 'cache', 'empty',
-    ];
-    
-    /**
      * 禁止读取的表名关键字，避免字段配置越权读取后台敏感表
      */
     protected const DENY_TABLE_KEYWORDS = [
@@ -514,12 +505,44 @@ class OptionResolver
      */
     protected static function isConfigArray(array $options): bool
     {
-        foreach (self::CONFIG_KEYS as $key) {
-            if (array_key_exists($key, $options)) {
+        // 仅凭键名判断会把普通选项映射误判为配置，例如 ['radio' => '单选框', ...]
+        // 因此要求键值与配置语义匹配后才视为结构化配置
+        $source = $options['source'] ?? null;
+        if (is_array($source) ? (bool)$source : (is_string($source) && self::isConfigString($source))) {
+            return true;
+        }
+        if (!empty($options['prop']) && is_array($options['prop'])) {
+            return true;
+        }
+        if (isset($options['mode']) && in_array($options['mode'], ['local', 'remote'], true)) {
+            return true;
+        }
+        foreach (['searchUrl', 'initUrl', 'dataInit'] as $key) {
+            if (isset($options[$key]) && is_string($options[$key]) && self::isConfigString($options[$key])) {
                 return true;
             }
         }
+        if (isset($options['remoteSearch']) && in_array($options['remoteSearch'], [true, 1, '1', 'true'], true)) {
+            return true;
+        }
+        if (isset($options['data']) && is_array($options['data'])) {
+            return true;
+        }
+        if (isset($options['pageSize']) && is_numeric($options['pageSize']) && (int)$options['pageSize'] > 0) {
+            return true;
+        }
         return false;
+    }
+    
+    /**
+     * 配置字符串是否为 ASCII 可见字符（表名、方法路径等），避免把中文选项文本误判为配置
+     * @param string $value
+     * @return bool
+     */
+    protected static function isConfigString(string $value): bool
+    {
+        $value = trim($value);
+        return $value !== '' && preg_match('/^[\x21-\x7E]+$/', $value) === 1;
     }
     
     /**
@@ -738,12 +761,13 @@ class OptionResolver
         
         $result = [];
         if (array_is_list($rows)) {
-            foreach ($rows as $row) {
+            foreach ($rows as $key => $row) {
                 if (is_array($row)) {
                     $value = $row[$prop['value']] ?? $row['value'] ?? $row['id'] ?? null;
                     $label = $row[$prop['name']] ?? $row['label'] ?? $row['title'] ?? null;
                 } elseif (is_scalar($row)) {
-                    $value = $row;
+                    // [0 => '不限', 1 => '必填'] 这类选项的键就是值，需保留键而非用文字做值
+                    $value = $key;
                     $label = $row;
                 } else {
                     continue;
