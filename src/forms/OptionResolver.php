@@ -132,6 +132,8 @@ class OptionResolver
             'minKeywordLength' => max(0, (int)($config['minKeywordLength'] ?? 0)),
             'showToolbar' => (bool)($config['showToolbar'] ?? true),
             'empty' => (string)($config['empty'] ?? ''),
+            // 远程搜索时前端需要把数据源一并提交，服务端校验后查询或自动创建
+            'source' => $source['type'] === 'table' ? $source : null,
         ];
         
         return [
@@ -148,9 +150,10 @@ class OptionResolver
      * @param string $keyword
      * @param int $page
      * @param int $pageSize
+     * @param bool $autoAdd 关键字无匹配时是否按 create 配置自动新增
      * @return array
      */
-    public static function searchTableSource(array $source, string $keyword = '', int $page = 1, int $pageSize = 20): array
+    public static function searchTableSource(array $source, string $keyword = '', int $page = 1, int $pageSize = 20, bool $autoAdd = false): array
     {
         $table = self::resolveTableName((string)($source['table'] ?? ''));
         if ($table === '') {
@@ -164,10 +167,20 @@ class OptionResolver
             return ['data' => [], 'total' => 0, 'last_page' => 0];
         }
         
+        // 自动新增：关键字无匹配记录时按 create 配置插入
+        if ($autoAdd && $keyword !== '' && !empty($source['create'])) {
+            self::createOptionRow($table, $columns, $source, $keyword, $label);
+        }
+        
         $query = Db::table($table)->field([$value, $label]);
         self::applyWhere($query, $source['where'] ?? [], $columns);
         if ($keyword !== '') {
-            $query->where($label, 'like', '%' . $keyword . '%');
+            $searchFields = self::getSearchFields($source, $columns, $label);
+            $query->where(function ($q) use ($searchFields, $keyword) {
+                foreach (array_values($searchFields) as $field) {
+                    $q->whereOr($field, 'like', '%' . $keyword . '%');
+                }
+            });
         }
         $order = trim((string)($source['order'] ?? ''));
         $query->order($order !== '' && self::isSafeOrder($order) ? $order : $value . ' desc');
@@ -184,6 +197,141 @@ class OptionResolver
             'per_page' => $paginate['per_page'] ?? $pageSize,
             'current_page' => $paginate['current_page'] ?? $page,
         ];
+    }
+    
+    /**
+     * 获取搜索字段，默认使用 label；create.field 会自动纳入搜索字段
+     * @param array $source
+     * @param array $columns
+     * @param string $label
+     * @return array
+     */
+    protected static function getSearchFields(array $source, array $columns, string $label): array
+    {
+        $search = $source['search'] ?? null;
+        if (is_string($search) && $search !== '') {
+            $fields = explode(',', $search);
+        } elseif (is_array($search)) {
+            $fields = $search;
+        } else {
+            $fields = [];
+        }
+        if (!$fields) {
+            $fields = [$label];
+        }
+        $create = is_array($source['create'] ?? null) ? $source['create'] : [];
+        if ($create) {
+            // 自动创建时关键字写入 create.field，该字段必须参与搜索，避免新增后查不到
+            $fields[] = trim((string)($create['field'] ?? '')) !== '' ? (string)$create['field'] : $label;
+        }
+        
+        $result = [];
+        foreach ($fields as $field) {
+            $field = trim((string)$field);
+            if ($field !== '' && in_array($field, $columns, true)) {
+                $result[] = $field;
+            }
+        }
+        return array_values(array_unique($result));
+    }
+    
+    /**
+     * 按 create 配置自动新增选项记录
+     * @param string $table
+     * @param array $columns
+     * @param array $source
+     * @param string $keyword
+     * @param string $label
+     * @return void
+     */
+    protected static function createOptionRow(string $table, array $columns, array $source, string $keyword, string $label): void
+    {
+        $create = is_array($source['create'] ?? null) ? $source['create'] : [];
+        $field = trim((string)($create['field'] ?? '')) ?: $label;
+        if (!in_array($field, $columns, true)) {
+            return;
+        }
+        $defaults = is_array($create['defaults'] ?? null) ? $create['defaults'] : [];
+        
+        // 唯一性条件：unique 中接收关键字的字段使用关键字，其余字段取 defaults
+        $unique = $create['unique'] ?? [$field];
+        if (is_string($unique)) {
+            $unique = explode(',', $unique);
+        }
+        if (!is_array($unique) || !$unique) {
+            $unique = [$field];
+        }
+        $where = [];
+        foreach ($unique as $item) {
+            $item = trim((string)$item);
+            if ($item === '' || !in_array($item, $columns, true)) {
+                continue;
+            }
+            if ($item === $field) {
+                $where[$item] = $keyword;
+            } elseif (array_key_exists($item, $defaults)) {
+                $defaultValue = self::resolveDefaultValue($defaults[$item]);
+                if (is_scalar($defaultValue)) {
+                    $where[$item] = $defaultValue;
+                }
+            }
+        }
+        if (!$where) {
+            return;
+        }
+        if (Db::table($table)->where($where)->count() > 0) {
+            return;
+        }
+        
+        $row = [];
+        foreach ($defaults as $key => $defaultValue) {
+            $key = (string)$key;
+            if ($key === $field || !in_array($key, $columns, true)) {
+                continue;
+            }
+            $row[$key] = self::resolveDefaultValue($defaultValue);
+        }
+        $row[$field] = $keyword;
+        try {
+            Db::table($table)->insert($row);
+        } catch (\Throwable $e) {
+            Log::warning("字段选项自动新增失败: {$table}: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * 解析默认值占位符
+     * @param mixed $value
+     * @return mixed
+     */
+    protected static function resolveDefaultValue(mixed $value): mixed
+    {
+        if (!is_string($value)) {
+            return $value;
+        }
+        return match ($value) {
+            '{{time}}' => time(),
+            '{{date}}' => date('Y-m-d'),
+            '{{datetime}}' => date('Y-m-d H:i:s'),
+            '{{admin_id}}' => self::adminValue('id'),
+            '{{admin_name}}' => self::adminValue('username'),
+            default => $value,
+        };
+    }
+    
+    /**
+     * 读取当前登录管理员信息
+     * @param string $key
+     * @return mixed
+     */
+    protected static function adminValue(string $key): mixed
+    {
+        try {
+            $user = session('user');
+        } catch (\Throwable) {
+            return null;
+        }
+        return is_array($user) ? ($user[$key] ?? null) : null;
     }
     
     /**
@@ -394,6 +542,8 @@ class OptionResolver
             'order' => (string)($source['order'] ?? ''),
             'limit' => (int)($source['limit'] ?? 2000),
             'data' => is_array($source['data'] ?? null) ? $source['data'] : [],
+            'search' => $source['search'] ?? null,
+            'create' => is_array($source['create'] ?? null) ? $source['create'] : [],
         ];
     }
     
@@ -405,7 +555,7 @@ class OptionResolver
     {
         return [
             'mode' => 'local',
-            'source' => ['type' => 'array', 'table' => '', 'value' => 'id', 'label' => 'title', 'where' => [], 'order' => '', 'limit' => 2000, 'data' => []],
+            'source' => ['type' => 'array', 'table' => '', 'value' => 'id', 'label' => 'title', 'where' => [], 'order' => '', 'limit' => 2000, 'data' => [], 'search' => null, 'create' => []],
             'data' => [],
             'prop' => [],
             'searchUrl' => '',
