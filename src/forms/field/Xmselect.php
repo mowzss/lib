@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace happy\admin\libs\forms\field;
 
-use happy\admin\libs\forms\FormatFieldOption;
+use happy\admin\libs\forms\OptionResolver;
 use happy\admin\libs\forms\FormFieldRenderer;
 use happy\admin\libs\forms\RendererInterface;
 
@@ -24,16 +24,14 @@ class Xmselect extends FormFieldRenderer implements RendererInterface
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
         
-        if (!is_array($option)) {
-            $option = FormatFieldOption::strToArray($option);
-        }
-        $required_html = $required ? 'required lay-verify="required"' : '';
+        $resolved = OptionResolver::resolveXmSelect($option, $value);
         return $this->fetch('xmselect', [
             'name' => $name,
             'label' => $label,
-            'value' => $value,
-            'required' => $required_html,
-            'option' => $option,
+            'value' => $resolved['value'],
+            'required' => $required && !$disabled,
+            'option' => $resolved['config'],
+            'data' => $resolved['data'],
             'extra' => $extra,
             'disabled' => $disabled,
         ]);

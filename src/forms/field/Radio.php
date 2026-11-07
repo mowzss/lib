@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace happy\admin\libs\forms\field;
 
-use happy\admin\libs\forms\FormatFieldOption;
+use happy\admin\libs\forms\OptionResolver;
 use happy\admin\libs\forms\FormFieldRenderer;
 use happy\admin\libs\forms\RendererInterface;
 
@@ -23,10 +23,8 @@ class Radio extends FormFieldRenderer implements RendererInterface
      */
     public function render(string $name, string $label, mixed $value, mixed $option, bool $required, mixed $disabled, mixed $extra): string
     {
-        if (!is_array($option)) {
-            $option = FormatFieldOption::strToArray($option);
-        }
-        $required_html = $required ? 'required lay-verify="required"' : '';
+        $option = OptionResolver::resolveKeyValue($option);
+        $required_html = ($required && !$disabled) ? 'required lay-verify="required"' : '';
         return $this->fetch('radio', [
             'name' => $name,
             'label' => $label,

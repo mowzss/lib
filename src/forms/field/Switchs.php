@@ -31,7 +31,7 @@ class Switchs extends FormFieldRenderer implements RendererInterface
                 $title = $option[1] . '|' . $option[0];
             }
         }
-        $required = $required ? 'required' : '';
+        $required_html = $required ? 'required' : '';
         return $this->fetch('switchs', [
             'name' => $name,
             'label' => $label,
