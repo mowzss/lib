@@ -86,6 +86,13 @@ class Lists extends TaglibBase
         if (!empty($config['field'])) {
             $params['field'] = $config['field'];
         }
+        //正文加载控制
+        if (isset($config['content_length'])) {
+            $params['content_length'] = (int)$config['content_length'];
+        }
+        if (isset($config['with_content'])) {
+            $params['with_content'] = (bool)$config['with_content'];
+        }
         $name = $config['name'];
         
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params) . json_encode($config));
