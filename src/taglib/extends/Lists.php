@@ -43,11 +43,9 @@ class Lists extends TaglibBase
             $params['whereor'] = $this->parseWhereArray($config['whereor']);
         }
         //状态
-        if (empty($config['status'])) {
-            $params['where'][] = ['status', '=', 1];
-        } else {
-            $params['where'][] = ['status', '=', $config['status']];
-        }
+        //未传 status 时默认只取正常数据；显式传 status="0" 时应能查询禁用数据
+        $status = $config['status'] ?? 1;
+        $params['where'][] = ['status', '=', is_numeric($status) ? (int)$status : 1];
         //排序方式
         if (!preg_match('/( asc| desc)$/i', $config['order'])) {
             $params['by'] = $config['by'] ?? 'desc';

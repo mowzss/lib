@@ -12,19 +12,19 @@ class Hp extends \think\template\TagLib
     protected $tags = [
         //数据库列表
         'table' => [
-            'attr' => 'name,table,where,item,rows,page,val,cache,status,whereor,order,by',
+            'attr' => 'name,table,where,item,rows,page,pagenum,val,cache,status,whereor,order,by',
             'level' => 3,
             'close' => 1,
         ],
         //数据列表
         'lists' => [
-            'attr' => 'name,module,mid,where,item,rows,page,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field,field',
+            'attr' => 'name,module,mid,where,item,rows,page,pagenum,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field,field',
             'level' => 3,
             'close' => 1,
         ],
         //分类
         'column' => [
-            'attr' => 'name,module,where,item,rows，val,cache,status,whereor,order,by,offset,length,key,mod,sub',
+            'attr' => 'name,module,where,item,rows,val,cache,status,whereor,order,by,offset,length,key,mod,sub',
             'level' => 3,
             'close' => 1,
         ],
@@ -150,18 +150,18 @@ class Hp extends \think\template\TagLib
      */
     public function tagLists(array $tag, string $content): string
     {
-        $name = $tag['name'];
-        $rows = $tag['rows'] ?? 20;
-        $module = $tag['module'];
-        $page = isset($tag['page']) ? 1 : 0;
-        $filter = isset($tag['filter']) ? 1 : 0;
-        $status = $tag['status'] ?? 1;
-        $pageNum = isset($tag['pagenum']) ? 1 : 0;
-        $cache = $tag['cache'] ?? 360;
-        $item = $tag['item'] ?? 'rs';
+        $name = $tag['name'] ?? '';
+        $module = $tag['module'] ?? '';
+        $rows = $this->attrInt($tag['rows'] ?? null, 20);
+        $page = $this->attrBool($tag, 'page');
+        $filter = $this->attrBool($tag, 'filter');
+        $status = $this->attrInt($tag['status'] ?? null, 1);
+        $pagenum = $this->attrCode($tag['pagenum'] ?? null);
+        $cache = $this->attrInt($tag['cache'] ?? null, 360);
+        $item = $this->attrVar($tag['item'] ?? null, 'rs');
         $where = $tag['where'] ?? '';
-        $cid = $tag['cid'] ?? 0;
-        $mid = $tag['mid'] ?? 0;
+        $cid = $this->attrCode($tag['cid'] ?? null);
+        $mid = $this->attrCode($tag['mid'] ?? null);
         $order = $tag['order'] ?? 0;
         $by = $tag['by'] ?? 0;
         $whereor = $tag['whereor'] ?? '';
@@ -169,17 +169,17 @@ class Hp extends \think\template\TagLib
         $sort_field = $tag['sort_field'] ?? '';
         $week = $tag['week'] ?? '';
         $month = $tag['month'] ?? '';
-        $count = $tag['count'] ?? 'count';
+        $count = $this->attrVar($tag['count'] ?? null, 'count');
         $get = $tag['get'] ?? '';
-        $val = $tag['val'] ?? false;
-        $vals = $tag['val'] ?? $tag['name'];
+        //val 作为变量名使用时校验合法性，非法名称回退到 name，避免生成 $1 这类非法变量
+        $vals = $this->attrVar($tag['val'] ?? null, $name);
         $parse = '<?php ';
         $parse .= '$' . $vals . '=\\happy\\admin\\libs\\taglib\\extends\\Lists::getInstance()->run("' . $module . '",[
         "module" => "' . $module . '",
         "page"=>' . $page . ',
         "filter"=>' . $filter . ',
         "status"=>' . $status . ',
-        "pagenum"=>' . $pageNum . ',
+        "pagenum"=>' . $pagenum . ',
         "rows"=>' . $rows . ',
         "name"=>"' . $name . '",
         "where"=>"' . $where . '",
@@ -196,11 +196,14 @@ class Hp extends \think\template\TagLib
         "field"=>"' . $field . '",
         ]);';
         if (!empty($page)) {
+            //按 count 属性派生独立的统计/分页变量，避免同页多个分页列表互相覆盖
             $parse .= '$' . $count . ' = $' . $vals . '->total();';
-            $parse .= '$pages = $' . $vals . '->render();';
+            $parse .= '$' . $count . '_pages = $' . $vals . '->render();';
+            //保留 $pages 变量，兼容既有模板
+            $parse .= '$pages = $' . $count . '_pages;';
         }
         $parse .= ' ?>';
-        if (!empty($val)) {
+        if (!empty($tag['val'])) {
             $parse .= $content;
         } else {
             $parse .= '{volist name="$' . $vals . '" id="' . $item . '"}';
@@ -208,6 +211,63 @@ class Hp extends \think\template\TagLib
             $parse .= '{/volist}';
         }
         return $parse;
+    }
+
+    /**
+     * 解析布尔型属性（page、filter 等）
+     * 不写该属性时为关闭；page="0"、page="false" 等按关闭处理
+     * @param array $tag
+     * @param string $key
+     * @return int
+     */
+    private function attrBool(array $tag, string $key): int
+    {
+        if (!isset($tag[$key])) {
+            return 0;
+        }
+        if (is_bool($tag[$key])) {
+            return $tag[$key] ? 1 : 0;
+        }
+        return in_array(strtolower(trim((string)$tag[$key])), ['', '0', 'false', 'no', 'off'], true) ? 0 : 1;
+    }
+
+    /**
+     * 解析变量名属性，非法名称回退到后续候选值
+     * @param mixed $value
+     * @param string ...$fallback
+     * @return string
+     */
+    private function attrVar($value, string ...$fallback): string
+    {
+        foreach (array_merge([$value], $fallback) as $candidate) {
+            if (is_string($candidate) && preg_match('/^[A-Za-z_]\w*$/', $candidate)) {
+                return $candidate;
+            }
+        }
+        return 'list';
+    }
+
+    /**
+     * 解析数值型属性，非数值回退默认值，避免生成非法 PHP 代码
+     * @param mixed $value
+     * @param int $default
+     * @return int
+     */
+    private function attrInt($value, int $default): int
+    {
+        return is_numeric($value) ? (int)$value : $default;
+    }
+
+    /**
+     * 原样透传属性表达式（支持数字与 $var 模板变量），空值回退默认值
+     * @param mixed $value
+     * @param string $default
+     * @return string
+     */
+    private function attrCode($value, string $default = '0'): string
+    {
+        $value = is_scalar($value) ? trim((string)$value) : '';
+        return $value === '' ? $default : $value;
     }
     
 }
