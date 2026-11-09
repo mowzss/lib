@@ -24,7 +24,7 @@ class CodeHelper
         $sumOfFirstTwoDigits = $firstDigit + $secondDigit;
         return $sumOfFirstTwoDigits . substr($timestampStr, 2);
     }
-    
+
     /**
      * 生成基于时间戳和随机数的唯一ID。
      *
@@ -52,7 +52,7 @@ class CodeHelper
         }
         return $prefix . $compressedTimestamp . $randomPart;
     }
-    
+
     /**
      * 生成完全随机的唯一字符串（包括字母和数字）。
      *
@@ -69,65 +69,20 @@ class CodeHelper
         if ($actualLength < 0) {
             throw new \InvalidArgumentException('Prefix is too long for the specified length.');
         }
-        
+
         try {
             $randomString = '';
             $charLength = strlen($characters);
             $bytes = random_bytes($actualLength);
-            
+
             for ($i = 0; $i < $actualLength; $i++) {
                 $randomString .= $characters[ord($bytes[$i]) % $charLength];
             }
         } catch (\Exception $e) {
             throw new LibsException('Failed to generate random string: ' . $e->getMessage(), 0, $e);
         }
-        
+
         return $prefix . $randomString;
     }
     
-    /**
-     * 自动检测文本编码并转换为指定的目标编码，默认为UTF-8。
-     *
-     * @param string $text 需要转换编码的文本。
-     * @param string|null $sourceEncoding 可选参数，指定文本的来源编码。
-     * @param string $target 目标编码，默认为'UTF-8'。
-     * @return string 返回转换为目标编码后的文本。
-     */
-    public static function convertToTargetEncoding(string $text, ?string $sourceEncoding = null, string $target = 'UTF-8'): string
-    {
-        if (empty($text)) {
-            return '';
-        }
-        if ($sourceEncoding !== null && mb_check_encoding($text, $sourceEncoding)) {
-            if (strcasecmp($sourceEncoding, $target) === 0) {
-                return $text;
-            }
-            return mb_convert_encoding($text, $target, $sourceEncoding);
-        }
-        $first4Bytes = substr($text, 0, 4);
-        $encoding = null;
-        switch (true) {
-            case $first4Bytes === "\x00\x00\xFE\xFF":
-                $encoding = 'UTF-32BE';
-                break;
-            case $first4Bytes === "\xFF\xFE\x00\x00":
-                $encoding = 'UTF-32LE';
-                break;
-            case isset($first4Bytes[1]) && substr($first4Bytes, 0, 2) === "\xFE\xFF":
-                $encoding = 'UTF-16BE';
-                break;
-            case isset($first4Bytes[1]) && substr($first4Bytes, 0, 2) === "\xFF\xFE":
-                $encoding = 'UTF-16LE';
-                break;
-            default:
-                $detectedEncoding = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1', 'EUC-JP', 'SJIS'], true);
-                if ($detectedEncoding !== false) {
-                    $encoding = $detectedEncoding;
-                }
-        }
-        if ($encoding === null || strcasecmp($encoding, $target) === 0) {
-            return $text;
-        }
-        return mb_convert_encoding($text, $target, $encoding);
-    }
 }
