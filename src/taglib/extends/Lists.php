@@ -5,16 +5,9 @@ declare (strict_types=1);
 
 namespace happy\admin\libs\taglib\extends;
 
-use think\facade\Db;
-use think\Paginator;
-use think\Collection;
-use think\db\exception\DbException;
+use happy\admin\libs\taglib\TaglibBase;
 use mowzs\cms\logic\ColumnBaseLogic;
 use mowzs\cms\logic\ContentBaseLogic;
-use happy\admin\libs\taglib\TaglibBase;
-use think\db\exception\DataNotFoundException;
-use happy\admin\libs\helper\ColumnCacheHelper;
-use think\db\exception\ModelNotFoundException;
 
 class Lists extends TaglibBase
 {
@@ -94,7 +87,7 @@ class Lists extends TaglibBase
             $params['with_content'] = (bool)$config['with_content'];
         }
         $name = $config['name'];
-        
+
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params) . json_encode($config));
         $return = cache($cacheName);
         if (empty($return) || $config['cache'] == -1) {
@@ -104,58 +97,5 @@ class Lists extends TaglibBase
             }
         }
         return $return;
-    }
-    
-    /**
-     * 格式化查询结果，添加分类和标签信息
-     *
-     * @param Paginator|Collection $data 查询结果对象
-     * @return void
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
-     */
-    protected function formatData(&$data): void
-    {
-        try {
-            $column_data = ColumnCacheHelper::instance()->getColumnsByIdTitle($this->module);
-        } catch (\Throwable $e) {
-            $column_data = [];
-        }
-        // 获取标签表和标签关联表的名称
-        $table_tag = $this->module . '_tag';
-        $table_tag_info = $this->module . '_tag_info';
-        // 遍历每个 item，追加分类和标签信息
-        $data->each(function ($item) use ($table_tag, $table_tag_info, $column_data) {
-            // 添加分类标题
-            $item['column_title'] = $column_data[$item['cid']] ?? '未知分类';
-            // 获取与当前 content 记录相关的 tag_info 和 tag 记录
-            $tags = Db::view($table_tag_info, 'tid')
-                ->view($table_tag, 'title', "{$table_tag}.id = {$table_tag_info}.tid")
-                ->where('aid', $item['id'])  // 使用 aid 关联 content 表
-                ->column('title');  // 获取 tag 的 title 字段
-            // 将标签信息追加到 item 中
-            $item['tags'] = $tags;  // 如果没有标签，设置为空字符串
-            $item['module_dir'] = $this->module;
-            return ContentBaseLogic::instance()->formatContentData($item);
-        });
-    }
-    
-    /**
-     * @param string $module
-     * @param int|string $mid
-     * @return \think\db\Query|Db
-     */
-    private function setDbQuery(string $module, int|string $mid = ''): Db|\think\db\Query
-    {
-        $content_table = $module . '_content';
-        $db = Db::name($content_table);
-        //构建查询视图
-        if (!empty($mid)) {
-            $content_table = $module . '_content_' . $mid;
-            $contents_table = $module . '_content_' . $mid . 's';
-            $db = Db::view($content_table)->view($contents_table, 'content', "{$contents_table}.id={$content_table}.id", 'LEFT');
-        }
-        return $db;
     }
 }
