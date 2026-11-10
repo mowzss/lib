@@ -86,6 +86,9 @@ class Lists extends TaglibBase
         if (isset($config['with_content'])) {
             $params['with_content'] = (bool)$config['with_content'];
         }
+        if (isset($config['with_tags'])) {
+            $params['with_tags'] = (bool)$config['with_tags'];
+        }
         $name = $config['name'];
 
         $cacheName = 'tpl_list_' . $name . '_' . $module . '_' . md5(json_encode($params) . json_encode($config));

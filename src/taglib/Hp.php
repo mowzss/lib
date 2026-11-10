@@ -18,7 +18,7 @@ class Hp extends \think\template\TagLib
         ],
         //数据列表
         'lists' => [
-            'attr' => 'name,module,mid,where,item,rows,page,pagenum,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field,field,with_content,content_length',
+            'attr' => 'name,module,mid,where,item,rows,page,pagenum,val,cache,order,by,cid,status,whereor,week,month,count,get,filter,sort_field,field,with_content,content_length,with_tags',
             'level' => 3,
             'close' => 1,
         ],
@@ -169,6 +169,8 @@ class Hp extends \think\template\TagLib
         //正文加载控制：content_length 为 0 时取全文，默认只取 300 字；with_content 不写时保持默认加载
         $content_length = $this->attrInt($tag['content_length'] ?? null, 300);
         $with_content = isset($tag['with_content']) ? ',"with_content"=>' . $this->attrBool($tag, 'with_content') : '';
+        //标签加载控制：不写时保持默认加载，简单列表可设置 with_tags="false" 跳过标签查询
+        $with_tags = isset($tag['with_tags']) ? ',"with_tags"=>' . $this->attrBool($tag, 'with_tags') : '';
         $sort_field = $tag['sort_field'] ?? '';
         $week = $tag['week'] ?? '';
         $month = $tag['month'] ?? '';
@@ -197,7 +199,7 @@ class Hp extends \think\template\TagLib
         "by"=>"' . $by . '",
         "get"=>"' . $get . '",
         "field"=>"' . $field . '",
-        "content_length"=>' . $content_length . $with_content . ',
+        "content_length"=>' . $content_length . $with_content . $with_tags . ',
         ]);';
         if (!empty($page)) {
             //按 count 属性派生独立的统计/分页变量，避免同页多个分页列表互相覆盖
