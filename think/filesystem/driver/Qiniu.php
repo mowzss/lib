@@ -46,6 +46,107 @@ class Qiniu extends Driver
         return $this->normalizer;
     }
     
+    /**
+     * 浏览器直传使用的上传地址
+     * @return string
+     */
+    public function getUploadHost(): string
+    {
+        return 'https://upload.qiniup.com';
+    }
+    
+    /**
+     * 生成上传凭证
+     *
+     * @param string $dir 对象 key 前缀（需以 / 结尾）
+     * @param int $maxSize 允许的最大字节数
+     * @param int $expire 有效期（秒）
+     * @return array
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     */
+    public function getSignToken(string $dir, int $maxSize, int $expire = 600): array
+    {
+        $accessKey = (string)sys_config('qiniu_access');
+        $secretKey = (string)sys_config('qiniu_secret');
+        $bucket = (string)sys_config('qiniu_bucket');
+        if ($accessKey === '' || $secretKey === '' || $bucket === '') {
+            throw new \RuntimeException('七牛云配置不完整');
+        }
+        
+        $auth = new \Qiniu\Auth($accessKey, $secretKey);
+        $expireAt = time() + max(60, $expire);
+        // uploadToken 内部会用 bucket:key 覆盖 scope，配合 isPrefixalScope 实现目录级限制
+        $token = $auth->uploadToken($bucket, $dir, max(60, $expire), [
+            'isPrefixalScope' => 1,
+            'fsizeLimit' => $maxSize,
+        ]);
+        
+        return [
+            'host' => $this->getUploadHost(),
+            'token' => $token,
+            'expire' => $expireAt,
+        ];
+    }
+    
+    /**
+     * 读取对象元信息（大小 / mime）
+     *
+     * @param string $path
+     * @return array|null
+     */
+    public function getObjectMeta(string $path): ?array
+    {
+        $accessKey = (string)sys_config('qiniu_access');
+        $secretKey = (string)sys_config('qiniu_secret');
+        $bucket = (string)sys_config('qiniu_bucket');
+        if ($accessKey === '' || $secretKey === '' || $bucket === '') {
+            return null;
+        }
+        
+        try {
+            $manager = new \Qiniu\Storage\BucketManager(new \Qiniu\Auth($accessKey, $secretKey));
+            [$stat, $error] = $manager->stat($bucket, ltrim($path, '/'));
+            if ($error) {
+                return null;
+            }
+            return [
+                'size' => (int)($stat['fsize'] ?? 0),
+                'mime' => (string)($stat['mimeType'] ?? ''),
+                // 七牛的 hash 不是 md5
+                'md5' => '',
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+    
+    /**
+     * 通过图片信息接口读取宽高
+     *
+     * @param string $path
+     * @return array|null
+     */
+    public function getImageInfo(string $path): ?array
+    {
+        $ch = curl_init($this->url($path) . '?imageInfo');
+        if (!$ch) {
+            return null;
+        }
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $body = curl_exec($ch);
+        curl_close($ch);
+        
+        $json = is_string($body) ? json_decode($body, true) : null;
+        $width = (int)($json['width'] ?? 0);
+        $height = (int)($json['height'] ?? 0);
+        return ($width > 0 && $height > 0) ? ['width' => $width, 'height' => $height] : null;
+    }
+    
     protected function createAdapter(): FilesystemAdapter
     {
         // TODO: Implement createAdapter() method.
