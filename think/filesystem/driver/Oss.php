@@ -3,13 +3,13 @@
 
 namespace think\filesystem\driver;
 
-use think\filesystem\Driver;
-use think\db\exception\DbException;
-use yzh52521\Flysystem\Oss\OssAdapter;
 use League\Flysystem\FilesystemAdapter;
-use think\db\exception\DataNotFoundException;
 use League\Flysystem\WhitespacePathNormalizer;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\filesystem\Driver;
+use yzh52521\Flysystem\Oss\OssAdapter;
 
 class Oss extends Driver
 {
@@ -17,7 +17,7 @@ class Oss extends Driver
      * @var WhitespacePathNormalizer|null
      */
     protected ?WhitespacePathNormalizer $normalizer = null;
-    
+
     /**
      * 获取文件访问地址
      * @param string $path 文件路径
@@ -29,13 +29,13 @@ class Oss extends Driver
     public function url(string $path): string
     {
         $path = $this->normalizer()->normalizePath($path);
-        
+
         if (!empty(sys_config('oss_domain'))) {
             return $this->concatPathToUrl(sys_config('oss_domain'), $path);
         }
         return parent::url($path);
     }
-    
+
     /**
      * @return WhitespacePathNormalizer|null
      */
@@ -46,7 +46,7 @@ class Oss extends Driver
         }
         return $this->normalizer;
     }
-    
+
     /**
      * 浏览器直传使用的上传地址
      * @return string
@@ -63,7 +63,7 @@ class Oss extends Driver
         }
         return 'https://' . $bucket . '.' . $endpoint;
     }
-    
+
     /**
      * 生成 PostObject 直传签名
      *
@@ -82,7 +82,7 @@ class Oss extends Driver
         if ($accessId === '' || $secret === '') {
             throw new \RuntimeException('OSS 配置不完整');
         }
-        
+
         $expireAt = time() + max(60, $expire);
         $policy = base64_encode((string)json_encode([
             'expiration' => gmdate('Y-m-d\TH:i:s.000\Z', $expireAt),
@@ -92,7 +92,7 @@ class Oss extends Driver
                 ['eq', '$success_action_status', '200'],
             ],
         ], JSON_UNESCAPED_SLASHES));
-        
+
         return [
             'host' => $this->getUploadHost(),
             'policy' => $policy,
@@ -102,7 +102,7 @@ class Oss extends Driver
             'successActionStatus' => 200,
         ];
     }
-    
+
     /**
      * 读取对象元信息（大小 / mime / md5）
      *
@@ -118,11 +118,11 @@ class Oss extends Driver
         if ($accessId === '' || $secret === '' || $bucket === '' || $endpoint === '') {
             return null;
         }
-        
+
         try {
             $client = new \OSS\OssClient($accessId, $secret, 'https://' . $endpoint);
             $meta = $client->getObjectMeta($bucket, ltrim($path, '/'));
-            
+
             $etag = trim((string)($meta['etag'] ?? ''), '"');
             return [
                 'size' => (int)($meta['content-length'] ?? 0),
@@ -134,12 +134,15 @@ class Oss extends Driver
             return null;
         }
     }
-    
+
     /**
      * 通过图片处理接口读取图片宽高
      *
      * @param string $path
      * @return array|null
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
     public function getImageInfo(string $path): ?array
     {
@@ -152,7 +155,7 @@ class Oss extends Driver
         $height = (int)($json['ImageHeight']['value'] ?? 0);
         return ($width > 0 && $height > 0) ? ['width' => $width, 'height' => $height] : null;
     }
-    
+
     /**
      * endpoint 主机名（不含协议与结尾斜杠）
      * @return string
@@ -162,7 +165,7 @@ class Oss extends Driver
         $endpoint = trim((string)sys_config('oss_endpoint'));
         return rtrim(preg_replace('#^https?://#i', '', $endpoint), '/');
     }
-    
+
     /**
      * 简单 GET 请求（用于读取图片信息）
      *
@@ -183,7 +186,7 @@ class Oss extends Driver
         curl_close($ch);
         return is_string($body) ? $body : '';
     }
-    
+
     /**
      * @return OssAdapter
      * @throws DataNotFoundException
