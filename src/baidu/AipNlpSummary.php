@@ -35,6 +35,6 @@ class AipNlpSummary extends BaseBaiduAip
             $url,
             ['json' => $post_data, 'headers' => ['Content-Type' => 'application/json']]
         );
-        return $data['summary'] ?: '';
+        return $data['data']['summary'] ?: '';
     }
 }
