@@ -216,3 +216,93 @@ if (!function_exists('vite_css')) {
         return trim($tags);
     }
 }
+if (!function_exists('pinyin_to_zhuyin')) {
+    /**
+     * 带声调拼音音节转注音符号
+     *
+     * overtrue/pinyin 不提供注音输出，按声母/韵母/声调转换；
+     * 无声调或轻声沿用常见注音习惯，不加声调符号。
+     *
+     * @param string $syllable 如 yī / bù / shí
+     * @return string 如 ㄧ / ㄅㄨˋ / ㄕˊ
+     */
+    function pinyin_to_zhuyin(string $syllable): string
+    {
+        static $toneChars = [
+            'ā' => 'a1', 'á' => 'a2', 'ǎ' => 'a3', 'à' => 'a4',
+            'ē' => 'e1', 'é' => 'e2', 'ě' => 'e3', 'è' => 'e4',
+            'ī' => 'i1', 'í' => 'i2', 'ǐ' => 'i3', 'ì' => 'i4',
+            'ō' => 'o1', 'ó' => 'o2', 'ǒ' => 'o3', 'ò' => 'o4',
+            'ū' => 'u1', 'ú' => 'u2', 'ǔ' => 'u3', 'ù' => 'u4',
+            'ǖ' => 'v1', 'ǘ' => 'v2', 'ǚ' => 'v3', 'ǜ' => 'v4', 'ü' => 'v5',
+        ];
+        static $initialMap = [
+            'zh' => 'ㄓ', 'ch' => 'ㄔ', 'sh' => 'ㄕ',
+            'b' => 'ㄅ', 'p' => 'ㄆ', 'm' => 'ㄇ', 'f' => 'ㄈ',
+            'd' => 'ㄉ', 't' => 'ㄊ', 'n' => 'ㄋ', 'l' => 'ㄌ',
+            'g' => 'ㄍ', 'k' => 'ㄎ', 'h' => 'ㄏ',
+            'j' => 'ㄐ', 'q' => 'ㄑ', 'x' => 'ㄒ', 'r' => 'ㄖ',
+            'z' => 'ㄗ', 'c' => 'ㄘ', 's' => 'ㄙ',
+        ];
+        static $finalMap = [
+            'a' => 'ㄚ', 'o' => 'ㄛ', 'e' => 'ㄜ', 'ai' => 'ㄞ', 'ei' => 'ㄟ',
+            'ao' => 'ㄠ', 'ou' => 'ㄡ', 'an' => 'ㄢ', 'en' => 'ㄣ',
+            'ang' => 'ㄤ', 'eng' => 'ㄥ', 'er' => 'ㄦ',
+            'i' => 'ㄧ', 'ia' => 'ㄧㄚ', 'ie' => 'ㄧㄝ', 'iao' => 'ㄧㄠ', 'iu' => 'ㄧㄡ',
+            'ian' => 'ㄧㄢ', 'in' => 'ㄧㄣ', 'iang' => 'ㄧㄤ', 'ing' => 'ㄧㄥ',
+            'u' => 'ㄨ', 'ua' => 'ㄨㄚ', 'uo' => 'ㄨㄛ', 'uai' => 'ㄨㄞ', 'ui' => 'ㄨㄟ',
+            'uan' => 'ㄨㄢ', 'un' => 'ㄨㄣ', 'uang' => 'ㄨㄤ', 'ueng' => 'ㄨㄥ', 'ong' => 'ㄨㄥ',
+            'v' => 'ㄩ', 've' => 'ㄩㄝ', 'van' => 'ㄩㄢ', 'vn' => 'ㄩㄣ', 'vong' => 'ㄩㄥ',
+        ];
+        static $toneMarks = [1 => '', 2 => 'ˊ', 3 => 'ˇ', 4 => 'ˋ', 5 => ''];
+        // y/w 为零声母，映射需按完整音节处理，不能简单替换为 i/u
+        static $zeroInitialMap = [
+            'yi' => 'i', 'you' => 'iu', 'yan' => 'ian', 'yin' => 'in',
+            'yang' => 'iang', 'ying' => 'ing', 'ya' => 'ia', 'ye' => 'ie', 'yao' => 'iao',
+            'yu' => 'v', 'yue' => 've', 'yuan' => 'van', 'yun' => 'vn', 'yong' => 'vong',
+            'wu' => 'u', 'wa' => 'ua', 'wo' => 'uo', 'wai' => 'uai', 'wei' => 'ui',
+            'wan' => 'uan', 'wen' => 'un', 'wang' => 'uang', 'weng' => 'ueng',
+        ];
+
+        $base = '';
+        $tone = 1;
+        foreach (preg_split('//u', mb_strtolower($syllable, 'UTF-8'), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $char) {
+            if (isset($toneChars[$char])) {
+                $base .= $toneChars[$char][0];
+                $tone = (int)$toneChars[$char][1];
+                continue;
+            }
+            $base .= $char;
+        }
+
+        $initial = '';
+        foreach (['zh', 'ch', 'sh', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'r', 'z', 'c', 's'] as $item) {
+            if (str_starts_with($base, $item)) {
+                $initial = $item;
+                $base = substr($base, strlen($item));
+                break;
+            }
+        }
+
+        // y/w 作为零声母：按完整音节查表，避免 yi→ii、wei→ue 之类的错误
+        if ($initial === '' && $base !== '') {
+            if (isset($zeroInitialMap[$base])) {
+                $base = $zeroInitialMap[$base];
+            } elseif (str_starts_with($base, 'y')) {
+                $base = 'i' . substr($base, 1);
+            } elseif (str_starts_with($base, 'w')) {
+                $base = 'u' . substr($base, 1);
+            }
+        }
+        // j/q/x 后的 u 实际为 ü
+        if (in_array($initial, ['j', 'q', 'x'], true) && str_starts_with($base, 'u')) {
+            $base = 'v' . substr($base, 1);
+        }
+        // zh/ch/sh/r/z/c/s 后的 i 为音节化声母，注音不写出 ㄧ
+        if (in_array($initial, ['zh', 'ch', 'sh', 'r', 'z', 'c', 's'], true) && $base === 'i') {
+            $base = '';
+        }
+
+        return ($initialMap[$initial] ?? '') . ($finalMap[$base] ?? '') . ($toneMarks[$tone] ?? '');
+    }
+}
