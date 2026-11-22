@@ -36,7 +36,9 @@ class SeoHeadMetaHelper extends Helper
 
         $siteName = trim((string)($system['site_name'] ?? ''));
         $siteDomain = rtrim((string)($system['site_domain'] ?? ''), '/');
-        $siteLogo = (string)($system['site_logo_image'] ?? ($system['square_logo'] ?? ''));
+        // OpenGraph 默认图优先取独立设置；留空时回退到方形 LOGO。
+        // 注意用 ?: 而非 ??：配置项新增后值为空字符串，?? 不会触发回退会导致 og:image 缺失。
+        $siteLogo = (string)($system['site_logo_image'] ?? '') ?: (string)($system['square_logo'] ?? '');
         $siteDescription = (string)($system['seo_description'] ?? '');
         $pageUrl = (string)$request->url(true);
 
