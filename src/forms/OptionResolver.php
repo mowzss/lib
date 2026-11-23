@@ -4,10 +4,10 @@ declare (strict_types=1);
 
 namespace happy\admin\libs\forms;
 
+use happy\admin\libs\helper\ExecutorHelper;
+use think\Collection;
 use think\facade\Db;
 use think\facade\Log;
-use think\Collection;
-use happy\admin\libs\helper\ExecutorHelper;
 
 /**
  * 表单字段选项统一解析器
@@ -17,7 +17,7 @@ use happy\admin\libs\helper\ExecutorHelper;
  * 2. 关联数组 key => label
  * 3. 数组数据 [{id,title}] / [['value'=>1,'label'=>'是']]
  * 4. 旧的文本 key|label，一行一个
- * 5. 旧的执行器字符串 Class@method@param1,param2
+ * 5. 旧的执行器字符串 Class@method@param1, param2
  */
 class OptionResolver
 {
@@ -28,13 +28,13 @@ class OptionResolver
         'admin', 'user', 'system', 'config', 'auth', 'role', 'permission',
         'session', 'token', 'log', 'queue', 'job',
     ];
-    
+
     /**
      * 请求内缓存
      * @var array
      */
     protected static array $cache = [];
-    
+
     /**
      * 解析为 key => label，供 select / radio / checkbox 及内容列表展示使用
      * @param mixed $options
@@ -45,7 +45,7 @@ class OptionResolver
     {
         return self::resolve($options, $context)['options'];
     }
-    
+
     /**
      * 解析为完整结构
      * @param mixed $options
@@ -58,7 +58,7 @@ class OptionResolver
         $source = $config['source'];
         $prop = self::getProp($config, $source);
         $data = [];
-        
+
         if ($source['type'] === 'table') {
             // 传入具体值时仅查询对应记录，避免远程大数据源全表加载
             $ids = self::normalizeValue($context['value'] ?? null);
@@ -67,12 +67,12 @@ class OptionResolver
         } else {
             $data = self::rowsToData($config['data'], $prop);
         }
-        
+
         $options = [];
         foreach ($data as $item) {
             $options[(string)$item[$prop['value']]] = (string)$item[$prop['name']];
         }
-        
+
         return [
             'options' => $options,
             'data' => $data,
@@ -81,7 +81,7 @@ class OptionResolver
             'config' => $config,
         ];
     }
-    
+
     /**
      * 解析 XmSelect 所需数据
      * @param mixed $options
@@ -95,7 +95,7 @@ class OptionResolver
         $prop = self::getProp($config, $source);
         $ids = self::normalizeValue($value);
         $data = [];
-        
+
         if ($config['mode'] === 'remote') {
             if ($source['type'] === 'table' && $ids) {
                 $rows = self::queryTable($source, $config, $ids, 200);
@@ -106,12 +106,12 @@ class OptionResolver
         } else {
             $data = self::resolve($options)['data'];
         }
-        
+
         $radio = (bool)($config['radio'] ?? false);
         if (($config['multiple'] ?? null) === false) {
             $radio = true;
         }
-        
+
         $jsConfig = [
             'remoteSearch' => $config['mode'] === 'remote' && $config['searchUrl'] !== '',
             'searchUrl' => self::buildUrl((string)$config['searchUrl']),
@@ -126,7 +126,7 @@ class OptionResolver
             // 远程搜索时前端需要把数据源一并提交，服务端校验后查询或自动创建
             'source' => $source['type'] === 'table' ? $source : null,
         ];
-        
+
         return [
             'config' => $jsConfig,
             'data' => $data,
@@ -134,7 +134,7 @@ class OptionResolver
             'prop' => $prop,
         ];
     }
-    
+
     /**
      * 远程搜索数据表数据（供通用 ajax 接口调用）
      * @param array $source
@@ -157,12 +157,12 @@ class OptionResolver
             Log::warning("选项数据源字段不存在: {$table}.{$value}/{$label}");
             return ['data' => [], 'total' => 0, 'last_page' => 0];
         }
-        
+
         // 自动新增：关键字无匹配记录时按 create 配置插入
         if ($autoAdd && $keyword !== '' && !empty($source['create'])) {
             self::createOptionRow($table, $columns, $source, $keyword, $label);
         }
-        
+
         $query = Db::table($table)->field([$value, $label]);
         self::applyWhere($query, $source['where'] ?? [], $columns);
         if ($keyword !== '') {
@@ -175,12 +175,12 @@ class OptionResolver
         }
         $order = trim((string)($source['order'] ?? ''));
         $query->order($order !== '' && self::isSafeOrder($order) ? $order : $value . ' desc');
-        
+
         $paginate = $query->paginate([
             'list_rows' => min(100, max(1, $pageSize)),
             'page' => max(1, $page),
         ])->toArray();
-        
+
         return [
             'data' => $paginate['data'] ?? [],
             'total' => $paginate['total'] ?? 0,
@@ -189,7 +189,7 @@ class OptionResolver
             'current_page' => $paginate['current_page'] ?? $page,
         ];
     }
-    
+
     /**
      * 获取搜索字段，默认使用 label；create.field 会自动纳入搜索字段
      * @param array $source
@@ -215,7 +215,7 @@ class OptionResolver
             // 自动创建时关键字写入 create.field，该字段必须参与搜索，避免新增后查不到
             $fields[] = trim((string)($create['field'] ?? '')) !== '' ? (string)$create['field'] : $label;
         }
-        
+
         $result = [];
         foreach ($fields as $field) {
             $field = trim((string)$field);
@@ -225,7 +225,7 @@ class OptionResolver
         }
         return array_values(array_unique($result));
     }
-    
+
     /**
      * 按 create 配置自动新增选项记录
      * @param string $table
@@ -243,7 +243,7 @@ class OptionResolver
             return;
         }
         $defaults = is_array($create['defaults'] ?? null) ? $create['defaults'] : [];
-        
+
         // 唯一性条件：unique 中接收关键字的字段使用关键字，其余字段取 defaults
         $unique = $create['unique'] ?? [$field];
         if (is_string($unique)) {
@@ -273,7 +273,7 @@ class OptionResolver
         if (Db::table($table)->where($where)->count() > 0) {
             return;
         }
-        
+
         $row = [];
         foreach ($defaults as $key => $defaultValue) {
             $key = (string)$key;
@@ -289,7 +289,7 @@ class OptionResolver
             Log::warning("字段选项自动新增失败: {$table}: " . $e->getMessage());
         }
     }
-    
+
     /**
      * 解析默认值占位符
      * @param mixed $value
@@ -309,7 +309,7 @@ class OptionResolver
             default => $value,
         };
     }
-    
+
     /**
      * 读取当前登录管理员信息
      * @param string $key
@@ -324,7 +324,7 @@ class OptionResolver
         }
         return is_array($user) ? ($user[$key] ?? null) : null;
     }
-    
+
     /**
      * 标准化字段值，支持数组、JSON、逗号分隔字符串
      * @param mixed $value
@@ -351,7 +351,7 @@ class OptionResolver
         } else {
             $list = [$value];
         }
-        
+
         $result = [];
         foreach ($list as $item) {
             if (is_array($item)) {
@@ -366,7 +366,7 @@ class OptionResolver
         }
         return array_values(array_unique($result));
     }
-    
+
     /**
      * 解析配置
      * @param mixed $options
@@ -397,14 +397,14 @@ class OptionResolver
             }
             return self::fromLegacyText($raw);
         }
-        
+
         if (is_array($options)) {
             return self::fromArray($options);
         }
-        
+
         return self::emptyConfig();
     }
-    
+
     /**
      * 数组写法解析
      * @param array $options
@@ -417,14 +417,14 @@ class OptionResolver
             $config['data'] = $options;
             return $config;
         }
-        
+
         $config = self::emptyConfig();
         $mode = (string)($options['mode'] ?? 'local');
         if (!empty($options['remoteSearch']) || !empty($options['searchUrl']) || !empty($options['initUrl']) || !empty($options['dataInit'])) {
             $mode = 'remote';
         }
         $config['mode'] = $mode === 'remote' ? 'remote' : 'local';
-        
+
         $source = $options['source'] ?? [];
         if (is_string($source) && $source !== '') {
             $source = ['type' => 'table', 'table' => $source];
@@ -434,19 +434,21 @@ class OptionResolver
         } elseif (!empty($options['data']) && is_array($options['data'])) {
             $config['source'] = ['type' => 'array', 'value' => $config['source']['value'], 'label' => $config['source']['label']];
         }
-        
+
         if (!empty($options['data']) && is_array($options['data'])) {
             $config['data'] = $options['data'];
         }
         if ($config['source']['type'] === 'array' && !empty($config['source']['data'])) {
             $config['data'] = $config['source']['data'];
         }
-        
+
         $config['prop'] = is_array($options['prop'] ?? null) ? $options['prop'] : [];
         $config['searchUrl'] = (string)($options['searchUrl'] ?? ($options['search']['url'] ?? ''));
         if ($config['mode'] === 'remote' && $config['searchUrl'] === '' && $config['source']['type'] === 'table') {
-            // 表格数据源远程模式默认使用后台通用选项接口
-            $config['searchUrl'] = 'getOptionList';
+            // 表格数据源远程模式默认使用后台通用选项接口。
+            // 固定到 admin/index 控制器，避免相对地址落到当前控制器后，
+            // 每个继承 BaseAdmin 的类都生成一个需逐类授权的 getOptionList 节点。
+            $config['searchUrl'] = aurl('index/index/getOptionList');
         }
         $config['initUrl'] = (string)($options['initUrl'] ?? $options['dataInit'] ?? ($options['search']['init_url'] ?? ''));
         $config['radio'] = (bool)($options['radio'] ?? false);
@@ -457,10 +459,10 @@ class OptionResolver
         $config['showToolbar'] = (bool)($options['showToolbar'] ?? true);
         $config['empty'] = (string)($options['empty'] ?? '');
         $config['cache'] = (int)($options['cache'] ?? 0);
-        
+
         return $config;
     }
-    
+
     /**
      * 旧文本写法解析：key|label 或 searchUrl|xxx 等配置行
      * @param string $raw
@@ -486,7 +488,7 @@ class OptionResolver
                 $items[$key] = $label;
             }
         }
-        
+
         if ($meta) {
             $options = $meta;
             if ($items) {
@@ -494,10 +496,10 @@ class OptionResolver
             }
             return self::fromArray($options);
         }
-        
+
         return self::fromArray($items);
     }
-    
+
     /**
      * 是否为结构化配置数组
      * @param array $options
@@ -533,7 +535,7 @@ class OptionResolver
         }
         return false;
     }
-    
+
     /**
      * 配置字符串是否为 ASCII 可见字符（表名、方法路径等），避免把中文选项文本误判为配置
      * @param string $value
@@ -544,7 +546,7 @@ class OptionResolver
         $value = trim($value);
         return $value !== '' && preg_match('/^[\x21-\x7E]+$/', $value) === 1;
     }
-    
+
     /**
      * 标准化数据源
      * @param array $source
@@ -569,7 +571,7 @@ class OptionResolver
             'create' => is_array($source['create'] ?? null) ? $source['create'] : [],
         ];
     }
-    
+
     /**
      * 空配置
      * @return array
@@ -593,7 +595,7 @@ class OptionResolver
             'cache' => 0,
         ];
     }
-    
+
     /**
      * 读取数据表的配置数据
      * @param array $source
@@ -612,7 +614,7 @@ class OptionResolver
         if (isset(self::$cache[$cacheKey])) {
             return self::$cache[$cacheKey];
         }
-        
+
         $columns = self::getTableColumns($table);
         $value = (string)($source['value'] ?? 'id');
         $label = (string)($source['label'] ?? 'title');
@@ -620,7 +622,7 @@ class OptionResolver
             Log::warning("选项数据源字段不存在: {$table}.{$value}/{$label}");
             return [];
         }
-        
+
         $query = Db::table($table)->field([$value, $label]);
         if ($ids) {
             $query->whereIn($value, $ids);
@@ -633,11 +635,11 @@ class OptionResolver
         }
         $max = $limit > 0 ? $limit : max(1, (int)($source['limit'] ?? 2000));
         $rows = $query->limit($max)->select()->toArray();
-        
+
         self::$cache[$cacheKey] = $rows;
         return $rows;
     }
-    
+
     /**
      * 应用 where 条件，仅允许已存在的字段
      * @param mixed $query
@@ -661,7 +663,7 @@ class OptionResolver
             }
         }
     }
-    
+
     /**
      * 数据表名合法性校验，并兼容不带前缀的写法
      * @param string $table
@@ -694,7 +696,7 @@ class OptionResolver
         $full = $prefix . $table;
         return self::getTableColumns($full) !== [] ? $full : '';
     }
-    
+
     /**
      * 获取数据表字段
      * @param string $table
@@ -718,7 +720,7 @@ class OptionResolver
         self::$cache[$key] = $columns;
         return $columns;
     }
-    
+
     /**
      * 排序表达式安全校验
      * @param string $order
@@ -728,7 +730,7 @@ class OptionResolver
     {
         return preg_match('/^[A-Za-z0-9_,.\s]+$/i', $order) === 1;
     }
-    
+
     /**
      * 输出 prop 配置
      * @param array $config
@@ -743,7 +745,7 @@ class OptionResolver
             'value' => (string)($prop['value'] ?? ($source['value'] ?? 'id')),
         ];
     }
-    
+
     /**
      * 转换为 xmSelect 数据格式
      * @param mixed $rows
@@ -758,7 +760,7 @@ class OptionResolver
         if (!is_array($rows)) {
             return [];
         }
-        
+
         $result = [];
         if (array_is_list($rows)) {
             foreach ($rows as $key => $row) {
@@ -797,7 +799,7 @@ class OptionResolver
         }
         return $result;
     }
-    
+
     /**
      * 解析远程地址，支持旧的 url@method 写法
      * @param string $url
