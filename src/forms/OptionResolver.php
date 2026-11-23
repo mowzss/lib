@@ -445,9 +445,6 @@ class OptionResolver
         $config['prop'] = is_array($options['prop'] ?? null) ? $options['prop'] : [];
         $config['searchUrl'] = (string)($options['searchUrl'] ?? ($options['search']['url'] ?? ''));
         if ($config['mode'] === 'remote' && $config['searchUrl'] === '' && $config['source']['type'] === 'table') {
-            // 表格数据源远程模式默认使用后台通用选项接口。
-            // 固定到 admin/index 控制器，避免相对地址落到当前控制器后，
-            // 每个继承 BaseAdmin 的类都生成一个需逐类授权的 getOptionList 节点。
             $config['searchUrl'] = aurl('index/index/getOptionList');
         }
         $config['initUrl'] = (string)($options['initUrl'] ?? $options['dataInit'] ?? ($options['search']['init_url'] ?? ''));
