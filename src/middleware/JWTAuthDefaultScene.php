@@ -25,8 +25,10 @@ class JWTAuthDefaultScene
     public function handle(Request $request, $next)
     {
         if ($this->app->config->get('route.controller_layer') === 'api') {
-            
-            if ($request->controller() === 'index.Login') {
+
+            // 免登录白名单：登录入口 + 站点公开配置（Vue 前端首屏需要，且仅返回白名单内的非敏感配置）
+            $publicControllers = ['index.Login', 'site.Config'];
+            if (in_array($request->controller(), $publicControllers, true)) {
                 return $next($request);
             }
             
