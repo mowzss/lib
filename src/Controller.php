@@ -5,16 +5,16 @@ declare (strict_types=1);
 namespace happy\admin\libs;
 
 use think\App;
+use think\exception\HttpResponseException;
+use think\exception\ValidateException;
+use think\facade\View;
 use think\Request;
 use think\Response;
 use think\Validate;
-use think\facade\View;
-use think\exception\ValidateException;
-use think\exception\HttpResponseException;
 
 abstract class Controller
 {
-    
+
     /**
      * @var array|mixed
      */
@@ -48,7 +48,7 @@ abstract class Controller
      * @var array
      */
     protected array $middleware = [];
-    
+
     /**
      * 构造方法
      * @access public
@@ -67,7 +67,7 @@ abstract class Controller
         // 控制器初始化
         $this->initialize();
     }
-    
+
     /**
      * 操作错误跳转的快捷方法
      * @access protected
@@ -82,7 +82,7 @@ abstract class Controller
     {
         $this->response($url, $msg, $data, $wait, $header, 0);
     }
-    
+
     /**
      * 初始化
      * @return void
@@ -90,7 +90,7 @@ abstract class Controller
     protected function initialize()
     {
     }
-    
+
     /**
      * @param string|null $url
      * @param mixed $msg
@@ -108,7 +108,7 @@ abstract class Controller
         } elseif ($url) {
             $url = (strpos($url, '://') || str_starts_with($url, '/')) ? $url : (string)$this->app->route->buildUrl($url);
         }
-        
+
         $result = [
             'code' => $code,
             'msg' => $msg,
@@ -116,7 +116,7 @@ abstract class Controller
             'url' => $url,
             'wait' => $wait,
         ];
-        
+
         $type = $this->getResponseType();
         // 把跳转模板的渲染下沉，这样在 response_send 行为里通过getData()获得的数据是一致性的格式
         if ('html' === strtolower($type)) {
@@ -134,7 +134,7 @@ abstract class Controller
         }
         throw new HttpResponseException($response);
     }
-    
+
     /**
      * 获取当前的response 输出类型
      * @access protected
@@ -144,7 +144,7 @@ abstract class Controller
     {
         return $this->request->isJson() || $this->request->isAjax() ? 'json' : 'html';
     }
-    
+
     /**
      * 模板变量赋值
      * @param mixed $name 要显示的模板变量
@@ -155,7 +155,7 @@ abstract class Controller
     {
         return View::assign($name, $value);
     }
-    
+
     /**
      * 数据回调
      * @param string $name
@@ -176,7 +176,7 @@ abstract class Controller
         }
         return true;
     }
-    
+
     /**
      * 渲染模板
      * @param string $template
@@ -185,13 +185,13 @@ abstract class Controller
      */
     protected function fetch(string $template = '', array $vars = []): string
     {
-        
+
         foreach ($this as $name => $value) {
             $vars[$name] = $value;
         }
         return View::fetch($template, $vars);
     }
-    
+
     /**
      * 验证数据
      * @access protected
@@ -218,17 +218,17 @@ abstract class Controller
                 $v->scene($scene);
             }
         }
-        
+
         $v->message($message);
-        
+
         // 是否批量验证
         if ($batch || $this->batchValidate) {
             $v->batch(true);
         }
-        
+
         return $v->failException(true)->check($data);
     }
-    
+
     /**
      * 操作成功跳转的快捷方法
      * @access protected
@@ -247,7 +247,7 @@ abstract class Controller
         }
         $this->response($url, $msg, $data, $wait, $header);
     }
-    
+
     /**
      * 闭站/模块提示
      * @param string $msg
@@ -260,7 +260,7 @@ abstract class Controller
         $tpl = $this->app->config->get('app.dispatch_close_site_tmpl');
         $this->response($url, $msg, [], $wait, [], 0, $tpl);
     }
-    
+
     /**
      * 返回封装后的API数据到客户端
      * @access protected
@@ -271,7 +271,7 @@ abstract class Controller
      * @param array $header 发送的Header信息
      * @return void
      */
-    protected function json(mixed $data, int $code = 0, null|string $msg = '', string $type = 'json', array $header = []): void
+    protected function json(mixed $data, int $code = 1, null|string $msg = '', string $type = 'json', array $header = []): void
     {
         $result = [
             'code' => $code,
@@ -282,7 +282,7 @@ abstract class Controller
         $response = Response::create($result, $type)->header($header);
         throw new HttpResponseException($response);
     }
-    
+
     /**
      * URL重定向
      * @access protected
@@ -297,5 +297,5 @@ abstract class Controller
         $response->code($code)->with($with);
         throw new HttpResponseException($response);
     }
-    
+
 }
