@@ -11,7 +11,7 @@ use yzh52521\Jwt\Util\JWTUtil;
 class JWTAuthDefaultScene
 {
     protected App $app;
-    
+
     /**
      * Construct
      * @param App $app
@@ -21,17 +21,17 @@ class JWTAuthDefaultScene
     {
         $this->app = $app;
     }
-    
+
     public function handle(Request $request, $next)
     {
         if ($this->app->config->get('route.controller_layer') === 'api') {
 
             // 免登录白名单：登录入口 + 站点公开配置（Vue 前端首屏需要，且仅返回白名单内的非敏感配置）
-            $publicControllers = ['index.Login', 'site.Config'];
-            if (in_array($request->controller(), $publicControllers, true)) {
-                return $next($request);
-            }
-            
+//            $publicControllers = ['index.Login', 'site.Config'];
+//            if (in_array($request->controller(), $publicControllers, true)) {
+//                return $next($request);
+//            }
+//
             try {
                 $token = JWTUtil::getToken($request);
                 if ($token === false) {
@@ -46,7 +46,7 @@ class JWTAuthDefaultScene
             } catch (\Exception $e) {
                 return json(['code' => 401, 'msg' => '未授权']);
             }
-            
+
         }
         return $next($request);
     }

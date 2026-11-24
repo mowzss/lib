@@ -33,8 +33,8 @@ class Service extends BaseService
         $this->app->middleware->add(\happy\admin\libs\middleware\Authentication::class, 'route');
         //注册请求响应过滤中间件
         $this->app->middleware->add(\happy\admin\libs\middleware\HttpResponse::class, 'route');
-        // 注册JWT默认权限
-        $this->app->middleware->add(\happy\admin\libs\middleware\JWTAuthDefaultScene::class, 'route');
+        // JWT 鉴权已下沉到 BaseAuthApi 基类（继承即鉴权），不再全局注册中间件。
+        // 这样公开接口无需维护白名单，避免白名单随页面增长而膨胀。
         // 注册多模块路由自动加载
         $this->app->event->listen('RouteLoaded', function () {
             Route::auto()->completeMatch(false);
