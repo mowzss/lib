@@ -8,7 +8,7 @@
   ],
   "require": {
     "php": ">=8.2.0",
-    "mowzs/happy-admin-installer": "dev-master",
+    "mowzs/happy-admin-installer": "^2.0",
     "topthink/framework": "^8.1",
     "topthink/think-filesystem": "^3.0",
     "topthink/think-view": "^2.0.4",
